@@ -61,7 +61,7 @@ namespace Microsoft.ML.PipelineInference2
             var pipelineTransformer = TrainTransformer(trainData);
             var scoredTestData = pipelineTransformer.Transform(testData);
             var ctx = new BinaryClassificationContext(env);
-            var metrics = ctx.Evaluate(scoredTestData);
+            var metrics = ctx.EvaluateNonCalibrated(scoredTestData);
             testMetricValue = metrics.Accuracy;
         }
 
