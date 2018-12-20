@@ -259,7 +259,8 @@ namespace Microsoft.ML.PipelineInference2
                 AllowSparse = args.AllowSparse,
                 AllowQuoting = args.AllowQuote,
             };
-            var idv = TextLoader.ReadFile(env, textLoaderArgs, fileSource);
+            var textLoader = new TextLoader(env, textLoaderArgs);
+            var idv = textLoader.Read(fileSource);
             idv = idv.Take(args.MaxRowsToRead);
 
             // Read all the data into memory.
@@ -267,10 +268,10 @@ namespace Microsoft.ML.PipelineInference2
             var data = new List<ReadOnlyMemory<char>[]>();
             using (var cursor = idv.GetRowCursor(col => true))
             {
-                int columnIndex;
-                bool found = cursor.Schema.TryGetColumnIndex("C", out columnIndex);
-                //Contracts.Assert(found);
-                var colType = cursor.Schema.GetColumnType(columnIndex);
+                var column = cursor.Schema.GetColumnOrNull("C");
+                //Contracts.Assert(column != null);
+                int columnIndex = column.Value.Index;
+                var colType = column.Value.Type;
                 //Contracts.Assert(colType.ItemType.IsText);
                 ValueGetter<VBuffer<ReadOnlyMemory<char>>> vecGetter = null;
                 ValueGetter<ReadOnlyMemory<char>> oneGetter = null;

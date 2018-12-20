@@ -122,11 +122,12 @@ namespace Microsoft.ML.PipelineInference2
                 {
                     messages.Add(msg);
                 });*/
-            var idv = TextLoader.ReadFile(new MLContext(), args, source).Take(1000);
+            var textLoader = new TextLoader(new MLContext(), args);
+            var idv = textLoader.Read(source).Take(1000);
             var columnCounts = new List<int>();
-            int columnIndex;
-            bool found = idv.Schema.TryGetColumnIndex("C", out columnIndex);
-            //ch.Assert(found);
+            var column = idv.Schema["C"];
+            //ch.Assert(column != null);
+            int columnIndex = column.Index;
 
             using (var cursor = idv.GetRowCursor(x => x == columnIndex))
             {

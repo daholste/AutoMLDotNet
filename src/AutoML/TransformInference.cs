@@ -156,8 +156,8 @@ namespace Microsoft.ML.PipelineInference2
                 _data = data;
                 _columnId = column.ColumnIndex;
                 _purpose = column.Purpose;
-                _type = new Lazy<ColumnType>(() => _data.Schema.GetColumnType(_columnId));
-                _columnName = new Lazy<string>(() => _data.Schema.GetColumnName(_columnId));
+                _type = new Lazy<ColumnType>(() => _data.Schema[_columnId].Type);
+                _columnName = new Lazy<string>(() => _data.Schema[_columnId].Name);
                 _hasMissing = new Lazy<bool>(() =>
                 {
                     if (Type.ItemType() != NumberType.R4)
@@ -1339,7 +1339,7 @@ namespace Microsoft.ML.PipelineInference2
             //h.Check(args.EstimatedSampleFraction > 0);
 
             data = data.Take(MaxRowsToRead);
-            var cols = purposes.Where(x => !data.Schema.IsHidden(x.ColumnIndex)).Select(x => new IntermediateColumn(data, x)).ToArray();
+            var cols = purposes.Where(x => !data.Schema[x.ColumnIndex].IsHidden).Select(x => new IntermediateColumn(data, x)).ToArray();
             //using (var rootCh = h.Start("InferTransforms"))
             //{
             var list = new List<SuggestedTransform>();
@@ -1372,7 +1372,7 @@ namespace Microsoft.ML.PipelineInference2
             //}
         }
 
-        public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, Arguments args, RoleMappedData dataRoles)
+        public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, Arguments args)
         {
             //Contracts.CheckValue(env, nameof(env));
             //var h = env.Register("InferTransforms");
@@ -1384,8 +1384,8 @@ namespace Microsoft.ML.PipelineInference2
 
             // Infer column purposes from data sample.
             var piArgs = new PurposeInference.Arguments { MaxRowsToRead = MaxRowsToRead };
-            var columnIndices = Enumerable.Range(0, dataSample.Schema.ColumnCount);
-            var piResult = PurposeInference.InferPurposes(env, dataSample, columnIndices, piArgs, dataRoles);
+            var columnIndices = Enumerable.Range(0, dataSample.Schema.Count);
+            var piResult = PurposeInference.InferPurposes(env, dataSample, columnIndices, piArgs);
             var purposes = piResult.Columns;
 
             // Infer transforms
@@ -1405,7 +1405,7 @@ namespace Microsoft.ML.PipelineInference2
                 .Contains(t.AtomicGroupId)).ToArray();*/
         }
 
-        public static SuggestedTransform[] InferConcatNumericFeatures(MLContext env, IDataView data, Arguments args, RoleMappedData dataRoles)
+        public static SuggestedTransform[] InferConcatNumericFeatures(MLContext env, IDataView data, Arguments args)
         {
             //Contracts.CheckValue(env, nameof(env));
             //var h = env.Register("InferConcatNumericFeatures");
@@ -1417,11 +1417,11 @@ namespace Microsoft.ML.PipelineInference2
 
             // Infer column purposes from data sample.
             var piArgs = new PurposeInference.Arguments { MaxRowsToRead = MaxRowsToRead };
-            var columnIndices = Enumerable.Range(0, data.Schema.ColumnCount);
-            var piResult = PurposeInference.InferPurposes(env, data, columnIndices, piArgs, dataRoles);
+            var columnIndices = Enumerable.Range(0, data.Schema.Count);
+            var piResult = PurposeInference.InferPurposes(env, data, columnIndices, piArgs);
             var purposes = piResult.Columns;
 
-            var cols = purposes.Where(x => !data.Schema.IsHidden(x.ColumnIndex)
+            var cols = purposes.Where(x => !data.Schema[x.ColumnIndex].IsHidden
                 && !args.ExcludedColumnIndices.Contains(x.ColumnIndex))
                 .Select(x => new IntermediateColumn(data, x))
                 .ToArray();

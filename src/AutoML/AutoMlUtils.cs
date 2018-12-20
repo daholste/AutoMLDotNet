@@ -52,14 +52,14 @@ namespace Microsoft.ML.PipelineInference2
 
             // For every column, see if either present in initial dataset, or
             // produced by a transform used in current pipeline.
-            for (int columnIndex = 0; columnIndex < dataSample.Schema.ColumnCount; columnIndex++)
+            for (int columnIndex = 0; columnIndex < dataSample.Schema.Count; columnIndex++)
             {
                 // Create ColumnInfo object for indexing dictionary
                 var colInfo = new AutoInference.ColumnInfo
                 {
-                    Name = dataSample.Schema.GetColumnName(columnIndex),
-                    ItemType = dataSample.Schema.GetColumnType(columnIndex).ItemType(),
-                    IsHidden = dataSample.Schema.IsHidden(columnIndex)
+                    Name = dataSample.Schema[columnIndex].Name,
+                    ItemType = dataSample.Schema[columnIndex].Type.ItemType(),
+                    IsHidden = dataSample.Schema[columnIndex].IsHidden
                 };
 
                 // Exclude all hidden and non-numeric columns
@@ -92,7 +92,7 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             // Exclude all columns not discovered by our inclusion process
-            return Enumerable.Range(0, dataSample.Schema.ColumnCount).Except(includedColumnIndices).ToArray();
+            return Enumerable.Range(0, dataSample.Schema.Count).Except(includedColumnIndices).ToArray();
         }
 
         public static IDataView ApplyTransformSet(IDataView data, TransformInference.SuggestedTransform[] transforms)
@@ -113,7 +113,7 @@ namespace Microsoft.ML.PipelineInference2
         /// (In other words, if there would be nothing for that concatenate transform to do.)
         /// </summary>
         private static TransformInference.SuggestedTransform[] GetFinalFeatureConcat(MLContext env,
-            IDataView dataSample, int[] excludedColumnIndices, int level, int atomicIdOffset, RoleMappedData dataRoles)
+            IDataView dataSample, int[] excludedColumnIndices, int level, int atomicIdOffset)
         {
             var finalArgs = new TransformInference.Arguments
             {
@@ -122,7 +122,7 @@ namespace Microsoft.ML.PipelineInference2
                 ExcludedColumnIndices = excludedColumnIndices
             };
 
-            var featuresConcatTransforms = TransformInference.InferConcatNumericFeatures(env, dataSample, finalArgs, dataRoles);
+            var featuresConcatTransforms = TransformInference.InferConcatNumericFeatures(env, dataSample, finalArgs);
 
             for (int i = 0; i < featuresConcatTransforms.Length; i++)
             {
@@ -138,7 +138,7 @@ namespace Microsoft.ML.PipelineInference2
         /// </summary>
         public static TransformInference.SuggestedTransform[] GetFinalFeatureConcat(MLContext env, IDataView data,
             AutoInference.DependencyMap dependencyMapping, TransformInference.SuggestedTransform[] selectedTransforms,
-            TransformInference.SuggestedTransform[] allTransforms, RoleMappedData dataRoles)
+            TransformInference.SuggestedTransform[] allTransforms)
         {
             int level = 1;
             int atomicGroupLimit = 0;
@@ -148,7 +148,7 @@ namespace Microsoft.ML.PipelineInference2
                 atomicGroupLimit = allTransforms.Max(t => t.AtomicGroupId) + 1;
             }
             var excludedColumnIndices = GetExcludedColumnIndices(selectedTransforms, data, dependencyMapping);
-            return GetFinalFeatureConcat(env, data, excludedColumnIndices, level, atomicGroupLimit, dataRoles);
+            return GetFinalFeatureConcat(env, data, excludedColumnIndices, level, atomicGroupLimit);
         }
 
         /// <summary>
@@ -158,19 +158,19 @@ namespace Microsoft.ML.PipelineInference2
             TransformInference.SuggestedTransform[] appliedTransforms)
         {
             var mapping = new AutoInference.LevelDependencyMap();
-            for (int i = 0; i < transformedData.Schema.ColumnCount; i++)
+            for (int i = 0; i < transformedData.Schema.Count; i++)
             {
-                if (transformedData.Schema.IsHidden(i))
+                if (transformedData.Schema[i].IsHidden)
                     continue;
                 var colInfo = new AutoInference.ColumnInfo
                 {
                     IsHidden = false,
-                    ItemType = transformedData.Schema.GetColumnType(i).ItemType(),
-                    Name = transformedData.Schema.GetColumnName(i)
+                    ItemType = transformedData.Schema[i].Type.ItemType(),
+                    Name = transformedData.Schema[i].Name
                 };
                 mapping.Add(colInfo, appliedTransforms.Where(t =>
                     t.RoutingStructure.ColumnsProduced.Any(o => o.Name == colInfo.Name &&
-                    o.IsNumeric == transformedData.Schema.GetColumnType(i).ItemType().IsNumber())).ToList());
+                    o.IsNumeric == transformedData.Schema[i].Type.ItemType().IsNumber())).ToList());
             }
             return mapping;
         }

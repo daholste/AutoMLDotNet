@@ -125,7 +125,7 @@ namespace Microsoft.ML.PipelineInference2
 
             // Add final features concat transform.
             sampledTransforms.AddRange(AutoMlUtils.GetFinalFeatureConcat(Env, FullyTransformedData,
-                DependencyMapping, sampledTransforms.ToArray(), AvailableTransforms, DataRoles));
+                DependencyMapping, sampledTransforms.ToArray(), AvailableTransforms));
 
             return sampledTransforms.ToArray();
         }
@@ -142,10 +142,9 @@ namespace Microsoft.ML.PipelineInference2
             return topLearners;
         }
 
-        public override PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numCandidates, RoleMappedData dataRoles)
+        public override PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numCandidates)
         {
             var prevCandidates = history.ToArray();
-            DataRoles = dataRoles;
 
             switch (_currentStage)
             {
@@ -161,7 +160,7 @@ namespace Microsoft.ML.PipelineInference2
                         // number of candidates, using second stage logic.
                         UpdateLearners(GetTopLearners(prevCandidates));
                         _currentStage += 2;
-                        return GetNextCandidates(prevCandidates, numCandidates, DataRoles);
+                        return GetNextCandidates(prevCandidates, numCandidates);
                     }
                     else
                         return GetInitialPipelines(prevCandidates, remainingNum);
@@ -196,7 +195,7 @@ namespace Microsoft.ML.PipelineInference2
         private PipelinePattern[] GetInitialPipelines(IEnumerable<PipelinePattern> history, int numCandidates)
         {
             var engine = _secondaryEngines[nameof(DefaultsEngine)];
-            return engine.GetNextCandidates(history, numCandidates, DataRoles);
+            return engine.GetNextCandidates(history, numCandidates);
         }
 
         private PipelinePattern[] NextCandidates(PipelinePattern[] history, int numCandidates,

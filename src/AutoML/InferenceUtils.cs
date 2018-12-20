@@ -27,7 +27,7 @@ namespace Microsoft.ML.PipelineInference2
         {
             //Contracts.AssertValue(data, "data");
             //Contracts.AssertValue(env, "env");
-            return new CacheDataView(env, data, Enumerable.Range(0, data.Schema.ColumnCount).ToArray());
+            return new CacheDataView(env, data, Enumerable.Range(0, data.Schema.Count).ToArray());
         }
 
         public static ColumnGroupingInference.GroupingColumn[] InferColumnPurposes(MLContext env, TextFileSample sample, TextFileContents.ColumnSplitResult splitResult,
@@ -59,7 +59,8 @@ namespace Microsoft.ML.PipelineInference2
                 AllowQuoting = splitResult.AllowQuote,
                 HasHeader = typeInferenceResult.HasHeader
             };
-            var typedData = TextLoader.ReadFile(env, typedLoaderArgs, sample);
+            var textLoader = new TextLoader(env, typedLoaderArgs);
+            var typedData = textLoader.Read(sample);
 
             var purposeInferenceResult = PurposeInference.InferPurposes(env, typedData,
                 Enumerable.Range(0, typedLoaderArgs.Column.Length), new PurposeInference.Arguments(),

@@ -94,8 +94,8 @@ namespace Microsoft.ML.PipelineInference2
             {
                 _data = data;
                 _columnId = columnId;
-                _type = new Lazy<ColumnType>(() => _data.Schema.GetColumnType(_columnId));
-                _columnName = new Lazy<string>(() => _data.Schema.GetColumnName(_columnId));
+                _type = new Lazy<ColumnType>(() => _data.Schema[_columnId].Type);
+                _columnName = new Lazy<string>(() => _data.Schema[_columnId].Name);
             }
 
             public Column GetColumn()
@@ -319,7 +319,7 @@ namespace Microsoft.ML.PipelineInference2
         /// <param name="colLabelName">(Optional) User defined Role mappings for data.</param>
         /// <returns>The result includes the array of auto-detected column purposes.</returns>
         public static InferenceResult InferPurposes(MLContext env, IDataView data, IEnumerable<int> columnIndices, Arguments args,
-            RoleMappedData dataRoles = null, string colLabelName = null)
+            string colLabelName = null)
         {
             //Contracts.CheckValue(env, nameof(env));
             //var host = env.Register("InferPurposes");
@@ -332,17 +332,6 @@ namespace Microsoft.ML.PipelineInference2
             var takenData = data.Take(args.MaxRowsToRead);
             var cols = columnIndices.Select(x => new IntermediateColumn(takenData, x)).ToList();
             data = takenData;
-
-            if (dataRoles != null)
-            {
-                var items = dataRoles.Schema.GetColumnRoles();
-                foreach (var item in items)
-                {
-                    Enum.TryParse(item.Key.Value, out ColumnPurpose purpose);
-                    var col = cols.Find(x => x.ColumnName == item.Value.Name);
-                    col.SuggestedPurpose = purpose;
-                }
-            }
 
             foreach (var expert in GetExperts())
             {

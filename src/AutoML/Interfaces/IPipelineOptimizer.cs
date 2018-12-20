@@ -20,7 +20,7 @@ namespace Microsoft.ML.PipelineInference2
     /// </summary>
     public interface IPipelineOptimizer
     {
-        PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numberOfCandidates, RoleMappedData dataRoles);
+        PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numberOfCandidates);
 
         void SetSpace(TransformInference.SuggestedTransform[] availableTransforms,
             RecipeInference.SuggestedRecipe.SuggestedLearner[] availableLearners,
@@ -38,7 +38,6 @@ namespace Microsoft.ML.PipelineInference2
         protected IDataView OriginalData;
         protected IDataView FullyTransformedData;
         protected AutoInference.DependencyMap DependencyMapping;
-        protected RoleMappedData DataRoles;
         protected readonly MLContext Env;
         protected readonly Dictionary<long, bool> TransformsMaskValidity;
         protected readonly HashSet<string> VisitedPipelines;
@@ -53,7 +52,7 @@ namespace Microsoft.ML.PipelineInference2
             ProbUtils = new SweeperProbabilityUtils();
         }
 
-        public abstract PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numberOfCandidates, RoleMappedData dataRoles);
+        public abstract PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numberOfCandidates);
 
         public virtual void SetSpace(TransformInference.SuggestedTransform[] availableTransforms,
             RecipeInference.SuggestedRecipe.SuggestedLearner[] availableLearners,

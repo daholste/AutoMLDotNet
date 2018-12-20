@@ -63,7 +63,6 @@ namespace Microsoft.ML.Runtime.PipelineInference2
             private TransformInference.SuggestedTransform[] _availableTransforms;
             private RecipeInference.SuggestedRecipe.SuggestedLearner[] _availableLearners;
             private DependencyMap _dependencyMapping;
-            private RoleMappedData _dataRoles;
             public IPipelineOptimizer AutoMlEngine { get; set; }
             public PipelinePattern[] BatchCandidates { get; set; }
             public SupportedMetric Metric { get; }
@@ -105,7 +104,7 @@ namespace Microsoft.ML.Runtime.PipelineInference2
                         var currentBatchSize = batchSize;
                         if (_terminator is IterationTerminator itr)
                             currentBatchSize = Math.Min(itr.RemainingIterations(_history), batchSize);
-                        var candidates = AutoMlEngine.GetNextCandidates(_sortedSampledElements.Values, currentBatchSize, _dataRoles);
+                        var candidates = AutoMlEngine.GetNextCandidates(_sortedSampledElements.Values, currentBatchSize);
 
                         // Break if no candidates returned, means no valid pipeline available.
                         if (candidates.Length == 0)
@@ -183,7 +182,7 @@ namespace Microsoft.ML.Runtime.PipelineInference2
                 TransformInference.SuggestedTransform[] existingTransforms = null)
             {
                 // Infer transforms using experts
-                var levelTransforms = TransformInference.InferTransforms(_env, data, args, _dataRoles);
+                var levelTransforms = TransformInference.InferTransforms(_env, data, args);
 
                 // Retain only those transforms inferred which were also passed in.
                 if (existingTransforms != null)
@@ -191,13 +190,12 @@ namespace Microsoft.ML.Runtime.PipelineInference2
                 return levelTransforms;
             }
 
-            public void InferSearchSpace(int numTransformLevels, RoleMappedData dataRoles = null)
+            public void InferSearchSpace(int numTransformLevels)
             {
                 var learners = RecipeInference.AllowedLearners(_env, TrainerKind).ToArray();
                 if (_requestedLearners != null && _requestedLearners.Length > 0)
                     learners = learners.Where(l => _requestedLearners.Contains(l.LearnerName)).ToArray();
-
-                _dataRoles = dataRoles;
+                
                 ComputeSearchSpace(numTransformLevels, learners, (b, c) => InferAndFilter(b, c));
             }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.ML.Runtime.Data;
+﻿using Microsoft.ML.Data;
+using Microsoft.ML.Runtime.Data;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,11 +13,12 @@ namespace Microsoft.ML.PipelineInference2
         /// Use tag to independently create multiple temporary, unique column
         /// names for a single transform.
         /// </summary>
-        public static string GetTemporaryColumnName(this ISchema schema, string tag = null)
+        public static string GetTemporaryColumnName(this Schema schema, string tag = null)
         {
-            int col;
-            if (!string.IsNullOrWhiteSpace(tag) && !schema.TryGetColumnIndex(tag, out col))
+            if (!string.IsNullOrWhiteSpace(tag) && schema.GetColumnOrNull(tag) == null)
+            {
                 return tag;
+            }
 
             for (int i = 0; ; i++)
             {
@@ -24,8 +26,10 @@ namespace Microsoft.ML.PipelineInference2
                     string.Format("temp_{0:000}", i) :
                     string.Format("temp_{0}_{1:000}", tag, i);
 
-                if (!schema.TryGetColumnIndex(name, out col))
+                if (schema.GetColumnOrNull(name) == null)
+                {
                     return name;
+                }
             }
         }
     }

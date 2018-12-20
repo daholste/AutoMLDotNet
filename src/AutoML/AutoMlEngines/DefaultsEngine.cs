@@ -28,10 +28,9 @@ namespace Microsoft.ML.PipelineInference2
             _currentLearnerIndex = 0;
         }
 
-        public override PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numCandidates, RoleMappedData dataRoles)
+        public override PipelinePattern[] GetNextCandidates(IEnumerable<PipelinePattern> history, int numCandidates)
         {
             var candidates = new List<PipelinePattern>();
-            DataRoles = dataRoles;
 
             while (candidates.Count < numCandidates)
             {
@@ -62,7 +61,7 @@ namespace Microsoft.ML.PipelineInference2
 
             // Add final features concat transform.
             sampledTransforms.AddRange(AutoMlUtils.GetFinalFeatureConcat(Env, FullyTransformedData,
-                DependencyMapping, sampledTransforms.ToArray(), AvailableTransforms, DataRoles));
+                DependencyMapping, sampledTransforms.ToArray(), AvailableTransforms));
 
             return sampledTransforms.ToArray();
         }
