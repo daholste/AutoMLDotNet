@@ -135,7 +135,7 @@ namespace Microsoft.ML.PipelineInference2
                             .All(x =>
                             {
                                 bool value;
-                                return Conversions.Instance.TryParse(in x, out value);
+                                return Conversions.TryParse(in x, out value);
                             })
                             )
                         {
@@ -145,7 +145,7 @@ namespace Microsoft.ML.PipelineInference2
                         col.SuggestedType = BoolType.Instance;
                         bool first;
 
-                        col.HasHeader = !Conversions.Instance.TryParse(in col.RawData[0], out first);
+                        col.HasHeader = !Conversions.TryParse(in col.RawData[0], out first);
                     }
                 }
             }
@@ -160,7 +160,7 @@ namespace Microsoft.ML.PipelineInference2
                             .All(x =>
                             {
                                 Single value;
-                                return Conversions.Instance.TryParse(in x, out value);
+                                return Conversions.TryParse(in x, out value);
                             })
                             )
                         {

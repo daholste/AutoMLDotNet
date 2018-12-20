@@ -159,7 +159,7 @@ namespace Microsoft.ML.Runtime.PipelineInference2
                 foreach (var transform in candidate.Transforms)
                 {
                     transformsSb.Append("xf:");
-                    transformsSb.Append(transform.Transform);
+                    transformsSb.Append(transform);
                     transformsSb.Append(" ");
                 }
                 var learnerStr = candidate.Learner.ToString();
@@ -178,15 +178,10 @@ namespace Microsoft.ML.Runtime.PipelineInference2
                 File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_sortedSampledElements.Count}\t{candidate.PerformanceSummary.MetricValue}\t{MyGlobals.Stopwatch.Elapsed}\t{commandLineStr}\r\n");
             }
 
-            private TransformInference.SuggestedTransform[] InferAndFilter(IDataView data, TransformInference.Arguments args,
-                TransformInference.SuggestedTransform[] existingTransforms = null)
+            private TransformInference.SuggestedTransform[] InferAndFilter(IDataView data, TransformInference.Arguments args)
             {
                 // Infer transforms using experts
                 var levelTransforms = TransformInference.InferTransforms(_env, data, args);
-
-                // Retain only those transforms inferred which were also passed in.
-                if (existingTransforms != null)
-                    return levelTransforms.Where(t => existingTransforms.Any(t2 => t2.Equals(t))).ToArray();
                 return levelTransforms;
             }
 
