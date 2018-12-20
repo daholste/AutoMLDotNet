@@ -17,6 +17,9 @@ namespace Samples
 
             var mlContext = new MLContext();
 
+            // auto-infer text loader args
+            var autoInfer = RecipeInference.MyAutoMlInferTextLoaderArguments(mlContext, trainDataPath, "Label");
+
             // load data
             var textLoader = new TextLoader(mlContext,
                 new TextLoader.Arguments()
