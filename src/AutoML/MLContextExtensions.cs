@@ -17,7 +17,7 @@ namespace Microsoft.ML.PipelineInference2
 
     public static class MLContextExtensions
     {
-        public static AutoMLResult Auto(this BinaryClassificationContext context,
+        public static AutoMLResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor)
         {
             // hack: init new MLContext

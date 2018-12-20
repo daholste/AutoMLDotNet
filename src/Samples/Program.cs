@@ -1,11 +1,11 @@
-﻿using Microsoft.ML.Core.Data;
+﻿using System;
+using System.IO;
+using Microsoft.ML;
+using Microsoft.ML.Core.Data;
 using Microsoft.ML.PipelineInference2;
 using Microsoft.ML.Runtime.Data;
-using System;
-using System.IO;
-using static Microsoft.ML.Runtime.Data.TextLoader;
 
-namespace Microsoft.ML.AutoMLPublicAPI2
+namespace Samples
 {
     public class Program
     {
@@ -16,8 +16,6 @@ namespace Microsoft.ML.AutoMLPublicAPI2
             const string testDataPath = @"C:\data\sample_test2.csv";
 
             var mlContext = new MLContext();
-
-            var textLoaderArgs = RecipeInference.MyAutoMlInferTextLoaderArguments(mlContext, trainDataPath, "Label");
 
             // load data
             var textLoader = new TextLoader(mlContext,
@@ -72,8 +70,16 @@ namespace Microsoft.ML.AutoMLPublicAPI2
             //////// AutoML
 
             // run AutoML & train model
-            var trainer = mlContext.BinaryClassification.Trainers.Auto(maxIterations: 9, validationData: validationData);
-            var model = trainer.Fit(trainData);
+            var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
+            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 5, preprocessor);
+            // get best AutoML model
+            var model = autoMlResult.BestModel;
+            // print all AutoML pipelines
+            var allPipelines = autoMlResult.AllPipelines;
+            foreach (var pipeline in allPipelines)
+            {
+                Console.WriteLine(pipeline);
+            }
 
             // run AutoML on test data
             var transformedOutput = model.Transform(testData);
