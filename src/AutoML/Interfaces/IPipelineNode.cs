@@ -23,18 +23,6 @@ using Microsoft.ML.Trainers.Online;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    public sealed class DataAndModel<TModel>
-    {
-        public Var<IDataView> OutData { get; }
-        public Var<TModel> Model { get; }
-
-        public DataAndModel(Var<IDataView> outData, Var<TModel> model)
-        {
-            OutData = outData;
-            Model = model;
-        }
-    }
-
     public abstract class PipelineNodeBase
     {
         public virtual ParameterSet HyperSweeperParamSet { get; set; }

@@ -262,7 +262,7 @@ namespace Microsoft.ML.PipelineInference2
             yield return new Experts.LabelAdvisory();
 
             // For boolean columns use convert transform
-            //yield return new Experts.Boolean();
+            yield return new Experts.Boolean();
 
             // For categorical columns, use Cat transform.
             yield return new Experts.Categorical();

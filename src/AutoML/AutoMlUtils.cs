@@ -6,31 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.ML.PipelineInference2;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Runtime.EntryPoints;
-using Microsoft.ML.Runtime.EntryPoints.JsonUtils;
-using Microsoft.ML.Runtime.Learners;
-using Microsoft.ML.Runtime.LightGBM;
-using Microsoft.ML.Runtime.PipelineInference2;
-using Microsoft.ML.Runtime.Sweeper;
-using Microsoft.ML.Trainers;
-using Microsoft.ML.Trainers.FastTree;
-using Microsoft.ML.Trainers.Online;
 
 namespace Microsoft.ML.PipelineInference2
 {
     public static class AutoMlUtils
     {
         public static Random Random = new Random();
-
-        public static IChannel MakeDummyChannel()
-        {
-            IHostEnvironment env = new MLContext();
-            var host = env.Register("host");
-            return host.Start("channel");
-        }
 
         public static void Assert(bool boolVal, string message = null)
         {

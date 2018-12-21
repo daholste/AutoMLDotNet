@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.ML.Runtime;
 using System.Linq;
-using static Microsoft.ML.Runtime.PipelineInference2.AutoInference;
+using static Microsoft.ML.PipelineInference2.AutoInference;
 
 namespace Microsoft.ML.PipelineInference2
 {
@@ -36,10 +36,6 @@ namespace Microsoft.ML.PipelineInference2
                 rocketEngine, terminator, MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer,
                    trainData, validationData);
             var pipelineResults = amls.InferPipelines(1, 1, 100);
-
-            // hack: start dummy host & channel
-            var host = (mlContext as IHostEnvironment).Register("hi");
-            var ch = host.Start("hi");
 
             var bestPipeline = pipelineResults.First();
             // hack: retrain on best iteration

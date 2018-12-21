@@ -31,5 +31,15 @@ namespace Microsoft.ML.PipelineInference2
                 new SweepableFloatParam("LearningRates", 0.025f, 0.4f, isLogScale: true),
                 new SweepableFloatParam("Shrinkage", 0.025f, 4f, isLogScale: true),
            };
+
+        public static Action<T> CreateArgsFunc<T>(IEnumerable<SweepableParam> sweepParams)
+        {
+            Action<T> argsFunc = null;
+            if (sweepParams != null)
+            {
+                argsFunc = (obj) => AutoMlUtils.UpdatePropertiesAndFields(obj, sweepParams);
+            }
+            return argsFunc;
+        }
     }
 }

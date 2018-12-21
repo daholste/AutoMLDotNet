@@ -5,11 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.ML.PipelineInference2;
 using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Runtime.EntryPoints;
-using Microsoft.ML.Runtime.PipelineInference2;
-using Microsoft.ML.Runtime.Sweeper.Algorithms;
 
 namespace Microsoft.ML.PipelineInference2
 {

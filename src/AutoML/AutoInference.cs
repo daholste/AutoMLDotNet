@@ -13,7 +13,7 @@ using System.Text;
 using Microsoft.ML.PipelineInference2;
 using MacroUtils = Microsoft.ML.PipelineInference2.MacroUtils;
 
-namespace Microsoft.ML.Runtime.PipelineInference2
+namespace Microsoft.ML.PipelineInference2
 {
     /// <summary>
     /// Class for generating potential recipes/pipelines, testing them, and zeroing in on the best ones.

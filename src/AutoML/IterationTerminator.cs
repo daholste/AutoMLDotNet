@@ -17,14 +17,6 @@ namespace Microsoft.ML.PipelineInference2
         private readonly Stopwatch _stopwatch;
         private readonly TimeSpan? _maxRunTime;
 
-        public sealed class Arguments
-        {
-            //[Argument(ArgumentType.Required, HelpText = "Total number of iterations.", ShortName = "length")]
-            public int FinalHistoryLength;
-
-            public ITerminator CreateComponent(MLContext env) => new IterationTerminator(FinalHistoryLength);
-        }
-
         public IterationTerminator(int finalHistoryLength, TimeSpan? maxRunTime = null,
             Stopwatch stopwatch = null)
         {

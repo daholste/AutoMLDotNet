@@ -31,11 +31,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<AveragedPerceptronTrainer.Arguments> argsFunc = null;
-            if (sweepParams != null)
-            {
-                argsFunc = (obj) => AutoMlUtils.UpdatePropertiesAndFields(obj, sweepParams);
-            }
+            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<AveragedPerceptronTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.AveragedPerceptron(advancedSettings: argsFunc);
             //return new AveragedPerceptronTrainer(mlContext, advancedSettings: argsFunc);
         }
@@ -57,11 +53,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<FastForestClassification.Arguments> argsFunc = null;
-            if (sweepParams != null)
-            {
-                argsFunc = (obj) => AutoMlUtils.UpdatePropertiesAndFields(obj, sweepParams);
-            }
+            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastForestClassification.Arguments>(sweepParams);
             return new FastForestClassification(mlContext, advancedSettings: argsFunc);
         }
 
@@ -82,11 +74,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<FastTreeBinaryClassificationTrainer.Arguments> argsFunc = null;
-            if (sweepParams != null)
-            {
-                argsFunc = (obj) => AutoMlUtils.UpdatePropertiesAndFields(obj, sweepParams);
-            }
+            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastTreeBinaryClassificationTrainer.Arguments>(sweepParams);
             return new FastTreeBinaryClassificationTrainer(mlContext, advancedSettings: argsFunc);
         }
 
@@ -121,17 +109,48 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<FastTreeBinaryClassificationTrainer.Arguments> argsFunc = null;
-            if (sweepParams != null)
-            {
-                argsFunc = (obj) => AutoMlUtils.UpdatePropertiesAndFields(obj, sweepParams);
-            }
+            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastTreeBinaryClassificationTrainer.Arguments>(sweepParams);
             return new FastTreeBinaryClassificationTrainer(mlContext, advancedSettings: argsFunc);
         }
 
         public string GetLearnerName()
         {
             return "LightGbmBinaryTrainer";
+        }
+    }
+
+    public class LinearSvmTrainerCatalogItem : ILearnerCatalogItem
+    {
+        private static readonly IEnumerable<SweepableParam> _sweepRanges = new SweepableParam[]
+            {
+                new SweepableDiscreteParam("NumBoostRound", new object[] { 10, 20, 50, 100, 150, 200 }),
+                new SweepableFloatParam("LearningRate", 0.025f, 0.4f, isLogScale: true),
+                new SweepableLongParam("NumLeaves", 2, 128, isLogScale: true, stepSize: 4),
+                new SweepableDiscreteParam("MinDataPerLeaf", new object[] { 1, 10, 20, 50 }),
+                new SweepableDiscreteParam("UseSoftmax", new object[] { true, false }),
+                new SweepableDiscreteParam("UseCat", new object[] { true, false }),
+                new SweepableDiscreteParam("UseMissing", new object[] { true, false }),
+                new SweepableDiscreteParam("MinDataPerGroup", new object[] { 10, 50, 100, 200 }),
+                new SweepableDiscreteParam("MaxCatThreshold", new object[] { 8, 16, 32, 64 }),
+                new SweepableDiscreteParam("CatSmooth", new object[] { 1, 10, 20 }),
+                new SweepableDiscreteParam("CatL2", new object[] { 0.1, 0.5, 1, 5, 10 }),
+
+            };
+
+        public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
+        {
+            return _sweepRanges;
+        }
+
+        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        {
+            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<LinearSvm.Arguments>(sweepParams);
+            return new LinearSvm(mlContext, advancedSettings: argsFunc);
+        }
+
+        public string GetLearnerName()
+        {
+            return "LinearSvm";
         }
     }
 }
