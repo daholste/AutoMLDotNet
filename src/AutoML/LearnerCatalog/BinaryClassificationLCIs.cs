@@ -7,6 +7,7 @@ using Microsoft.ML.Runtime.Training;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
 using Microsoft.ML.Trainers.Online;
+using Microsoft.ML.Trainers.SymSgd;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -213,7 +214,6 @@ namespace Microsoft.ML.PipelineInference2
             new SweepableDiscreteParam("ConvergenceTolerance", new object[] { 1e-2f, 1e-3f, 1e-4f, 1e-5f }),
             new SweepableDiscreteParam("MaxIterations", new object[] { 1, 5, 10, 20 }),
             new SweepableDiscreteParam("Shuffle", null, isBool: true),
-
         };
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
@@ -230,6 +230,32 @@ namespace Microsoft.ML.PipelineInference2
         public string GetLearnerName()
         {
             return "StochasticGradientDescent";
+        }
+    }
+
+    public class SymSgdBinaryClassificationLCI : ILearnerCatalogItem
+    {
+        private static readonly IEnumerable<SweepableParam> _sweepRanges = new SweepableParam[] {
+            new SweepableDiscreteParam("NumberOfIterations", new object[] { 1, 5, 10, 20, 30, 40, 50 }),
+            new SweepableDiscreteParam("LearningRate", new object[] { "<Auto>", 1e1f, 1e0f, 1e-1f, 1e-2f, 1e-3f }),
+            new SweepableDiscreteParam("L2Regularization", new object[] { 0.0f, 1e-5f, 1e-5f, 1e-6f, 1e-7f }),
+            new SweepableDiscreteParam("UpdateFrequency", new object[] { "<Auto>", 5, 20 })
+        };
+
+        public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
+        {
+            return _sweepRanges;
+        }
+
+        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        {
+            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SymSgdClassificationTrainer.Arguments>(sweepParams);
+            return mlContext.BinaryClassification.Trainers.SymbolicStochasticGradientDescent(advancedSettings: argsFunc);
+        }
+
+        public string GetLearnerName()
+        {
+            return "SymSGD";
         }
     }
 }
