@@ -13,10 +13,10 @@ namespace Microsoft.ML.PipelineInference2
             {
                 { MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer,
                     new ILearnerCatalogItem[] {
-                        new AveragedPerceptronCatalogItem(),
-                        new FastForestCatalogItem(),
-                        new FastTreeBinaryClassifierCatalogItem(),
-                        new LightGbmBinaryTrainerCatalogItem()
+                        new AveragedPerceptronBinaryClassificationLCI(),
+                        new FastForestBinaryClassifierLCI(),
+                        new FastTreeBinaryClassifierLCI(),
+                        new LightGbmBinaryClassificationLCI()
                     } },
             };
 

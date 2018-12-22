@@ -37,7 +37,7 @@ namespace Microsoft.ML.PipelineInference2
             Action<T> argsFunc = null;
             if (sweepParams != null)
             {
-                argsFunc = (obj) => AutoMlUtils.UpdatePropertiesAndFields(obj, sweepParams);
+                argsFunc = (args) => AutoMlUtils.UpdatePropertiesAndFields(args, sweepParams);
             }
             return argsFunc;
         }

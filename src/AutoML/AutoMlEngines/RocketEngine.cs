@@ -53,7 +53,7 @@ namespace Microsoft.ML.PipelineInference2
             _hyperSweepers = new Dictionary<string, ISweeper>();
             _secondaryEngines = new Dictionary<string, IPipelineOptimizer>
             {
-                [nameof(DefaultsEngine)] = new DefaultsEngine(env, new DefaultsEngine.Arguments())
+                [nameof(DefaultsEngine)] = new DefaultsEngine(env)
             };
         }
 

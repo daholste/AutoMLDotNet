@@ -18,12 +18,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         private int _currentLearnerIndex;
 
-        public sealed class Arguments
-        {
-            public IPipelineOptimizer CreateComponent(MLContext env) => new DefaultsEngine(env, this);
-        }
-
-        public DefaultsEngine(MLContext env, Arguments args) : base(env)
+        public DefaultsEngine(MLContext env) : base(env)
         {
             _currentLearnerIndex = 0;
         }
