@@ -15,6 +15,8 @@ using System.Text;
 
 namespace Microsoft.ML.PipelineInference2
 {
+    using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
+
     public class AveragedPerceptronBinaryClassificationLCI : ILearnerCatalogItem
     {
         private static readonly IEnumerable<SweepableParam> _sweepRanges =
@@ -26,7 +28,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<AveragedPerceptronTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.AveragedPerceptron(advancedSettings: argsFunc);
@@ -34,7 +36,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return $"AveragedPerceptron";
+            return LearnerNames.AveragedPerceptron.ToString();
         }
     }
 
@@ -47,7 +49,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastForestClassification.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.FastForest(advancedSettings: argsFunc);
@@ -68,7 +70,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastTreeBinaryClassificationTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.FastTree(advancedSettings: argsFunc);
@@ -106,7 +108,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             Action<LightGbmArguments> argsFunc = null;
             if (sweepParams != null)
@@ -138,7 +140,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<LinearSvm.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.LinearSupportVectorMachines(advancedSettings: argsFunc);
@@ -166,7 +168,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SdcaBinaryTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.StochasticDualCoordinateAscent(advancedSettings: argsFunc);
@@ -195,7 +197,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<LogisticRegression.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.LogisticRegression(advancedSettings: argsFunc);
@@ -221,7 +223,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<StochasticGradientDescentClassificationTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.StochasticGradientDescent(advancedSettings: argsFunc);
@@ -247,7 +249,7 @@ namespace Microsoft.ML.PipelineInference2
             return _sweepRanges;
         }
 
-        public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
+        public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
             var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SymSgdClassificationTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.SymbolicStochasticGradientDescent(advancedSettings: argsFunc);

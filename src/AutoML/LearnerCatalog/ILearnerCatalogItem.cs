@@ -6,10 +6,12 @@ using System.Text;
 
 namespace Microsoft.ML.PipelineInference2
 {
+    using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
+
     public interface ILearnerCatalogItem
     {
         IEnumerable<SweepableParam> GetHyperparamSweepRanges();
-        ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams);
+        ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams);
         string GetLearnerName();
     }
 }

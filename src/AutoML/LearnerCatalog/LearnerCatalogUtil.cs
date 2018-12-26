@@ -4,6 +4,11 @@ using System.Text;
 
 namespace Microsoft.ML.PipelineInference2
 {
+    public enum LearnerNames
+    {
+        AveragedPerceptron,
+    }
+
     public static class LearnerCatalogUtil
     {
         public static readonly IEnumerable<SweepableParam> AveragedLinearArgsSweepableParams =

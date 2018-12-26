@@ -84,7 +84,7 @@ namespace Microsoft.ML.PipelineInference2
             // append estimators to normalize features, if needed
             if (learner.Info.NeedNormalization)
             {
-                var normalizingEstimator = new NormalizingEstimator(_mlContext, DefaultColumnNames.Features);
+                var normalizingEstimator = _mlContext.Transforms.Normalize(DefaultColumnNames.Features);
                 pipeline = pipeline.Append(normalizingEstimator);
             }
 

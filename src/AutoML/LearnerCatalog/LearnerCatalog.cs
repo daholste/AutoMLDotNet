@@ -18,6 +18,10 @@ namespace Microsoft.ML.PipelineInference2
                         new FastTreeBinaryClassifierLCI(),
                         new LightGbmBinaryClassificationLCI()
                     } },
+                { MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer,
+                    new ILearnerCatalogItem[] {
+                        new AveragedPerceptronMultiClassificationLCI()
+                    } },
             };
 
         public IEnumerable<ILearnerCatalogItem> GetLearners(MacroUtils.TrainerKinds trainerKind)
