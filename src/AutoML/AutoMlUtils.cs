@@ -203,18 +203,6 @@ namespace Microsoft.ML.PipelineInference2
             throw new Exception($"Sweeping only supported for Discrete, Long, and Float parameter types. Unrecognized type {param.GetType()}");
         }
 
-        private static void SetValue(PropertyInfo pi, IComparable value, object entryPointObj, Type propertyType)
-        {
-            if (propertyType == value?.GetType())
-                pi.SetValue(entryPointObj, value);
-            else if (propertyType == typeof(double) && value is float)
-                pi.SetValue(entryPointObj, Convert.ToDouble(value));
-            else if (propertyType == typeof(int) && value is long)
-                pi.SetValue(entryPointObj, Convert.ToInt32(value));
-            else if (propertyType == typeof(long) && value is int)
-                pi.SetValue(entryPointObj, Convert.ToInt64(value));
-        }
-
         private static void SetValue(FieldInfo fi, IComparable value, object entryPointObj, Type propertyType)
         {
             if (propertyType == value?.GetType())
@@ -230,80 +218,19 @@ namespace Microsoft.ML.PipelineInference2
         /// <summary>
         /// Updates properties of entryPointObj instance based on the values in sweepParams
         /// </summary>
-        public static bool UpdateProperties(object entryPointObj, IEnumerable<SweepableParam> sweepParams)
+        public static void UpdateFields(object entryPointObj, IEnumerable<SweepableParam> sweepParams)
         {
-            bool result = true;
             foreach (var param in sweepParams)
             {
                 try
                 {
                     // Only updates property if param.value isn't null and
                     // param has a name of property.
-                    var pi = entryPointObj.GetType().GetProperty(param.Name);
-                    if (pi is null || param.RawValue == null)
-                        continue;
-                    var propType = Nullable.GetUnderlyingType(pi.PropertyType) ?? pi.PropertyType;
-
-                    if (param is SweepableDiscreteParam dp)
+                    if(param.RawValue == null)
                     {
-                        var optIndex = (int)dp.RawValue;
-                        //Contracts.Assert(0 <= optIndex && optIndex < dp.Options.Length, $"Options index out of range: {optIndex}");
-                        var option = dp.Options[optIndex].ToString().ToLower();
-
-                        // Handle <Auto> string values in sweep params
-                        if (option == "auto" || option == "<auto>" || option == "< auto >")
-                        {
-                            //Check if nullable type, in which case 'null' is the auto value.
-                            if (Nullable.GetUnderlyingType(pi.PropertyType) != null)
-                                pi.SetValue(entryPointObj, null);
-                            else if (pi.PropertyType.IsEnum)
-                            {
-                                // Check if there is an enum option named Auto
-                                var enumDict = pi.PropertyType.GetEnumValues().Cast<int>()
-                                    .ToDictionary(v => Enum.GetName(pi.PropertyType, v), v => v);
-                                if (enumDict.ContainsKey("Auto"))
-                                    pi.SetValue(entryPointObj, enumDict["Auto"]);
-                            }
-                        }
-                        else
-                            SetValue(pi, (IComparable)dp.Options[optIndex], entryPointObj, propType);
-                    }
-                    else
-                        SetValue(pi, param.RawValue, entryPointObj, propType);
-                }
-                catch (Exception)
-                {
-                    // Could not update param
-                    result = false;
-                }
-            }
-
-            // Make sure all changes were saved.
-            return result && CheckEntryPointStateMatchesParamValues(entryPointObj, sweepParams);
-        }
-
-        public static bool UpdatePropertiesAndFields(object entryPointObj, IEnumerable<SweepableParam> sweepParams)
-        {
-            var result = UpdateProperties(entryPointObj, sweepParams);
-            result &= UpdateFields(entryPointObj, sweepParams);
-            return result;
-        }
-
-        /// <summary>
-        /// Updates properties of entryPointObj instance based on the values in sweepParams
-        /// </summary>
-        public static bool UpdateFields(object entryPointObj, IEnumerable<SweepableParam> sweepParams)
-        {
-            bool result = true;
-            foreach (var param in sweepParams)
-            {
-                try
-                {
-                    // Only updates property if param.value isn't null and
-                    // param has a name of property.
-                    var fi = entryPointObj.GetType().GetField(param.Name);
-                    if (fi is null || param.RawValue == null)
                         continue;
+                    }
+                    var fi = entryPointObj.GetType().GetField(param.Name);
                     var propType = Nullable.GetUnderlyingType(fi.FieldType) ?? fi.FieldType;
 
                     if (param is SweepableDiscreteParam dp)
@@ -335,32 +262,10 @@ namespace Microsoft.ML.PipelineInference2
                 }
                 catch (Exception)
                 {
-                    // Could not update param
-                    result = false;
+                    // hack: make better error message
+                    throw new Exception("cannot set learner parameter");
                 }
             }
-
-            // Make sure all changes were saved.
-            return result && CheckEntryPointStateMatchesParamValues(entryPointObj, sweepParams);
-        }
-
-        public static bool CheckEntryPointStateMatchesParamValues(object entryPointObj,
-            IEnumerable<SweepableParam> sweepParams)
-        {
-            foreach (var param in sweepParams)
-            {
-                var pi = entryPointObj.GetType().GetProperty(param.Name);
-                if (pi is null)
-                    continue;
-
-                // Make sure the value matches
-                var epVal = pi.GetValue(entryPointObj);
-                if (param.RawValue != null
-                    && (!param.ProcessedValue().ToString().ToLower().Contains("auto") || epVal != null)
-                    && !epVal.Equals(param.ProcessedValue()))
-                    return false;
-            }
-            return true;
         }
 
         public static double ProcessWeight(double weight, double maxWeight, bool isMaximizingMetric) =>

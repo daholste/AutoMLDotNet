@@ -90,7 +90,7 @@ namespace Microsoft.ML.PipelineInference2
                 var learner = new SuggestedRecipe.SuggestedLearner
                 {
                     PipelineNode = new TrainerPipelineNode(mlContext, learnerCatalogItem, sweepParams),
-                    LearnerName = learnerName
+                    LearnerName = learnerName.ToString()
                 };
                 learners.Add(learner);
             }

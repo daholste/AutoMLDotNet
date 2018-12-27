@@ -20,7 +20,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.AveragePerceptron;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -29,9 +29,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.AveragedPerceptronOva.ToString();
+            return LearnerName.AveragedPerceptronOva;
         }
     }
 
@@ -41,7 +41,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.FastForest;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -50,9 +50,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.FastForestOva.ToString();
+            return LearnerName.FastForestOva;
         }
     }
 
@@ -62,25 +62,18 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.LightGbm;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<LightGbmArguments> argsFunc = null;
-            if (sweepParams != null)
-            {
-                argsFunc = (args) => {
-                    AutoMlUtils.UpdatePropertiesAndFields(args, sweepParams);
-                    AutoMlUtils.UpdatePropertiesAndFields(args.Booster, sweepParams);
-                };
-            }
+            Action<LightGbmArguments> argsFunc = LearnerCatalogUtil.CreateLightGbmArgsFunc(sweepParams);
             return mlContext.MulticlassClassification.Trainers.LightGbm(advancedSettings: argsFunc);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.LightGbmMulticlass.ToString();
+            return LearnerName.LightGbmMulti;
         }
     }
 
@@ -90,7 +83,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.LinearSvm;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -99,9 +92,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.LinearSvmOva.ToString();
+            return LearnerName.LinearSvmOva;
         }
     }
 
@@ -111,7 +104,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.Sdca;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -120,9 +113,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent(advancedSettings: argsFunc);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.SdcaMulticlass.ToString();
+            return LearnerName.SdcaMulti;
         }
     }
 
@@ -133,7 +126,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.LogisticRegression;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -142,9 +135,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.LogisticRegressionOva.ToString();
+            return LearnerName.LogisticRegressionOva;
         }
     }
 
@@ -154,7 +147,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.Sgd;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -163,9 +156,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.StochasticGradientDescentOva.ToString();
+            return LearnerName.StochasticGradientDescentOva;
         }
     }
 
@@ -184,9 +177,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.SymSgdOva.ToString();
+            return LearnerName.SymSgdOva;
         }
     }
 
@@ -196,7 +189,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.FastTree;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -205,9 +198,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.FastTreeOva.ToString();
+            return LearnerName.FastTreeOva;
         }
     }
 
@@ -217,7 +210,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return _binaryLearnerCatalogItem.GetHyperparamSweepRanges();
+            return SweepableParams.LogisticRegression;
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -226,9 +219,9 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.LogisticRegression(advancedSettings: argsFunc);
         }
 
-        public string GetLearnerName()
+        public LearnerName GetLearnerName()
         {
-            return LearnerNames.LogisticRegressionMulticlass.ToString();
+            return LearnerName.LogisticRegressionMulti;
         }
     }
 }

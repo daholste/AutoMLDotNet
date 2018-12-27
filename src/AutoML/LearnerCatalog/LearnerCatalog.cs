@@ -10,15 +10,15 @@ namespace Microsoft.ML.PipelineInference2
         {
             if(trainerKind == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
             {
-                return GetBinaryClassificationLearners(maxNumIterations);
+                return GetBinaryLearners(maxNumIterations);
             }
             else if (trainerKind == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
             {
-                return GetMulticlassClassificationLearners(maxNumIterations);
+                return GetMultiLearners(maxNumIterations);
             }
             else if (trainerKind == MacroUtils.TrainerKinds.SignatureRegressorTrainer)
             {
-                return null;
+                return GetRegressionLearners();
             }
             else
             {
@@ -27,7 +27,7 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        private static IEnumerable<ILearnerCatalogItem> GetBinaryClassificationLearners(int maxNumIterations)
+        private static IEnumerable<ILearnerCatalogItem> GetBinaryLearners(int maxNumIterations)
         {
             var learners = new List<ILearnerCatalogItem>()
             {
@@ -61,7 +61,7 @@ namespace Microsoft.ML.PipelineInference2
             return learners;
         }
 
-        private static IEnumerable<ILearnerCatalogItem> GetMulticlassClassificationLearners(int maxNumIterations)
+        private static IEnumerable<ILearnerCatalogItem> GetMultiLearners(int maxNumIterations)
         {
             var learners = new List<ILearnerCatalogItem>()
             {
@@ -94,6 +94,21 @@ namespace Microsoft.ML.PipelineInference2
             });
 
             return learners;
+        }
+
+        private static IEnumerable<ILearnerCatalogItem> GetRegressionLearners()
+        {
+            return new ILearnerCatalogItem[]
+            {
+                new FastForestRegressionLCI(),
+                new FastTreeRegressionLCI(),
+                new FastTreeTweedieRegressionLCI(),
+                new LightGbmRegressionLCI(),
+                new OnlineGradientDescentRegressionLCI(),
+                new OrdinaryLeastSquaresRegressionLCI(),
+                new PoissonRegressionLCI(),
+                new SdcaRegressionLCI()
+            };
         }
     }
 }

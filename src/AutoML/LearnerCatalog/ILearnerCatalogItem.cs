@@ -12,6 +12,6 @@ namespace Microsoft.ML.PipelineInference2
     {
         IEnumerable<SweepableParam> GetHyperparamSweepRanges();
         ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams);
-        string GetLearnerName();
+        LearnerName GetLearnerName();
     }
 }
