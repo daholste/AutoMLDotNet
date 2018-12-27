@@ -55,14 +55,33 @@ namespace Microsoft.ML.PipelineInference2
         /// Runs a train-test experiment on the current pipeline
         /// </summary>
         public void RunTrainTestExperiment(IDataView trainData, IDataView testData,
-            SupportedMetric metric, MacroUtils.TrainerKinds trainerKind, MLContext env,
+            SupportedMetric metric, MacroUtils.TrainerKinds task, MLContext mlContext,
             out double testMetricValue)
         {
             var pipelineTransformer = TrainTransformer(trainData);
             var scoredTestData = pipelineTransformer.Transform(testData);
-            var ctx = new BinaryClassificationContext(env);
-            var metrics = ctx.EvaluateNonCalibrated(scoredTestData);
-            testMetricValue = metrics.Accuracy;
+            testMetricValue = GetTestMetricValue(mlContext, task, scoredTestData);
+        }
+
+        private static double GetTestMetricValue(MLContext mlContext, MacroUtils.TrainerKinds task, IDataView scoredData)
+        {
+            if (task == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
+            {
+                return mlContext.BinaryClassification.EvaluateNonCalibrated(scoredData).Accuracy;
+            }
+            if (task == MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer)
+            {
+                return mlContext.MulticlassClassification.Evaluate(scoredData).AccuracyMicro;
+            }
+            if (task == MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer)
+            {
+                return mlContext.Regression.Evaluate(scoredData).RSquared;
+            }
+            else
+            {
+                // todo: better error handling?
+                throw new Exception("unsupported task");
+            }
         }
 
         public ITransformer TrainTransformer(IDataView trainData)
