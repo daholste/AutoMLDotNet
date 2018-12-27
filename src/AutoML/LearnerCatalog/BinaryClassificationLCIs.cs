@@ -19,6 +19,8 @@ namespace Microsoft.ML.PipelineInference2
 
     public class AveragedPerceptronBinaryClassificationLCI : ILearnerCatalogItem
     {
+        private const int DefaultNumIterations = 10;
+
         private static readonly IEnumerable<SweepableParam> _sweepRanges =
             LearnerCatalogUtil.AveragedLinearArgsSweepableParams
                 .Concat(LearnerCatalogUtil.OnlineLinearArgsSweepableParams);
@@ -30,7 +32,18 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<AveragedPerceptronTrainer.Arguments>(sweepParams);
+            Action<AveragedPerceptronTrainer.Arguments> argsFunc = null;
+            if (sweepParams == null)
+            {
+                argsFunc = (args) =>
+                {
+                    args.NumIterations = DefaultNumIterations;
+                };
+            }
+            else
+            {
+                argsFunc = LearnerCatalogUtil.CreateArgsFunc<AveragedPerceptronTrainer.Arguments>(sweepParams);
+            }
             return mlContext.BinaryClassification.Trainers.AveragedPerceptron(advancedSettings: argsFunc);
         }
 
@@ -40,7 +53,7 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public class FastForestBinaryClassifierLCI : ILearnerCatalogItem
+    public class FastForestBinaryClassificationLCI : ILearnerCatalogItem
     {
         private static readonly IEnumerable<SweepableParam> _sweepRanges = LearnerCatalogUtil.TreeArgsSweepableParams;
 
@@ -57,11 +70,11 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "FastForest";
+            return LearnerNames.FastForest.ToString();
         }
     }
 
-    public class FastTreeBinaryClassifierLCI : ILearnerCatalogItem
+    public class FastTreeBinaryClassificationLCI : ILearnerCatalogItem
     {
         private static readonly IEnumerable<SweepableParam> _sweepRanges = LearnerCatalogUtil.TreeArgsSweepableParams;
 
@@ -78,7 +91,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "FastTree";
+            return LearnerNames.FastTree.ToString();
         }
     }
 
@@ -123,7 +136,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "LightGbm";
+            return LearnerNames.LightGbm.ToString();
         }
     }
 
@@ -148,7 +161,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "LinearSvm";
+            return LearnerNames.LinearSvm.ToString();
         }
     }
 
@@ -205,7 +218,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "LogisticRegression";
+            return LearnerNames.LogisticRegression.ToString();
         }
     }
 
@@ -231,7 +244,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "StochasticGradientDescent";
+            return LearnerNames.StochasticGradientDescent.ToString();
         }
     }
 
@@ -257,7 +270,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public string GetLearnerName()
         {
-            return "SymSGD";
+            return LearnerNames.SymSgd.ToString();
         }
     }
 }

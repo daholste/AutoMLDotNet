@@ -7,6 +7,24 @@ namespace Microsoft.ML.PipelineInference2
     public enum LearnerNames
     {
         AveragedPerceptron,
+        AveragedPerceptronOva,
+        FastForest,
+        FastForestOva,
+        FastTree,
+        FastTreeOva,
+        LightGbm,
+        LightGbmMulticlass,
+        LinearSvm,
+        LinearSvmOva,
+        LogisticRegression,
+        LogisticRegressionOva,
+        LogisticRegressionMulticlass,
+        Sdca,
+        SdcaMulticlass,
+        StochasticGradientDescent,
+        StochasticGradientDescentOva,
+        SymSgd,
+        SymSgdOva
     }
 
     public static class LearnerCatalogUtil

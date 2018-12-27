@@ -51,7 +51,7 @@ namespace Microsoft.ML.PipelineInference2
 
             var amls = new AutoMlMlState(mlContext,
                 PipelineSweeperSupportedMetrics.GetSupportedMetric(metric), rocketEngine, terminator, task,
-                   trainData, validationData);
+                   maxIterations, trainData, validationData);
             var pipelineResults = amls.InferPipelines(1, 1, 100);
 
             var bestPipeline = pipelineResults.First();

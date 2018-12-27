@@ -59,6 +59,7 @@ namespace Microsoft.ML.PipelineInference2
             private IDataView _testData;
             private IDataView _transformedData;
             private ITerminator _terminator;
+            private int _maxNumIterations;
             private string[] _requestedLearners;
             private TransformInference.SuggestedTransform[] _availableTransforms;
             private RecipeInference.SuggestedRecipe.SuggestedLearner[] _availableLearners;
@@ -69,7 +70,8 @@ namespace Microsoft.ML.PipelineInference2
             public MacroUtils.TrainerKinds TrainerKind { get; }
 
             public AutoMlMlState(MLContext env, SupportedMetric metric, IPipelineOptimizer autoMlEngine,
-                ITerminator terminator, MacroUtils.TrainerKinds trainerKind, IDataView trainData = null, IDataView testData = null,
+                ITerminator terminator, MacroUtils.TrainerKinds trainerKind, int maxNumIterations,
+                IDataView trainData = null, IDataView testData = null,
                 string[] requestedLearners = null)
             {
                 //Contracts.CheckValue(env, nameof(env));
@@ -83,6 +85,7 @@ namespace Microsoft.ML.PipelineInference2
                 _trainData = trainData;
                 _testData = testData;
                 _terminator = terminator;
+                _maxNumIterations = maxNumIterations;
                 _requestedLearners = requestedLearners;
                 AutoMlEngine = autoMlEngine;
                 BatchCandidates = new PipelinePattern[] { };
@@ -187,7 +190,7 @@ namespace Microsoft.ML.PipelineInference2
 
             public void InferSearchSpace(int numTransformLevels)
             {
-                var learners = RecipeInference.AllowedLearners(_env, TrainerKind).ToArray();
+                var learners = RecipeInference.AllowedLearners(_env, TrainerKind, _maxNumIterations).ToArray();
                 if (_requestedLearners != null && _requestedLearners.Length > 0)
                     learners = learners.Where(l => _requestedLearners.Contains(l.LearnerName)).ToArray();
                 

@@ -77,9 +77,10 @@ namespace Microsoft.ML.PipelineInference2
         /// Given a predictor type returns a set of all permissible learners (with their sweeper params, if defined).
         /// </summary>
         /// <returns>Array of viable learners.</returns>
-        public static SuggestedRecipe.SuggestedLearner[] AllowedLearners(MLContext mlContext, MacroUtils.TrainerKinds trainerKind)
+        public static SuggestedRecipe.SuggestedLearner[] AllowedLearners(MLContext mlContext, MacroUtils.TrainerKinds task,
+            int maxNumIterations)
         {
-            var learnerCatalogItems = LearnerCatalog.Instance.GetLearners(trainerKind);
+            var learnerCatalogItems = LearnerCatalog.GetLearners(task, maxNumIterations);
 
             var learners = new List<SuggestedRecipe.SuggestedLearner>();
             foreach (var learnerCatalogItem in learnerCatalogItems)

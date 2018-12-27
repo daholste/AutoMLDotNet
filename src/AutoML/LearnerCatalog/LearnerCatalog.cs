@@ -6,27 +6,94 @@ namespace Microsoft.ML.PipelineInference2
 {
     public class LearnerCatalog
     {
-        public static LearnerCatalog Instance = new LearnerCatalog();
-
-        private static readonly IDictionary<MacroUtils.TrainerKinds, IEnumerable<ILearnerCatalogItem>> _tasksToLearners =
-            new Dictionary<MacroUtils.TrainerKinds, IEnumerable<ILearnerCatalogItem>>()
+        public static IEnumerable<ILearnerCatalogItem> GetLearners(MacroUtils.TrainerKinds trainerKind, int maxNumIterations)
+        {
+            if(trainerKind == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
             {
-                { MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer,
-                    new ILearnerCatalogItem[] {
-                        new AveragedPerceptronBinaryClassificationLCI(),
-                        new FastForestBinaryClassifierLCI(),
-                        new FastTreeBinaryClassifierLCI(),
-                        new LightGbmBinaryClassificationLCI()
-                    } },
-                { MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer,
-                    new ILearnerCatalogItem[] {
-                        new AveragedPerceptronMultiClassificationLCI()
-                    } },
+                return GetBinaryClassificationLearners(maxNumIterations);
+            }
+            else if (trainerKind == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
+            {
+                return GetMulticlassClassificationLearners(maxNumIterations);
+            }
+            else if (trainerKind == MacroUtils.TrainerKinds.SignatureRegressorTrainer)
+            {
+                return null;
+            }
+            else
+            {
+                // todo: fix this up
+                throw new Exception("unsupported task");
+            }
+        }
+
+        private static IEnumerable<ILearnerCatalogItem> GetBinaryClassificationLearners(int maxNumIterations)
+        {
+            var learners = new List<ILearnerCatalogItem>()
+            {
+                new AveragedPerceptronBinaryClassificationLCI(),
+                new SdcaBinaryClassificationLCI(),
+                new LightGbmBinaryClassificationLCI(),
+                new SymSgdBinaryClassificationLCI()
             };
 
-        public IEnumerable<ILearnerCatalogItem> GetLearners(MacroUtils.TrainerKinds trainerKind)
+            if(maxNumIterations < 20)
+            {
+                return learners;
+            }
+
+            learners.AddRange(new ILearnerCatalogItem[] {
+                new LinearSvmBinaryClassificationLCI(),
+                new FastTreeBinaryClassificationLCI()
+            });
+
+            if(maxNumIterations < 100)
+            {
+                return learners;
+            }
+
+            learners.AddRange(new ILearnerCatalogItem[] {
+                new LogisticRegressionBinaryClassificationLCI(),
+                new FastForestBinaryClassificationLCI(),
+                new SgdBinaryClassificationLCI()
+            });
+
+            return learners;
+        }
+
+        private static IEnumerable<ILearnerCatalogItem> GetMulticlassClassificationLearners(int maxNumIterations)
         {
-            return _tasksToLearners[trainerKind];
+            var learners = new List<ILearnerCatalogItem>()
+            {
+                new AveragedPerceptronOvaLCI(),
+                new SdcaMulticlassClassificationLCI(),
+                new LightGbmMulticlassClassificationLCI(),
+                new SymSgdOvaLCI()
+            };
+
+            if (maxNumIterations < 20)
+            {
+                return learners;
+            }
+
+            learners.AddRange(new ILearnerCatalogItem[] {
+                new FastTreeOvaLCI(),
+                new LinearSvmOvaLCI(),
+                new LogisticRegressionOvaLCI()
+            });
+
+            if (maxNumIterations < 100)
+            {
+                return learners;
+            }
+
+            learners.AddRange(new ILearnerCatalogItem[] {
+                new SgdBinaryClassificationLCI(),
+                new FastForestBinaryClassificationLCI(),
+                new LogisticRegressionBinaryClassificationLCI(),
+            });
+
+            return learners;
         }
     }
 }
