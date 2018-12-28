@@ -2,25 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.ML.Data;
-using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Runtime.EntryPoints;
-using Microsoft.ML.Runtime.Internal.Internallearn;
-using Microsoft.ML.Runtime.Sweeper;
-using Microsoft.ML.Trainers;
-using Microsoft.ML.Trainers.FastTree;
-using Microsoft.ML.Trainers.Online;
-using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using Microsoft.ML.Runtime.Training;
-using Microsoft.ML.PipelineInference2;
-using Microsoft.ML.Runtime.LightGBM;
-using Microsoft.ML.Runtime.Learners;
+using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.PipelineInference2
 {
@@ -28,7 +11,6 @@ namespace Microsoft.ML.PipelineInference2
     {
         public readonly struct SuggestedRecipe
         {
-            public readonly string Description;
             public readonly TransformInference.SuggestedTransform[] Transforms;
             public struct SuggestedLearner
             {
@@ -55,13 +37,9 @@ namespace Microsoft.ML.PipelineInference2
         public static TextLoader.Arguments MyAutoMlInferTextLoaderArguments(MLContext env,
             string dataFile, string labelColName)
         {
-            //var h = env.Register("InferRecipesFromData", seed: 0, verbose: false);
-            //using (var ch = h.Start("InferRecipesFromData"))
-            //{
             var sample = TextFileSample.CreateFromFullFile(dataFile);
             var splitResult = TextFileContents.TrySplitColumns(sample, TextFileContents.DefaultSeparators);
-            var columnPurposes = InferenceUtils.InferColumnPurposes(env, sample, splitResult,
-                out var hasHeader, labelColName);
+            var columnPurposes = InferenceUtils.InferColumnPurposes(env, sample, splitResult, out var hasHeader, labelColName);
             return new TextLoader.Arguments
             {
                 Column = ColumnGroupingInference.GenerateLoaderColumns(columnPurposes),
@@ -70,7 +48,6 @@ namespace Microsoft.ML.PipelineInference2
                 AllowSparse = splitResult.AllowSparse,
                 AllowQuoting = splitResult.AllowQuote
             };
-            //}
         }
 
         /// <summary>

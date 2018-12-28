@@ -12,11 +12,10 @@ using System.Linq;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    public static class InferenceUtils
+    internal static class InferenceUtils
     {
         public static IDataView Take(this IDataView data, int count)
         {
-            //Contracts.CheckValue(data, nameof(data));
             // REVIEW: This should take an env as a parameter, not create one.
             var env = new MLContext();
             var take = SkipTakeFilter.Create(env, new SkipTakeFilter.TakeArguments { Count = count }, data);
@@ -25,15 +24,13 @@ namespace Microsoft.ML.PipelineInference2
 
         private static IDataView CacheCore(IDataView data, MLContext env)
         {
-            //Contracts.AssertValue(data, "data");
-            //Contracts.AssertValue(env, "env");
             return new CacheDataView(env, data, Enumerable.Range(0, data.Schema.Count).ToArray());
         }
 
         public static ColumnGroupingInference.GroupingColumn[] InferColumnPurposes(MLContext env, TextFileSample sample, TextFileContents.ColumnSplitResult splitResult,
             out bool hasHeader, string colLabelName = null)
         {
-           // ch.Info("Detecting column types");
+           // detecting column types
             var typeInferenceResult = ColumnTypeInference.InferTextFileColumnTypes(env, sample,
                 new ColumnTypeInference.Arguments
                 {
@@ -46,11 +43,11 @@ namespace Microsoft.ML.PipelineInference2
             hasHeader = true;
             if (!typeInferenceResult.IsSuccess)
             {
-                //ch.Error("Couldn't detect column types.");
+                // couldn't detect column types
                 return null;
             }
 
-            //ch.Info("Detecting column purposes");
+            // detecting column purposes
             var typedLoaderArgs = new TextLoader.Arguments
             {
                 Column = ColumnTypeInference.GenerateLoaderColumns(typeInferenceResult.Columns),
@@ -65,8 +62,8 @@ namespace Microsoft.ML.PipelineInference2
             var purposeInferenceResult = PurposeInference.InferPurposes(env, typedData,
                 Enumerable.Range(0, typedLoaderArgs.Column.Length), new PurposeInference.Arguments(),
                 colLabelName: colLabelName);
-            //ch.Info("Detecting column grouping and generating column names");
 
+            // detecting column grouping and generating column names
             ColumnGroupingInference.GroupingColumn[] groupingResult = ColumnGroupingInference.InferGroupingAndNames(env, typeInferenceResult.HasHeader,
                 typeInferenceResult.Columns, purposeInferenceResult.Columns).Columns;
 

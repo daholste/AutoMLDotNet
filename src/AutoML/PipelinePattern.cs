@@ -25,11 +25,11 @@ namespace Microsoft.ML.PipelineInference2
         private readonly MLContext _mlContext;
         public readonly IList<TransformInference.SuggestedTransform> Transforms;
         public readonly RecipeInference.SuggestedRecipe.SuggestedLearner Learner;
-        public PipelineSweeperRunSummary PerformanceSummary { get; set; }
+        public double Result { get; set; }
 
         public PipelinePattern(TransformInference.SuggestedTransform[] transforms,
             RecipeInference.SuggestedRecipe.SuggestedLearner learner,
-            string loaderSettings, MLContext mlContext, PipelineSweeperRunSummary summary = null)
+            string loaderSettings, MLContext mlContext)
         {
             // Make sure internal pipeline nodes and sweep params are cloned, not shared.
             // Cloning the transforms and learner rather than assigning outright
@@ -40,7 +40,6 @@ namespace Microsoft.ML.PipelineInference2
             Learner = learner.Clone();
             _mlContext = mlContext;
             AddNormalizationTransforms();
-            PerformanceSummary = summary;
         }
 
         /// <summary>
@@ -53,7 +52,7 @@ namespace Microsoft.ML.PipelineInference2
         /// Runs a train-test experiment on the current pipeline
         /// </summary>
         public void RunTrainTestExperiment(IDataView trainData, IDataView testData,
-            SupportedMetric metric, MacroUtils.TrainerKinds task, MLContext mlContext,
+            MacroUtils.TrainerKinds task, MLContext mlContext,
             out double testMetricValue)
         {
             var pipelineTransformer = TrainTransformer(trainData);

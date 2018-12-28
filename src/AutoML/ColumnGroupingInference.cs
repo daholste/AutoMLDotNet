@@ -17,7 +17,7 @@ namespace Microsoft.ML.PipelineInference2
     /// This class incapsulates logic for grouping together the inferred columns of the text file based on their type
     /// and purpose, and generating column names.
     /// </summary>
-    public static class ColumnGroupingInference
+    internal static class ColumnGroupingInference
     {
         /// <summary>
         /// This is effectively a merger of <see cref="PurposeInference.Column"/> and a <see cref="ColumnTypeInference.Column"/>
@@ -93,11 +93,8 @@ namespace Microsoft.ML.PipelineInference2
                     : GetName(g.Key.ItemType.RawKind(), g.Key.Purpose, result);
 
                 string range = GetRange(g.Select(t => t.Item1.ColumnIndex).ToArray());
-                //if (g.Count() > 1)
-                    //ch.Info("Grouped data from columns '{0}' into vector column '{1}'.", range, name);
                 result.Add(new GroupingColumn(name, g.Key.ItemType.RawKind(), g.Key.Purpose, range));
             }
-            //}
 
             return new InferenceResult(result.ToArray());
         }

@@ -127,7 +127,7 @@ namespace Microsoft.ML.PipelineInference2
         private RecipeInference.SuggestedRecipe.SuggestedLearner[] GetTopLearners(IEnumerable<PipelinePattern> history)
         {
             history = history.GroupBy(h => h.Learner.LearnerName).Select(g => g.First());
-            IEnumerable<PipelinePattern> sortedHistory = history.OrderBy(h => h.PerformanceSummary.MetricValue);
+            IEnumerable<PipelinePattern> sortedHistory = history.OrderBy(h => h.Result);
             if(IsMaximizingMetric)
             {
                 sortedHistory = sortedHistory.Reverse();

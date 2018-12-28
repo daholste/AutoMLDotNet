@@ -81,7 +81,7 @@ namespace Microsoft.ML.PipelineInference2
             double[] weights = new double[numLearners];
             int[] counts = new int[numLearners];
             Dictionary<string, int> labelToIndex = new Dictionary<string, int>();
-            double maxWeight = history.Length > 0 ? history.Max(w => w.PerformanceSummary.MetricValue) : 0d;
+            double maxWeight = history.Length > 0 ? history.Max(w => w.Result) : 0d;
 
             // Map categorical values to their index
             for (int j = 0; j < numLearners; j++)
@@ -93,7 +93,7 @@ namespace Microsoft.ML.PipelineInference2
                 if (AvailableLearners.All(l => l.LearnerName != pipeline.Learner.LearnerName))
                     continue;
                 weights[labelToIndex[pipeline.Learner.LearnerName]] +=
-                    AutoMlUtils.ProcessWeight(pipeline.PerformanceSummary.MetricValue,
+                    AutoMlUtils.ProcessWeight(pipeline.Result,
                         maxWeight, isMaximizingMetric);
                 counts[labelToIndex[pipeline.Learner.LearnerName]]++;
             }

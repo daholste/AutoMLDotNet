@@ -54,7 +54,7 @@ namespace Microsoft.ML.PipelineInference2
         {
             private readonly SortedList<double, PipelinePattern> _sortedSampledElements;
             private readonly List<PipelinePattern> _history;
-            private readonly MLContext _env;
+            private readonly MLContext _mlContext;
             private IDataView _trainData;
             private IDataView _testData;
             private IDataView _transformedData;
@@ -66,22 +66,19 @@ namespace Microsoft.ML.PipelineInference2
             private DependencyMap _dependencyMapping;
             public IPipelineOptimizer AutoMlEngine { get; set; }
             public PipelinePattern[] BatchCandidates { get; set; }
-            public SupportedMetric Metric { get; }
+            public OptimizingMetricInfo OptimizingMetricInfo { get; }
             public MacroUtils.TrainerKinds TrainerKind { get; }
 
-            public AutoMlMlState(MLContext env, SupportedMetric metric, IPipelineOptimizer autoMlEngine,
+            public AutoMlMlState(MLContext mlContext, OptimizingMetric metric, IPipelineOptimizer autoMlEngine,
                 ITerminator terminator, MacroUtils.TrainerKinds trainerKind, int maxNumIterations,
                 IDataView trainData = null, IDataView testData = null,
                 string[] requestedLearners = null)
             {
-                //Contracts.CheckValue(env, nameof(env));
-                _sortedSampledElements =
-                    metric.IsMaximizing ? new SortedList<double, PipelinePattern>(new ReversedComparer<double>()) :
+                OptimizingMetricInfo = new OptimizingMetricInfo(metric);
+                _sortedSampledElements = OptimizingMetricInfo.IsMaximizing ? new SortedList<double, PipelinePattern>(new ReversedComparer<double>()) :
                         new SortedList<double, PipelinePattern>();
                 _history = new List<PipelinePattern>();
-                _env = env;
-                //_host = _env.Register("AutoMlState");
-                //_ch = _host.Start("AutoMlStateChannel");
+                _mlContext = mlContext;
                 _trainData = trainData;
                 _testData = testData;
                 _terminator = terminator;
@@ -89,7 +86,6 @@ namespace Microsoft.ML.PipelineInference2
                 _requestedLearners = requestedLearners;
                 AutoMlEngine = autoMlEngine;
                 BatchCandidates = new PipelinePattern[] { };
-                Metric = metric;
                 TrainerKind = trainerKind;
             }
 
@@ -105,7 +101,7 @@ namespace Microsoft.ML.PipelineInference2
                     {
                         // Get next set of candidates
                         var currentBatchSize = batchSize;
-                        if (_terminator is IterationTerminator itr)
+                        if (_terminator is IterationBasedTerminator itr)
                             currentBatchSize = Math.Min(itr.RemainingIterations(_history), batchSize);
                         var candidates = AutoMlEngine.GetNextCandidates(_sortedSampledElements.Values, currentBatchSize);
 
@@ -146,7 +142,7 @@ namespace Microsoft.ML.PipelineInference2
                 // Run pipeline, and time how long it takes
                 stopwatch.Restart();
                 candidate.RunTrainTestExperiment(_trainData,
-                    _testData, Metric, TrainerKind, _env, out var testMetricVal);
+                    _testData, TrainerKind, _mlContext, out var testMetricVal);
                 stopwatch.Stop();
 
                 // Handle key collisions on sorted list
@@ -154,8 +150,8 @@ namespace Microsoft.ML.PipelineInference2
                     testMetricVal += 1e-10;
 
                 // Save performance score
-                candidate.PerformanceSummary = new PipelineSweeperRunSummary(testMetricVal, randomizedNumberOfRows, stopwatch.ElapsedMilliseconds, 0);
-                _sortedSampledElements.Add(candidate.PerformanceSummary.MetricValue, candidate);
+                candidate.Result = testMetricVal;
+                _sortedSampledElements.Add(testMetricVal, candidate);
                 _history.Add(candidate);
 
                 var transformsSb = new StringBuilder();
@@ -166,19 +162,19 @@ namespace Microsoft.ML.PipelineInference2
                     transformsSb.Append(" ");
                 }
                 var commandLineStr = $"{transformsSb.ToString()} tr={candidate.Learner}";
-                File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_sortedSampledElements.Count}\t{candidate.PerformanceSummary.MetricValue}\t{MyGlobals.Stopwatch.Elapsed}\t{commandLineStr}\r\n");
+                File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_sortedSampledElements.Count}\t{candidate.Result}\t{MyGlobals.Stopwatch.Elapsed}\t{commandLineStr}\r\n");
             }
 
             private TransformInference.SuggestedTransform[] InferAndFilter(IDataView data, TransformInference.Arguments args)
             {
                 // Infer transforms using experts
-                var levelTransforms = TransformInference.InferTransforms(_env, data, args);
+                var levelTransforms = TransformInference.InferTransforms(_mlContext, data, args);
                 return levelTransforms;
             }
 
             public void InferSearchSpace(int numTransformLevels)
             {
-                var learners = RecipeInference.AllowedLearners(_env, TrainerKind, _maxNumIterations).ToArray();
+                var learners = RecipeInference.AllowedLearners(_mlContext, TrainerKind, _maxNumIterations).ToArray();
                 if (_requestedLearners != null && _requestedLearners.Length > 0)
                     learners = learners.Where(l => _requestedLearners.Contains(l.LearnerName)).ToArray();
                 
@@ -275,8 +271,7 @@ namespace Microsoft.ML.PipelineInference2
 
                 // Update autoML engine to know what the search space looks like
                 AutoMlEngine.SetSpace(_availableTransforms, _availableLearners,
-                    _trainData, _transformedData, _dependencyMapping, Metric.IsMaximizing);
-                //}
+                    _trainData, _transformedData, _dependencyMapping, OptimizingMetricInfo.IsMaximizing);
             }
 
             public bool IsSearchSpaceDefined() => _availableLearners != null && _availableTransforms != null;

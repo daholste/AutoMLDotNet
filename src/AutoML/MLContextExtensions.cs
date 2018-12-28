@@ -21,18 +21,18 @@ namespace Microsoft.ML.PipelineInference2
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor = null)
         {
             return AutoFit(trainData, validationData, maxIterations, preprocessor, MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer,
-                PipelineSweeperSupportedMetrics.Metrics.Accuracy);
+                OptimizingMetric.Accuracy);
         }
 
         public static AutoMLResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor = null)
         {
             return AutoFit(trainData, validationData, maxIterations, preprocessor, MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer,
-                PipelineSweeperSupportedMetrics.Metrics.Accuracy);
+                OptimizingMetric.Accuracy);
         }
 
         public static AutoMLResult AutoFit(IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor,
-            MacroUtils.TrainerKinds task, PipelineSweeperSupportedMetrics.Metrics metric)
+            MacroUtils.TrainerKinds task, OptimizingMetric metric)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
@@ -47,10 +47,9 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             var rocketEngine = new RocketEngine(mlContext, new RocketEngine.Arguments());
-            var terminator = new IterationTerminator(maxIterations);
+            var terminator = new IterationBasedTerminator(maxIterations);
 
-            var amls = new AutoMlMlState(mlContext,
-                PipelineSweeperSupportedMetrics.GetSupportedMetric(metric), rocketEngine, terminator, task,
+            var amls = new AutoMlMlState(mlContext, OptimizingMetric.Accuracy, rocketEngine, terminator, task,
                    maxIterations, trainData, validationData);
             var pipelineResults = amls.InferPipelines(1, 1, 100);
 

@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Runtime.Data;
-using System.Collections.Concurrent;
 using Microsoft.ML.Runtime.Data.IO;
 
 namespace Microsoft.ML.PipelineInference2
@@ -50,21 +49,13 @@ namespace Microsoft.ML.PipelineInference2
         public static ColumnSplitResult TrySplitColumns(IMultiStreamSource source,
             string[] separatorCandidates, bool? allowSparse = null, bool? allowQuote = null, bool skipStrictValidation = false)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //var h = env.Register("CandidateLoader");
-            //h.CheckValue(source, nameof(source));
-            //h.CheckNonEmpty(separatorCandidates, nameof(separatorCandidates));
             // Default value for sparse and quote is true.
             bool[] sparse = new[] { true, false };
             bool[] quote = new[] { true, false };
-            if (allowSparse.HasValue)
-                sparse = new[] { allowSparse.Value };
-            if (allowQuote.HasValue)
-                quote = new[] { allowQuote.Value };
+            if (allowSparse.HasValue) { sparse = new[] { allowSparse.Value }; }
+            if (allowQuote.HasValue) { quote = new[] { allowQuote.Value }; }
             bool foundAny = false;
             var result = default(ColumnSplitResult);
-            //using (var ch = env.Register("SplitColumns").Start("SplitColumns"))
-            //{
             foreach (var perm in (from _allowSparse in sparse
                                     from _allowQuote in quote
                                     from _sep in separatorCandidates
@@ -84,49 +75,16 @@ namespace Microsoft.ML.PipelineInference2
                     break;
                 }
             }
-
-            //if (foundAny)
-                //ch.Info("Discovered {0} columns using separator '{1}'.", result.ColumnCount, result.Separator);
-            //else
-            //{
-                // REVIEW: May need separate messages for GUI-specific and non-specific. This component can be used
-                // by itself outside the GUI.
-                //ch.Info("Couldn't determine columns in the file using separators {0}. Does the input file consist of only a single column? "
-                  //  + "If so, in TLC GUI, please close the import wizard, and then, in the loader settings to the right, manually add a column, "
-                   // + "choose a name, and set source index to 0.",
-                   // string.Join(",", separatorCandidates.Select(c => string.Format("'{0}'", GetSeparatorString(c)))));
-            //}
-            //}
             return foundAny ? result : new ColumnSplitResult(false, null, true, true, 0);
-        }
-
-        private static string GetSeparatorString(string sep)
-        {
-            //Contracts.AssertValue(sep);
-            if (sep.Length == 1)
-                return TextSaver.SeparatorCharToString(sep[0]);
-            return sep;
         }
 
         private static bool TryParseFile(TextLoader.Arguments args, IMultiStreamSource source, bool skipStrictValidation, out ColumnSplitResult result)
         {
             result = default(ColumnSplitResult);
-            //try
-            //{
-            // No need to provide information from unsuccessful loader, so we create temporary environment and get information from it in case of success
-            //using (var loaderEnv = new ConsoleEnvironment(0, true))
-            //{
-            //var messages = new ConcurrentBag<ChannelMessage>();
-            /*loaderEnv.AddListener<ChannelMessage>(
-                (src, msg) =>
-                {
-                    messages.Add(msg);
-                });*/
             var textLoader = new TextLoader(new MLContext(), args);
             var idv = textLoader.Read(source).Take(1000);
             var columnCounts = new List<int>();
             var column = idv.Schema["C"];
-            //ch.Assert(column != null);
             int columnIndex = column.Index;
 
             using (var cursor = idv.GetRowCursor(x => x == columnIndex))
@@ -140,32 +98,16 @@ namespace Microsoft.ML.PipelineInference2
                     columnCounts.Add(line.Length);
                 }
             }
-
-            //Contracts.Check(columnCounts.Count > 0);
+            
             var mostCommon = columnCounts.GroupBy(x => x).OrderByDescending(x => x.Count()).First();
             if (!skipStrictValidation && mostCommon.Count() < UniformColumnCountThreshold * columnCounts.Count)
                 return false;
 
-            // If user explicitly specified separator we're allowing "single" column case;
-            // Otherwise user will see message informing that we were not able to detect any columns.
-            if (!skipStrictValidation && mostCommon.Key <= 1)
-                return false;
+            // If user explicitly specified separator we're allowing "single" column case
+            if (!skipStrictValidation && mostCommon.Key <= 1) { return false; }
 
             result = new ColumnSplitResult(true, args.Separator, args.AllowQuoting, args.AllowSparse, mostCommon.Key);
-            //ch.Trace("Discovered {0} columns using separator '{1}'", mostCommon.Key, args.Separator);
-            //foreach (var msg in messages)
-            //    ch.Send(msg);
             return true;
-            //}
-            //}
-            //catch (Exception ex)
-            //{
-            //   throw ex;
-            //if (!ex.IsMarked())
-            //    throw;
-            // For known exceptions, we just continue to the next separator candidate.
-            //}
-            //return false;
         }
     }
 }

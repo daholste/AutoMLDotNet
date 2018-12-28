@@ -271,14 +271,14 @@ namespace Microsoft.ML.PipelineInference2
         public static double ProcessWeight(double weight, double maxWeight, bool isMaximizingMetric) =>
             isMaximizingMetric ? weight : maxWeight - weight;
 
-        public static IRunResult ConvertToRunResult(RecipeInference.SuggestedRecipe.SuggestedLearner learner, PipelineSweeperRunSummary rs, bool isMetricMaximizing)
+        public static IRunResult ConvertToRunResult(RecipeInference.SuggestedRecipe.SuggestedLearner learner, double result, bool isMetricMaximizing)
         {
-            return new RunResult(learner.PipelineNode.BuildParameterSet(), rs.MetricValue, isMetricMaximizing);
+            return new RunResult(learner.PipelineNode.BuildParameterSet(), result, isMetricMaximizing);
         }
 
         public static IRunResult[] ConvertToRunResults(PipelinePattern[] history, bool isMetricMaximizing)
         {
-            return history.Select(h => ConvertToRunResult(h.Learner, h.PerformanceSummary, isMetricMaximizing)).ToArray();
+            return history.Select(h => ConvertToRunResult(h.Learner, h.Result, isMetricMaximizing)).ToArray();
         }
 
         public static IValueGenerator[] ConvertToValueGenerators(IEnumerable<SweepableParam> hps)

@@ -6,9 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.ML.PipelineInference2;
 using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Runtime.Data.Conversion;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
 namespace Microsoft.ML.PipelineInference2
@@ -17,7 +15,7 @@ namespace Microsoft.ML.PipelineInference2
     /// This class incapsulates logic for automatic inference of column types for the text file.
     /// It also attempts to guess whether there is a header row.
     /// </summary>
-    public static class ColumnTypeInference
+    internal static class ColumnTypeInference
     {
         // Maximum number of columns to invoke type inference.
         // REVIEW: revisit this requirement. Either work for arbitrary number of columns,
@@ -220,38 +218,24 @@ namespace Microsoft.ML.PipelineInference2
         /// </summary>
         public static InferenceResult InferTextFileColumnTypes(MLContext env, IMultiStreamSource fileSource, Arguments args)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //env.CheckValue(fileSource, nameof(fileSource));
-            //env.CheckValue(args, nameof(args));
-            //env.CheckNonEmpty(args.Separator, nameof(args.Separator));
-            //env.Check(args.MaxRowsToRead > 0);
-
-            //using (var ch = env.Register("InferTextFileColumnTypes").Start("TypeInference"))
-            //{
             return InferTextFileColumnTypesCore(env, fileSource, args);
-            //}
         }
 
         private static InferenceResult InferTextFileColumnTypesCore(MLContext env, IMultiStreamSource fileSource, Arguments args)
         {
-            //Contracts.AssertValue(ch);
-            //ch.AssertValue(env);
-            //ch.AssertValue(fileSource);
-            //ch.AssertValue(args);
-
             if (args.ColumnCount == 0)
             {
-                //ch.Error("Too many empty columns for automatic inference.");
+                // too many empty columns for automatic inference
                 return InferenceResult.Fail();
             }
 
             if (args.ColumnCount >= SmartColumnsLim)
             {
-                //ch.Error("Too many columns for automatic inference.");
+                // too many columns for automatic inference
                 return InferenceResult.Fail();
             }
 
-            // Read the file as the specified number of text columns.
+            // read the file as the specified number of text columns
             var textLoaderArgs = new TextLoader.Arguments
             {
                 Column = new[] { TextLoader.Column.Parse(string.Format("C:TX:0-{0}", args.ColumnCount - 1)) },
@@ -263,24 +247,20 @@ namespace Microsoft.ML.PipelineInference2
             var idv = textLoader.Read(fileSource);
             idv = idv.Take(args.MaxRowsToRead);
 
-            // Read all the data into memory.
-            // List items are rows of the dataset.
+            // read all the data into memory.
+            // list items are rows of the dataset.
             var data = new List<ReadOnlyMemory<char>[]>();
             using (var cursor = idv.GetRowCursor(col => true))
             {
                 var column = cursor.Schema.GetColumnOrNull("C");
-                //Contracts.Assert(column != null);
                 int columnIndex = column.Value.Index;
                 var colType = column.Value.Type;
-                //Contracts.Assert(colType.ItemType.IsText);
                 ValueGetter<VBuffer<ReadOnlyMemory<char>>> vecGetter = null;
                 ValueGetter<ReadOnlyMemory<char>> oneGetter = null;
                 bool isVector = colType.IsVector();
-                if (isVector)
-                    vecGetter = cursor.GetGetter<VBuffer<ReadOnlyMemory<char>>>(columnIndex);
+                if (isVector) { vecGetter = cursor.GetGetter<VBuffer<ReadOnlyMemory<char>>>(columnIndex); }
                 else
                 {
-                    //Contracts.Assert(args.ColumnCount == 1);
                     oneGetter = cursor.GetGetter<ReadOnlyMemory<char>>(columnIndex);
                 }
 
@@ -291,7 +271,6 @@ namespace Microsoft.ML.PipelineInference2
                     if (isVector)
                     {
                         vecGetter(ref line);
-                        //Contracts.Assert(line.Length == args.ColumnCount);
                         var values = new ReadOnlyMemory<char>[args.ColumnCount];
                         line.CopyTo(values);
                         data.Add(values);
@@ -307,18 +286,20 @@ namespace Microsoft.ML.PipelineInference2
 
             if (data.Count < 2)
             {
-                //ch.Error("Too few rows ({0}) for automatic inference.", data.Count);
+                // too few rows for automatic inference
                 return InferenceResult.Fail();
             }
 
             var cols = new IntermediateColumn[args.ColumnCount];
             for (int i = 0; i < args.ColumnCount; i++)
+            {
                 cols[i] = new IntermediateColumn(data.Select(x => x[i]).ToArray(), i);
+            }
 
             foreach (var expert in GetExperts())
+            {
                 expert.Apply(cols);
-
-            //Contracts.Check(cols.All(x => x.SuggestedType != null), "Column type inference must be conclusive");
+            }
 
             // Aggregating header signals.
             int suspect = 0;
@@ -365,11 +346,7 @@ namespace Microsoft.ML.PipelineInference2
                 cols.Select((x, i) => new Column(x.ColumnId, names[i], x.SuggestedType)).ToArray();
 
             var numerics = outCols.Count(x => x.ItemType.IsNumber());
-
-            //ch.Info("Detected {0} numeric and {1} text columns.", numerics, outCols.Length - numerics);
-           // if (hasHeader)
-                //ch.Info("Generated column names from the file header.");
-
+            
             return InferenceResult.Success(outCols, hasHeader, cols.Select(col => col.RawData).ToArray());
         }
 
