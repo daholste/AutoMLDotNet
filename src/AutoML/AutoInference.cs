@@ -161,23 +161,11 @@ namespace Microsoft.ML.PipelineInference2
                 var transformsSb = new StringBuilder();
                 foreach (var transform in candidate.Transforms)
                 {
-                    transformsSb.Append("xf:");
+                    transformsSb.Append("xf=");
                     transformsSb.Append(transform);
                     transformsSb.Append(" ");
                 }
-                var learnerStr = candidate.Learner.ToString();
-                learnerStr = learnerStr.Replace(",", "");
-                learnerStr = learnerStr.Replace("False", "-");
-                learnerStr = learnerStr.Replace("True", "+");
-                learnerStr = learnerStr.Replace("LearningRate:0 ", "");
-                learnerStr = learnerStr.Replace("NumLeaves:0", "");
-                learnerStr = learnerStr.Replace("Trainers.", "");
-                learnerStr = learnerStr.Replace("LightGbmClassifier", "LightGBMMulticlass");
-                learnerStr = learnerStr.Replace("LightGbmBinaryClassifier", "LightGBMBinary");
-                learnerStr = learnerStr.Replace("LogisticRegressionClassifier", "MultiClassLogisticRegression");
-                learnerStr = learnerStr.Replace("FastTreeBinaryClassifier", "FastTreeBinaryClassification");
-                learnerStr = learnerStr.Replace("FieldAwareFactorizationMachineBinaryClassifier", "FieldAwareFactorizationMachine");
-                var commandLineStr = $"{transformsSb.ToString()} tr={learnerStr}";
+                var commandLineStr = $"{transformsSb.ToString()} tr={candidate.Learner}";
                 File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_sortedSampledElements.Count}\t{candidate.PerformanceSummary.MetricValue}\t{MyGlobals.Stopwatch.Elapsed}\t{commandLineStr}\r\n");
             }
 

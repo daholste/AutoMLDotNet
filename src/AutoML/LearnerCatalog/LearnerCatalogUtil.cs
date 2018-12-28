@@ -53,16 +53,15 @@ namespace Microsoft.ML.PipelineInference2
 
         public static Action<LightGbmArguments> CreateLightGbmArgsFunc(IEnumerable<SweepableParam> sweepParams)
         {
-            var treeBoosterParams = sweepParams.Where(p => _treeBoosterParamNames.Contains(p.Name));
-            var parentArgParams = sweepParams.Except(treeBoosterParams);
-
             Action<LightGbmArguments> argsFunc = null;
             if (sweepParams != null)
             {
                 argsFunc = (args) =>
                 {
-                    AutoMlUtils.UpdateFields(args, sweepParams);
-                    AutoMlUtils.UpdateFields(args.Booster, sweepParams);
+                    var treeBoosterParams = sweepParams.Where(p => _treeBoosterParamNames.Contains(p.Name));
+                    var parentArgParams = sweepParams.Except(treeBoosterParams);
+                    AutoMlUtils.UpdateFields(args, parentArgParams);
+                    AutoMlUtils.UpdateFields(args.Booster, treeBoosterParams);
                 };
             }
             return argsFunc;

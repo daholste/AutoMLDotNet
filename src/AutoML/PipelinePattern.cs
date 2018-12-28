@@ -12,6 +12,7 @@ using Microsoft.ML.Core.Data;
 using Microsoft.ML.Runtime.Internal.Calibration;
 using Microsoft.ML.PipelineInference2;
 using Microsoft.ML.Transforms.Normalizers;
+using static Microsoft.ML.PipelineInference2.TransformInference.ColumnRoutingStructure;
 
 namespace Microsoft.ML.PipelineInference2
 {
@@ -22,11 +23,9 @@ namespace Microsoft.ML.PipelineInference2
     public sealed class PipelinePattern
     {
         private readonly MLContext _mlContext;
-        public readonly TransformInference.SuggestedTransform[] Transforms;
+        public readonly IList<TransformInference.SuggestedTransform> Transforms;
         public readonly RecipeInference.SuggestedRecipe.SuggestedLearner Learner;
         public PipelineSweeperRunSummary PerformanceSummary { get; set; }
-        public string LoaderSettings { get; set; }
-        public Guid UniqueId { get; }
 
         public PipelinePattern(TransformInference.SuggestedTransform[] transforms,
             RecipeInference.SuggestedRecipe.SuggestedLearner learner,
@@ -37,12 +36,11 @@ namespace Microsoft.ML.PipelineInference2
             // ensures that this will be the case. Doing this here allows us to not
             // worry about changing hyperparameter values in candidate pipelines
             // possibly overwritting other pipelines.
-            Transforms = transforms.Select(t => t.Clone()).ToArray();
+            Transforms = transforms.Select(t => t.Clone()).ToList();
             Learner = learner.Clone();
-            LoaderSettings = loaderSettings;
             _mlContext = mlContext;
+            AddNormalizationTransforms();
             PerformanceSummary = summary;
-            UniqueId = Guid.NewGuid();
         }
 
         /// <summary>
@@ -91,26 +89,42 @@ namespace Microsoft.ML.PipelineInference2
             // append each transformer to the pipeline
             foreach (var transform in Transforms)
             {
-                if(transform.PipelineNode.Estimator != null)
+                if(transform.Estimator != null)
                 {
-                    pipeline = pipeline.Append(transform.PipelineNode.Estimator);
+                    pipeline = pipeline.Append(transform.Estimator);
                 }
             }
 
             // get learner
             var learner = Learner.PipelineNode.BuildTrainer(_mlContext);
 
-            // append estimators to normalize features, if needed
-            if (learner.Info.NeedNormalization)
-            {
-                var normalizingEstimator = _mlContext.Transforms.Normalize(DefaultColumnNames.Features);
-                pipeline = pipeline.Append(normalizingEstimator);
-            }
-
             // append learner to pipeline
             pipeline = pipeline.Append(learner);
 
             return pipeline.Fit(trainData);
+        }
+
+        private void AddNormalizationTransforms()
+        {
+            // get learner
+            var learner = Learner.PipelineNode.BuildTrainer(_mlContext);
+
+            // only add normalization if learner needs it
+            if (!learner.Info.NeedNormalization)
+            {
+                return;
+            }
+
+            var estimator = _mlContext.Transforms.Normalize(DefaultColumnNames.Features);
+            var annotatedColNames = new[] { new AnnotatedName() { Name = DefaultColumnNames.Features, IsNumeric = true } };
+            var routingStructure = new TransformInference.ColumnRoutingStructure(annotatedColNames, annotatedColNames);
+            var properties = new Dictionary<string, string>()
+            {
+                { "mode", "MinMax" }
+            };
+            var transform = new TransformInference.SuggestedTransform(estimator, 
+                routingStructure: routingStructure, properties: properties);
+            Transforms.Add(transform);
         }
     }
 }

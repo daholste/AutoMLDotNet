@@ -44,21 +44,6 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public sealed class TransformPipelineNode
-    {
-        public readonly IEstimator<ITransformer> Estimator;
-
-        public TransformPipelineNode(IEstimator<ITransformer> estimator)
-        {
-            Estimator = estimator;
-        }
-
-        public TransformPipelineNode Clone()
-        {
-            return new TransformPipelineNode(Estimator);
-        }
-    }
-
     public sealed class TrainerPipelineNode : PipelineNodeBase
     {
         public IEnumerable<SweepableParam> SweepParams { get; }

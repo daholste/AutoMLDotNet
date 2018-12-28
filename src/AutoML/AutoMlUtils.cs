@@ -82,7 +82,7 @@ namespace Microsoft.ML.PipelineInference2
         {
             foreach(var transform in transforms)
             {
-                data = transform.PipelineNode.Estimator.Fit(data).Transform(data);
+                data = transform.Estimator.Fit(data).Transform(data);
             }
             return data;
         }

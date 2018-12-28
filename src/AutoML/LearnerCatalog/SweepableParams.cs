@@ -7,6 +7,43 @@ namespace Microsoft.ML.PipelineInference2
 {
     internal static class SweepableParams
     {
+        private static readonly IEnumerable<SweepableParam> AveragedLinearArgs =
+            new SweepableParam[]
+            {
+                new SweepableDiscreteParam("LearningRate", new object[] { 0.01, 0.1, 0.5, 1.0 }),
+                new SweepableDiscreteParam("DecreaseLearningRate", new object[] { false, true }),
+                new SweepableFloatParam("L2RegularizerWeight", 0.0f, 0.4f),
+            };
+
+        private static readonly IEnumerable<SweepableParam> OnlineLinearArgs =
+            new SweepableParam[]
+            {
+                new SweepableLongParam("NumIterations", 1, 100, stepSize: 10, isLogScale: true),
+                new SweepableFloatParam("InitWtsDiameter", 0.0f, 1.0f, numSteps: 5),
+                new SweepableDiscreteParam("Shuffle", new object[] { false, true }),
+            };
+
+        private static readonly IEnumerable<SweepableParam> TreeArgs =
+           new SweepableParam[]
+           {
+                new SweepableLongParam("NumLeaves", 2, 128, isLogScale: true, stepSize: 4),
+                new SweepableDiscreteParam("MinDocumentsInLeafs", new object[] { 1, 10, 50 }),
+                new SweepableDiscreteParam("NumTrees", new object[] { 20, 100, 500 }),
+                new SweepableFloatParam("LearningRates", 0.025f, 0.4f, isLogScale: true),
+                new SweepableFloatParam("Shrinkage", 0.025f, 4f, isLogScale: true),
+           };
+
+        private static readonly IEnumerable<SweepableParam> LbfgsArgs =
+            new SweepableParam[] {
+                new SweepableFloatParam("L2Weight", 0.0f, 1.0f, numSteps: 4),
+                new SweepableFloatParam("L1Weight", 0.0f, 1.0f, numSteps: 4),
+                new SweepableDiscreteParam("OptTol", new object[] { 1e-4f, 1e-7f }),
+                new SweepableDiscreteParam("MemorySize", new object[] { 5, 20, 50 }),
+                new SweepableLongParam("MaxIterations", 1, int.MaxValue),
+                new SweepableFloatParam("InitWtsDiameter", 0.0f, 1.0f, numSteps: 5),
+                new SweepableDiscreteParam("DenseOptimizer", new object[] { false, true }),
+            };
+
         public static readonly IEnumerable<SweepableParam> AveragePerceptron = AveragedLinearArgs
             .Concat(OnlineLinearArgs);
 
@@ -73,42 +110,5 @@ namespace Microsoft.ML.PipelineInference2
             new SweepableDiscreteParam("L2Regularization", new object[] { 0.0f, 1e-5f, 1e-5f, 1e-6f, 1e-7f }),
             new SweepableDiscreteParam("UpdateFrequency", new object[] { "<Auto>", 5, 20 })
         };
-
-        private static readonly IEnumerable<SweepableParam> AveragedLinearArgs =
-            new SweepableParam[]
-            {
-                new SweepableDiscreteParam("LearningRate", new object[] { 0.01, 0.1, 0.5, 1.0 }),
-                new SweepableDiscreteParam("DecreaseLearningRate", new object[] { false, true }),
-                new SweepableFloatParam("L2RegularizerWeight", 0.0f, 0.4f),
-            };
-
-        private static readonly IEnumerable<SweepableParam> OnlineLinearArgs =
-            new SweepableParam[]
-            {
-                new SweepableLongParam("NumIterations", 1, 100, stepSize: 10, isLogScale: true),
-                new SweepableFloatParam("InitWtsDiameter", 0.0f, 1.0f, numSteps: 5),
-                new SweepableDiscreteParam("Shuffle", new object[] { false, true }),
-            };
-
-        private static readonly IEnumerable<SweepableParam> TreeArgs =
-           new SweepableParam[]
-           {
-                new SweepableLongParam("NumLeaves", 2, 128, isLogScale: true, stepSize: 4),
-                new SweepableDiscreteParam("MinDocumentsInLeafs", new object[] { 1, 10, 50 }),
-                new SweepableDiscreteParam("NumTrees", new object[] { 20, 100, 500 }),
-                new SweepableFloatParam("LearningRates", 0.025f, 0.4f, isLogScale: true),
-                new SweepableFloatParam("Shrinkage", 0.025f, 4f, isLogScale: true),
-           };
-
-        private static readonly IEnumerable<SweepableParam> LbfgsArgs =
-            new SweepableParam[] {
-                new SweepableFloatParam("L2Weight", 0.0f, 1.0f, numSteps: 4),
-                new SweepableFloatParam("L1Weight", 0.0f, 1.0f, numSteps: 4),
-                new SweepableDiscreteParam("OptTol", new object[] { 1e-4f, 1e-7f }),
-                new SweepableDiscreteParam("MemorySize", new object[] { 5, 20, 50 }),
-                new SweepableLongParam("MaxIterations", 1, int.MaxValue),
-                new SweepableFloatParam("InitWtsDiameter", 0.0f, 1.0f, numSteps: 5),
-                new SweepableDiscreteParam("DenseOptimizer", new object[] { false, true }),
-            };
     }
 }
