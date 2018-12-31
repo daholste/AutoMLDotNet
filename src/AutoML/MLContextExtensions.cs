@@ -46,12 +46,13 @@ namespace Microsoft.ML.PipelineInference2
                 validationData = preprocessorTransform.Transform(validationData);
             }
 
-            var rocketEngine = new RocketEngine(mlContext, new RocketEngine.Arguments());
+            var optimizingMetricfInfo = new OptimizingMetricInfo(OptimizingMetric.Accuracy);
+            var rocketEngine = new RocketEngine(mlContext, optimizingMetricfInfo.IsMaximizing);
             var terminator = new IterationBasedTerminator(maxIterations);
 
-            var amls = new AutoMlMlState(mlContext, OptimizingMetric.Accuracy, rocketEngine, terminator, task,
+            var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, rocketEngine, task,
                    maxIterations, trainData, validationData);
-            var pipelineResults = amls.InferPipelines(1, 1, 100);
+            var pipelineResults = auotFitter.InferPipelines(1, 1, 100);
 
             var bestPipeline = pipelineResults.First();
             // hack: retrain on best iteration

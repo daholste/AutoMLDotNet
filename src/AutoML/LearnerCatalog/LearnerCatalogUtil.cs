@@ -44,7 +44,10 @@ namespace Microsoft.ML.PipelineInference2
             Action<T> argsFunc = null;
             if (sweepParams != null)
             {
-                argsFunc = (args) => AutoMlUtils.UpdateFields(args, sweepParams);
+                argsFunc = (args) =>
+                {
+                    AutoMlUtils.UpdateFields(args, sweepParams);
+                };
             }
             return argsFunc;
         }

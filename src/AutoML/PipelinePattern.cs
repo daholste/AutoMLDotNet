@@ -24,12 +24,12 @@ namespace Microsoft.ML.PipelineInference2
     {
         private readonly MLContext _mlContext;
         public readonly IList<TransformInference.SuggestedTransform> Transforms;
-        public readonly RecipeInference.SuggestedRecipe.SuggestedLearner Learner;
+        public readonly SuggestedLearner Learner;
         public double Result { get; set; }
 
-        public PipelinePattern(TransformInference.SuggestedTransform[] transforms,
-            RecipeInference.SuggestedRecipe.SuggestedLearner learner,
-            string loaderSettings, MLContext mlContext)
+        public PipelinePattern(IEnumerable<TransformInference.SuggestedTransform> transforms,
+            SuggestedLearner learner,
+            MLContext mlContext)
         {
             // Make sure internal pipeline nodes and sweep params are cloned, not shared.
             // Cloning the transforms and learner rather than assigning outright
@@ -51,12 +51,12 @@ namespace Microsoft.ML.PipelineInference2
         /// <summary>
         /// Runs a train-test experiment on the current pipeline
         /// </summary>
-        public void RunTrainTestExperiment(IDataView trainData, IDataView testData,
+        public void RunTrainTestExperiment(IDataView trainData, IDataView validationData,
             MacroUtils.TrainerKinds task, MLContext mlContext,
             out double testMetricValue)
         {
             var pipelineTransformer = TrainTransformer(trainData);
-            var scoredTestData = pipelineTransformer.Transform(testData);
+            var scoredTestData = pipelineTransformer.Transform(validationData);
             testMetricValue = GetTestMetricValue(mlContext, task, scoredTestData);
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             // get learner
-            var learner = Learner.PipelineNode.BuildTrainer(_mlContext);
+            var learner = Learner.BuildTrainer(_mlContext);
 
             // append learner to pipeline
             pipeline = pipeline.Append(learner);
@@ -106,7 +106,7 @@ namespace Microsoft.ML.PipelineInference2
         private void AddNormalizationTransforms()
         {
             // get learner
-            var learner = Learner.PipelineNode.BuildTrainer(_mlContext);
+            var learner = Learner.BuildTrainer(_mlContext);
 
             // only add normalization if learner needs it
             if (!learner.Info.NeedNormalization)

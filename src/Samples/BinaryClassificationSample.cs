@@ -74,7 +74,7 @@ namespace Samples
 
             // run AutoML & train model
             var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
-            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 5, preprocessor);
+            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 19, preprocessor);
             // get best AutoML model
             var model = autoMlResult.BestModel;
             // print all AutoML pipelines
@@ -90,9 +90,11 @@ namespace Samples
             Console.WriteLine($"Model Accuracy: {results.Accuracy}\r\n");
 
             // save model to disk
-            string modelPath = $"Model.zip";
+            var modelPath = $"Model.zip";
             using (var fs = new FileStream(modelPath, FileMode.Create, FileAccess.Write, FileShare.Write))
+            {
                 mlContext.Model.Save(model, fs);
+            }
             ITransformer savedModel;
             using (var stream = new FileStream(modelPath, FileMode.Open, FileAccess.Read, FileShare.Read))
             {

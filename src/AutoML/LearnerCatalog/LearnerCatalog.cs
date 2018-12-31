@@ -43,7 +43,7 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             learners.AddRange(new ILearnerCatalogItem[] {
-                new LinearSvmBinaryClassificationLCI(),
+                //new LinearSvmBinaryClassificationLCI(),
                 new FastTreeBinaryClassificationLCI()
             });
 

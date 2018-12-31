@@ -15,7 +15,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.FastForest;
+            return SweepableParams.BuildFastForestParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -34,7 +34,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.FastTree;
+            return SweepableParams.BuildFastTreeParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -53,7 +53,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.FastTreeTweedie;
+            return SweepableParams.BuildFastTreeTweedieParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -72,7 +72,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.LightGbm;
+            return SweepableParams.BuildLightGbmParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -91,7 +91,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.OnlineGradientDescent;
+            return SweepableParams.BuildOnlineGradientDescentParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -110,7 +110,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.OrdinaryLeastSquares;
+            return SweepableParams.BuildOrdinaryLeastSquaresParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -129,7 +129,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.PoissonRegression;
+            return SweepableParams.BuildPoissonRegressionParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
@@ -148,7 +148,7 @@ namespace Microsoft.ML.PipelineInference2
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
-            return SweepableParams.Sdca;
+            return SweepableParams.BuildSdcaParams();
         }
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
