@@ -17,15 +17,15 @@ namespace Microsoft.ML.PipelineInference2
         public ParameterSet HyperParamSet { get; set; }
 
         private readonly MLContext _mlContext;
-        private readonly ILearnerCatalogItem _learnerCatalogItem;
+        private readonly ITrainerExtension _learnerCatalogItem;
 
-        public SuggestedLearner(MLContext mlContext, ILearnerCatalogItem learnerCatalogItem,
+        internal SuggestedLearner(MLContext mlContext, ITrainerExtension learnerCatalogItem,
             ParameterSet hyperParamSet = null)
         {
             _mlContext = mlContext;
             _learnerCatalogItem = learnerCatalogItem;
             SweepParams = _learnerCatalogItem.GetHyperparamSweepRanges();
-            LearnerName = _learnerCatalogItem.GetLearnerName().ToString();
+            LearnerName = _learnerCatalogItem.GetTrainerName().ToString();
             SetHyperparamValues(hyperParamSet);
         }
 
@@ -89,7 +89,7 @@ namespace Microsoft.ML.PipelineInference2
         {
             public readonly TransformInference.SuggestedTransform[] Transforms;
             
-            public readonly IEnumerable<SuggestedLearner> Learners;
+            internal readonly IEnumerable<SuggestedLearner> Learners;
         }
 
         public static TextLoader.Arguments MyAutoMlInferTextLoaderArguments(MLContext env,
@@ -115,7 +115,7 @@ namespace Microsoft.ML.PipelineInference2
         public static IEnumerable<SuggestedLearner> AllowedLearners(MLContext mlContext, MacroUtils.TrainerKinds task,
             int maxNumIterations)
         {
-            var learnerCatalogItems = LearnerCatalog.GetLearners(task, maxNumIterations);
+            var learnerCatalogItems = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);
 
             var learners = new List<SuggestedLearner>();
             foreach (var learnerCatalogItem in learnerCatalogItems)

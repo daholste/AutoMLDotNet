@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Generic;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Training;
 using Microsoft.ML.StaticPipe;
@@ -11,7 +15,7 @@ namespace Microsoft.ML.PipelineInference2
 {
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
 
-    public class FastForestRegressionLCI : ILearnerCatalogItem
+    internal class FastForestRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -20,17 +24,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastForestRegression.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<FastForestRegression.Arguments>(sweepParams);
             return mlContext.Regression.Trainers.FastForest(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastForestRegression;
+            return TrainerName.FastForestRegression;
         }
     }
 
-    public class FastTreeRegressionLCI : ILearnerCatalogItem
+    internal class FastTreeRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -39,17 +43,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastTreeRegressionTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<FastTreeRegressionTrainer.Arguments>(sweepParams);
             return mlContext.Regression.Trainers.FastTree(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastTreeRegression;
+            return TrainerName.FastTreeRegression;
         }
     }
 
-    public class FastTreeTweedieRegressionLCI : ILearnerCatalogItem
+    internal class FastTreeTweedieRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -58,17 +62,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastTreeTweedieTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<FastTreeTweedieTrainer.Arguments>(sweepParams);
             return mlContext.Regression.Trainers.FastTreeTweedie(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastTreeTweedieRegression;
+            return TrainerName.FastTreeTweedieRegression;
         }
     }
 
-    public class LightGbmRegressionLCI : ILearnerCatalogItem
+    internal class LightGbmRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -77,17 +81,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateLightGbmArgsFunc(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateLightGbmArgsFunc(sweepParams);
             return mlContext.Regression.Trainers.LightGbm(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LightGbmRegression;
+            return TrainerName.LightGbmRegression;
         }
     }
 
-    public class OnlineGradientDescentRegressionLCI : ILearnerCatalogItem
+    internal class OnlineGradientDescentRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -96,17 +100,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<AveragedLinearArguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<AveragedLinearArguments>(sweepParams);
             return mlContext.Regression.Trainers.OnlineGradientDescent(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.OnlineGradientDescentRegression;
+            return TrainerName.OnlineGradientDescentRegression;
         }
     }
 
-    public class OrdinaryLeastSquaresRegressionLCI : ILearnerCatalogItem
+    internal class OrdinaryLeastSquaresRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -115,17 +119,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<OlsLinearRegressionTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<OlsLinearRegressionTrainer.Arguments>(sweepParams);
             return mlContext.Regression.Trainers.OrdinaryLeastSquares(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.OrdinaryLeastSquaresRegression;
+            return TrainerName.OrdinaryLeastSquaresRegression;
         }
     }
 
-    public class PoissonRegressionLCI : ILearnerCatalogItem
+    internal class PoissonRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -134,17 +138,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<PoissonRegression.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<PoissonRegression.Arguments>(sweepParams);
             return mlContext.Regression.Trainers.PoissonRegression(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.PoissonRegression;
+            return TrainerName.PoissonRegression;
         }
     }
 
-    public class SdcaRegressionLCI : ILearnerCatalogItem
+    internal class SdcaRegressionExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -153,13 +157,13 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SdcaRegressionTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<SdcaRegressionTrainer.Arguments>(sweepParams);
             return mlContext.Regression.Trainers.StochasticDualCoordinateAscent(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.SdcaRegression;
+            return TrainerName.SdcaRegression;
         }
     }
 }

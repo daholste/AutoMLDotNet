@@ -11,4 +11,9 @@
     <PackageReference Include="Microsoft.ML.LightGBM" Version="0.9.0-preview-27217-0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="ObjectModel\" />
+  </ItemGroup>
+
 </Project>

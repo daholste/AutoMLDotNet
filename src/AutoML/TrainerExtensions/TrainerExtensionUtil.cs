@@ -1,12 +1,15 @@
-﻿using Microsoft.ML.Runtime.LightGBM;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.ML.Runtime.LightGBM;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    public enum LearnerName
+    public enum TrainerName
     {
         AveragedPerceptronBinary,
         AveragedPerceptronOva,
@@ -37,7 +40,7 @@ namespace Microsoft.ML.PipelineInference2
         SymSgdOva
     }
 
-    public static class LearnerCatalogUtil
+    public static class TrainerExtensionUtil
     {
         public static Action<T> CreateArgsFunc<T>(IEnumerable<SweepableParam> sweepParams)
         {

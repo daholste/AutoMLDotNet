@@ -6,20 +6,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    /// <summary>
-    /// Interface that defines what an AutoML engine looks like
-    /// </summary>
-    internal interface IPipelineSuggester
-    {
-        IEnumerable<PipelinePattern> GetNextPipelines(IEnumerable<PipelinePattern> history, int numberOfCandidates);
-
-        void UpdateLearners(IEnumerable<SuggestedLearner> availableLearners);
-
-        void UpdateTransforms(IEnumerable<TransformInference.SuggestedTransform> availableTransforms);
-
-        void MarkPipelineAsFailed(PipelinePattern failedPipeline);
-    }
-
     internal abstract class PipelineSuggesterBase : IPipelineSuggester
     {
         protected IEnumerable<TransformInference.SuggestedTransform> AvailableTransforms;

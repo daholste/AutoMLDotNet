@@ -47,7 +47,7 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             var optimizingMetricfInfo = new OptimizingMetricInfo(OptimizingMetric.Accuracy);
-            var rocketEngine = new RocketEngine(mlContext, optimizingMetricfInfo.IsMaximizing);
+            var rocketEngine = new RocketPipelineSuggester(mlContext, optimizingMetricfInfo.IsMaximizing);
             var terminator = new IterationBasedTerminator(maxIterations);
 
             var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, rocketEngine, task,

@@ -1,6 +1,8 @@
-﻿using Microsoft.ML.Core.Data;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.EntryPoints;
 using Microsoft.ML.Runtime.Learners;
 using Microsoft.ML.Runtime.LightGBM;
 using Microsoft.ML.Runtime.Training;
@@ -10,14 +12,12 @@ using Microsoft.ML.Trainers.Online;
 using Microsoft.ML.Trainers.SymSgd;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.ML.PipelineInference2
 {
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
 
-    public class AveragedPerceptronBinaryClassificationLCI : ILearnerCatalogItem
+    internal class AveragedPerceptronBinaryExtension : ITrainerExtension
     {
         private const int DefaultNumIterations = 10;
 
@@ -38,18 +38,18 @@ namespace Microsoft.ML.PipelineInference2
             }
             else
             {
-                argsFunc = LearnerCatalogUtil.CreateArgsFunc<AveragedPerceptronTrainer.Arguments>(sweepParams);
+                argsFunc = TrainerExtensionUtil.CreateArgsFunc<AveragedPerceptronTrainer.Arguments>(sweepParams);
             }
             return mlContext.BinaryClassification.Trainers.AveragedPerceptron(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.AveragedPerceptronBinary;
+            return TrainerName.AveragedPerceptronBinary;
         }
     }
 
-    public class FastForestBinaryClassificationLCI : ILearnerCatalogItem
+    internal class FastForestBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -58,17 +58,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastForestClassification.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<FastForestClassification.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.FastForest(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastForestBinary;
+            return TrainerName.FastForestBinary;
         }
     }
 
-    public class FastTreeBinaryClassificationLCI : ILearnerCatalogItem
+    internal class FastTreeBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -77,17 +77,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<FastTreeBinaryClassificationTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<FastTreeBinaryClassificationTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.FastTree(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastTreeBinary;
+            return TrainerName.FastTreeBinary;
         }
     }
 
-    public class LightGbmBinaryClassificationLCI : ILearnerCatalogItem
+    internal class LightGbmBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -96,17 +96,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<LightGbmArguments> argsFunc = LearnerCatalogUtil.CreateLightGbmArgsFunc(sweepParams);
+            Action<LightGbmArguments> argsFunc = TrainerExtensionUtil.CreateLightGbmArgsFunc(sweepParams);
             return mlContext.BinaryClassification.Trainers.LightGbm(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LightGbmBinary;
+            return TrainerName.LightGbmBinary;
         }
     }
 
-    public class LinearSvmBinaryClassificationLCI : ILearnerCatalogItem
+    internal class LinearSvmBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -115,17 +115,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<LinearSvm.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<LinearSvm.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.LinearSupportVectorMachines(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LinearSvmBinary;
+            return TrainerName.LinearSvmBinary;
         }
     }
 
-    public class SdcaBinaryClassificationLCI : ILearnerCatalogItem
+    internal class SdcaBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -134,17 +134,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SdcaBinaryTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<SdcaBinaryTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.StochasticDualCoordinateAscent(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.SdcaBinary;
+            return TrainerName.SdcaBinary;
         }
     }
 
-    public class LogisticRegressionBinaryClassificationLCI : ILearnerCatalogItem
+    internal class LogisticRegressionBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -153,17 +153,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<LogisticRegression.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<LogisticRegression.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.LogisticRegression(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LogisticRegressionBinary;
+            return TrainerName.LogisticRegressionBinary;
         }
     }
 
-    public class SgdBinaryClassificationLCI : ILearnerCatalogItem
+    internal class SgdBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -172,17 +172,17 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<StochasticGradientDescentClassificationTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<StochasticGradientDescentClassificationTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.StochasticGradientDescent(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.StochasticGradientDescentBinary;
+            return TrainerName.StochasticGradientDescentBinary;
         }
     }
 
-    public class SymSgdBinaryClassificationLCI : ILearnerCatalogItem
+    internal class SymSgdBinaryExtension : ITrainerExtension
     {
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -191,13 +191,13 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SymSgdClassificationTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<SymSgdClassificationTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.SymbolicStochasticGradientDescent(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.SymSgdBinary;
+            return TrainerName.SymSgdBinary;
         }
     }
 }

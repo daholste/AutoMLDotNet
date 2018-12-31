@@ -1,4 +1,8 @@
-﻿using Microsoft.ML.Runtime;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Learners;
 using Microsoft.ML.Runtime.LightGBM;
 using Microsoft.ML.Runtime.Training;
@@ -14,9 +18,9 @@ namespace Microsoft.ML.PipelineInference2
     using ITrainerEstimatorProducingFloat = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
     
-    public class AveragedPerceptronOvaLCI : ILearnerCatalogItem
+    internal class AveragedPerceptronOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new AveragedPerceptronBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new AveragedPerceptronBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -29,15 +33,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.AveragedPerceptronOva;
+            return TrainerName.AveragedPerceptronOva;
         }
     }
 
-    public class FastForestOvaLCI : ILearnerCatalogItem
+    internal class FastForestOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new FastForestBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new FastForestBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -50,15 +54,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastForestOva;
+            return TrainerName.FastForestOva;
         }
     }
 
-    public class LightGbmMulticlassClassificationLCI : ILearnerCatalogItem
+    internal class LightGbmMultiExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new LightGbmBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new LightGbmBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -67,19 +71,19 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            Action<LightGbmArguments> argsFunc = LearnerCatalogUtil.CreateLightGbmArgsFunc(sweepParams);
+            Action<LightGbmArguments> argsFunc = TrainerExtensionUtil.CreateLightGbmArgsFunc(sweepParams);
             return mlContext.MulticlassClassification.Trainers.LightGbm(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LightGbmMulti;
+            return TrainerName.LightGbmMulti;
         }
     }
 
-    public class LinearSvmOvaLCI : ILearnerCatalogItem
+    internal class LinearSvmOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new LinearSvmBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new LinearSvmBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -92,15 +96,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LinearSvmOva;
+            return TrainerName.LinearSvmOva;
         }
     }
 
-    public class SdcaMulticlassClassificationLCI : ILearnerCatalogItem
+    internal class SdcaMultiExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new SdcaBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new SdcaBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -109,20 +113,20 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<SdcaMultiClassTrainer.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<SdcaMultiClassTrainer.Arguments>(sweepParams);
             return mlContext.MulticlassClassification.Trainers.StochasticDualCoordinateAscent(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.SdcaMulti;
+            return TrainerName.SdcaMulti;
         }
     }
 
 
-    public class LogisticRegressionOvaLCI : ILearnerCatalogItem
+    internal class LogisticRegressionOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new LogisticRegressionBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new LogisticRegressionBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -135,15 +139,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LogisticRegressionOva;
+            return TrainerName.LogisticRegressionOva;
         }
     }
 
-    public class SgdOvaLCI : ILearnerCatalogItem
+    internal class SgdOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new SgdBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new SgdBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -156,15 +160,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.StochasticGradientDescentOva;
+            return TrainerName.StochasticGradientDescentOva;
         }
     }
 
-    public class SymSgdOvaLCI : ILearnerCatalogItem
+    internal class SymSgdOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new SymSgdBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new SymSgdBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -177,15 +181,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.SymSgdOva;
+            return TrainerName.SymSgdOva;
         }
     }
 
-    public class FastTreeOvaLCI : ILearnerCatalogItem
+    internal class FastTreeOvaExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new FastTreeBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new FastTreeBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -198,15 +202,15 @@ namespace Microsoft.ML.PipelineInference2
             return mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryTrainer);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.FastTreeOva;
+            return TrainerName.FastTreeOva;
         }
     }
 
-    public class LogisticRegressionMulticlassClassificationLCI : ILearnerCatalogItem
+    internal class LogisticRegressionMultiExtension : ITrainerExtension
     {
-        private static readonly ILearnerCatalogItem _binaryLearnerCatalogItem = new LogisticRegressionBinaryClassificationLCI();
+        private static readonly ITrainerExtension _binaryLearnerCatalogItem = new LogisticRegressionBinaryExtension();
 
         public IEnumerable<SweepableParam> GetHyperparamSweepRanges()
         {
@@ -215,13 +219,13 @@ namespace Microsoft.ML.PipelineInference2
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = LearnerCatalogUtil.CreateArgsFunc<MulticlassLogisticRegression.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<MulticlassLogisticRegression.Arguments>(sweepParams);
             return mlContext.MulticlassClassification.Trainers.LogisticRegression(advancedSettings: argsFunc);
         }
 
-        public LearnerName GetLearnerName()
+        public TrainerName GetTrainerName()
         {
-            return LearnerName.LogisticRegressionMulti;
+            return TrainerName.LogisticRegressionMulti;
         }
     }
 }

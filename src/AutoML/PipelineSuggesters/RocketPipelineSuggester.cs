@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    internal class RocketEngine : PipelineSuggesterBase
+    internal class RocketPipelineSuggester : PipelineSuggesterBase
     {
         private const int TopKLearners = 1;
         private const int SecondRoundTrialsPerLearner = 5;
@@ -26,7 +26,7 @@ namespace Microsoft.ML.PipelineInference2
             Third
         }
 
-        public RocketEngine(MLContext mlContext, bool isMaximizingMetric) : base(mlContext, isMaximizingMetric)
+        public RocketPipelineSuggester(MLContext mlContext, bool isMaximizingMetric) : base(mlContext, isMaximizingMetric)
         {
             _currentStage = (int)Stage.First;
             _hyperSweepers = new Dictionary<string, ISweeper>();
