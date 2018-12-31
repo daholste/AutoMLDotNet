@@ -32,23 +32,23 @@ namespace Microsoft.ML.PipelineInference2
             _hyperSweepers = new Dictionary<string, ISweeper>();
         }
 
-        public override void UpdateLearners(IEnumerable<SuggestedLearner> availableLearners)
+        public override void UpdateTrainers(IEnumerable<SuggestedTrainer> availableLearners)
         {
-            base.UpdateLearners(availableLearners);
+            base.UpdateTrainers(availableLearners);
             switch(_currentStage)
             {
                 case (int)Stage.First:
-                    _remainingStageOneTrials = AvailableLearners.Count();
+                    _remainingStageOneTrials = AvailableTrainers.Count();
                     break;
                 case (int)Stage.Second:
-                    _remainingStageTwoTrials = AvailableLearners.Count() * SecondRoundTrialsPerLearner;
+                    _remainingStageTwoTrials = AvailableTrainers.Count() * SecondRoundTrialsPerLearner;
                     break;
             }
         }
 
-        public override IEnumerable<PipelinePattern> GetNextPipelines(IEnumerable<PipelinePattern> history, int numberOfCandidates)
+        public override IEnumerable<Pipeline> GetNextPipelines(IEnumerable<Pipeline> history, int numberOfCandidates)
         {
-            var pipelnes = new List<PipelinePattern>();
+            var pipelnes = new List<Pipeline>();
             for (var i = 0; i < numberOfCandidates; i++)
             {
                 var pipeline = GetNextPipeline(history);
@@ -57,21 +57,21 @@ namespace Microsoft.ML.PipelineInference2
             return pipelnes;
         }
 
-        private IEnumerable<SuggestedLearner> GetTopLearners(IEnumerable<PipelinePattern> history)
+        private IEnumerable<SuggestedTrainer> GetTopLearners(IEnumerable<Pipeline> history)
         {
-            history = history.GroupBy(h => h.Learner.LearnerName).Select(g => g.First());
-            IEnumerable<PipelinePattern> sortedHistory = history.OrderBy(h => h.Result);
+            history = history.GroupBy(h => h.Trainer.TrainerName).Select(g => g.First());
+            IEnumerable<Pipeline> sortedHistory = history.OrderBy(h => h.Result);
             if(IsMaximizingMetric)
             {
                 sortedHistory = sortedHistory.Reverse();
             }
-            var topLearners = sortedHistory.Take(TopKLearners).Select(h => h.Learner);
+            var topLearners = sortedHistory.Take(TopKLearners).Select(h => h.Trainer);
             return topLearners;
         }
 
-        private PipelinePattern GetNextPipeline(IEnumerable<PipelinePattern> history)
+        private Pipeline GetNextPipeline(IEnumerable<Pipeline> history)
         {
-            PipelinePattern pipeline;
+            Pipeline pipeline;
 
             if (_currentStage == (int)Stage.First)
             {
@@ -79,8 +79,8 @@ namespace Microsoft.ML.PipelineInference2
             }
             else
             {
-                var learner = AvailableLearners.ElementAt(_currentLearnerIndex).Clone();
-                _currentLearnerIndex = (_currentLearnerIndex + 1) % AvailableLearners.Count();
+                var learner = AvailableTrainers.ElementAt(_currentLearnerIndex).Clone();
+                _currentLearnerIndex = (_currentLearnerIndex + 1) % AvailableTrainers.Count();
 
                 SampleHyperparameters(learner, history);
 
@@ -91,7 +91,7 @@ namespace Microsoft.ML.PipelineInference2
                 bool valid;
                 do
                 {
-                    pipeline = new PipelinePattern(AvailableTransforms, learner, MLContext);
+                    pipeline = new Pipeline(AvailableTransforms, learner, MLContext);
                     valid = !VisitedPipelines.Contains(pipeline.ToString()) && !HasPipelineFailed(pipeline);
                     count++;
                 } while (!valid && count <= maxNumberAttempts);
@@ -108,7 +108,7 @@ namespace Microsoft.ML.PipelineInference2
             return pipeline;
         }
         
-        private void IncrementStageState(IEnumerable<PipelinePattern> history)
+        private void IncrementStageState(IEnumerable<Pipeline> history)
         {
             switch (_currentStage)
             {
@@ -121,7 +121,7 @@ namespace Microsoft.ML.PipelineInference2
                         // select top k learners, update stage, then get requested
                         // number of candidates, using second stage logic
                         var topLearners = GetTopLearners(history);
-                        UpdateLearners(topLearners);
+                        UpdateTrainers(topLearners);
                         foreach(var learner in topLearners)
                         {
                             InitHyperparamSweepers(learner);
@@ -141,13 +141,13 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        private PipelinePattern GetNextStageOnePipeline()
+        private Pipeline GetNextStageOnePipeline()
         {
-            var learner = AvailableLearners.ElementAt(_currentLearnerIndex);
-            var pipeline = new PipelinePattern(AvailableTransforms, learner, MLContext);
+            var learner = AvailableTrainers.ElementAt(_currentLearnerIndex);
+            var pipeline = new Pipeline(AvailableTransforms, learner, MLContext);
 
             // update current index
-            _currentLearnerIndex = (_currentLearnerIndex + 1) % AvailableLearners.Count();
+            _currentLearnerIndex = (_currentLearnerIndex + 1) % AvailableTrainers.Count();
 
             return pipeline;
         }
@@ -155,12 +155,12 @@ namespace Microsoft.ML.PipelineInference2
         /// <summary>
         /// if first time optimizing hyperparams, create new hyperparameter sweepers
         /// </summary>
-        private void InitHyperparamSweepers(SuggestedLearner learner)
+        private void InitHyperparamSweepers(SuggestedTrainer learner)
         {
-            if (!_hyperSweepers.ContainsKey(learner.LearnerName))
+            if (!_hyperSweepers.ContainsKey(learner.TrainerName))
             {
                 var sps = AutoMlUtils.ConvertToValueGenerators(learner.SweepParams);
-                _hyperSweepers[learner.LearnerName] = new KdoSweeper(
+                _hyperSweepers[learner.TrainerName] = new KdoSweeper(
                     new KdoSweeper.Arguments
                     {
                         SweptParameters = sps,
@@ -169,13 +169,13 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        private void SampleHyperparameters(SuggestedLearner learner, IEnumerable<PipelinePattern> history)
+        private void SampleHyperparameters(SuggestedTrainer learner, IEnumerable<Pipeline> history)
         {
-            var sweeper = _hyperSweepers[learner.LearnerName];
-            IEnumerable<PipelinePattern> historyToUse = new PipelinePattern[0];
+            var sweeper = _hyperSweepers[learner.TrainerName];
+            IEnumerable<Pipeline> historyToUse = new Pipeline[0];
             if (_currentStage == (int)Stage.Third)
             {
-                historyToUse = history.Where(p => p.Learner.LearnerName == learner.LearnerName && p.Learner.HyperParamSet != null);
+                historyToUse = history.Where(p => p.Trainer.TrainerName == learner.TrainerName && p.Trainer.HyperParamSet != null);
             }
 
             // get new set of hyperparameter values

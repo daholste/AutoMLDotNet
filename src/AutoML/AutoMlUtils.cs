@@ -23,15 +23,6 @@ namespace Microsoft.ML.PipelineInference2
                 throw new Exception(message);
             }
         }
-
-        public static IDataView ApplyTransformSet(IDataView data, TransformInference.SuggestedTransform[] transforms)
-        {
-            foreach(var transform in transforms)
-            {
-                data = transform.Estimator.Fit(data).Transform(data);
-            }
-            return data;
-        }
         
         private static void SetValue(FieldInfo fi, IComparable value, object entryPointObj, Type propertyType)
         {
@@ -98,14 +89,14 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        public static IRunResult ConvertToRunResult(SuggestedLearner learner, double result, bool isMetricMaximizing)
+        public static IRunResult ConvertToRunResult(SuggestedTrainer learner, double result, bool isMetricMaximizing)
         {
             return new RunResult(learner.HyperParamSet, result, isMetricMaximizing);
         }
 
-        public static IRunResult[] ConvertToRunResults(IEnumerable<PipelinePattern> history, bool isMetricMaximizing)
+        public static IRunResult[] ConvertToRunResults(IEnumerable<Pipeline> history, bool isMetricMaximizing)
         {
-            return history.Where(h => h.Learner.HyperParamSet != null).Select(h => ConvertToRunResult(h.Learner, h.Result, isMetricMaximizing)).ToArray();
+            return history.Where(h => h.Trainer.HyperParamSet != null).Select(h => ConvertToRunResult(h.Trainer, h.Result, isMetricMaximizing)).ToArray();
         }
 
         public static IValueGenerator[] ConvertToValueGenerators(IEnumerable<SweepableParam> hps)

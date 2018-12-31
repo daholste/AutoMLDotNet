@@ -12,8 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="ObjectModel\" />
+    <Folder Include="TransformExtensions\" />
   </ItemGroup>
 
 </Project>

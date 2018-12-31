@@ -10,22 +10,22 @@ using Microsoft.ML.Runtime.Training;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    public class SuggestedLearner
+    public class SuggestedTrainer
     {
         public IEnumerable<SweepableParam> SweepParams { get; }
-        public string LearnerName { get; }
+        public string TrainerName { get; }
         public ParameterSet HyperParamSet { get; set; }
 
         private readonly MLContext _mlContext;
         private readonly ITrainerExtension _learnerCatalogItem;
 
-        internal SuggestedLearner(MLContext mlContext, ITrainerExtension learnerCatalogItem,
+        internal SuggestedTrainer(MLContext mlContext, ITrainerExtension learnerCatalogItem,
             ParameterSet hyperParamSet = null)
         {
             _mlContext = mlContext;
             _learnerCatalogItem = learnerCatalogItem;
             SweepParams = _learnerCatalogItem.GetHyperparamSweepRanges();
-            LearnerName = _learnerCatalogItem.GetTrainerName().ToString();
+            TrainerName = _learnerCatalogItem.GetTrainerName().ToString();
             SetHyperparamValues(hyperParamSet);
         }
 
@@ -35,9 +35,9 @@ namespace Microsoft.ML.PipelineInference2
             PropagateParamSetValues();
         }
 
-        public SuggestedLearner Clone()
+        public SuggestedTrainer Clone()
         {
-            return new SuggestedLearner(_mlContext, _learnerCatalogItem, HyperParamSet?.Clone());
+            return new SuggestedTrainer(_mlContext, _learnerCatalogItem, HyperParamSet?.Clone());
         }
 
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> BuildTrainer(MLContext env)
@@ -57,7 +57,18 @@ namespace Microsoft.ML.PipelineInference2
             {
                 paramsStr = string.Join(", ", SweepParams.Where(p => p != null && p.RawValue != null).Select(p => $"{p.Name}:{p.ProcessedValue()}"));
             }
-            return $"{LearnerName}{{{paramsStr}}}";
+            return $"{TrainerName}{{{paramsStr}}}";
+        }
+
+        public Auto.ObjectModel.PipelineElement ToObjectModel()
+        {
+            var hyperParams = SweepParams.Where(p => p != null && p.RawValue != null);
+            var elementProperties = new Dictionary<string, object>();
+            foreach(var hyperParam in hyperParams)
+            {
+                elementProperties[hyperParam.Name] = hyperParam.ProcessedValue();
+            }
+            return new Auto.ObjectModel.PipelineElement(TrainerName, Auto.ObjectModel.PipelineElementType.Trainer, elementProperties);
         }
 
         /// <summary>
@@ -85,13 +96,6 @@ namespace Microsoft.ML.PipelineInference2
 
     public static class RecipeInference
     {
-        public readonly struct SuggestedRecipe
-        {
-            public readonly TransformInference.SuggestedTransform[] Transforms;
-            
-            internal readonly IEnumerable<SuggestedLearner> Learners;
-        }
-
         public static TextLoader.Arguments MyAutoMlInferTextLoaderArguments(MLContext env,
             string dataFile, string labelColName)
         {
@@ -112,15 +116,15 @@ namespace Microsoft.ML.PipelineInference2
         /// Given a predictor type returns a set of all permissible learners (with their sweeper params, if defined).
         /// </summary>
         /// <returns>Array of viable learners.</returns>
-        public static IEnumerable<SuggestedLearner> AllowedLearners(MLContext mlContext, MacroUtils.TrainerKinds task,
+        public static IEnumerable<SuggestedTrainer> AllowedLearners(MLContext mlContext, MacroUtils.TrainerKinds task,
             int maxNumIterations)
         {
             var learnerCatalogItems = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);
 
-            var learners = new List<SuggestedLearner>();
+            var learners = new List<SuggestedTrainer>();
             foreach (var learnerCatalogItem in learnerCatalogItems)
             {
-                var learner = new SuggestedLearner(mlContext, learnerCatalogItem);
+                var learner = new SuggestedTrainer(mlContext, learnerCatalogItem);
                 learners.Add(learner);
             }
             return learners.ToArray();

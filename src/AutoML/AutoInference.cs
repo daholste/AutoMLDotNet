@@ -9,6 +9,7 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Core.Data;
 
 namespace Microsoft.ML.PipelineInference2
 {
@@ -31,8 +32,8 @@ namespace Microsoft.ML.PipelineInference2
         /// </summary>
         internal sealed class AutoFitter
         {
-            private readonly SortedList<double, PipelinePattern> _sortedSampledElements;
-            private readonly List<PipelinePattern> _history;
+            private readonly SortedList<double, Pipeline> _sortedSampledElements;
+            private readonly List<Pipeline> _history;
             private readonly MLContext _mlContext;
             private IDataView _trainData;
             private IDataView _validationData;
@@ -48,9 +49,9 @@ namespace Microsoft.ML.PipelineInference2
                 IDataView trainData, IDataView validationData)
             {
                 OptimizingMetricInfo = metricInfo;
-                _sortedSampledElements = OptimizingMetricInfo.IsMaximizing ? new SortedList<double, PipelinePattern>(new ReversedComparer<double>()) :
-                        new SortedList<double, PipelinePattern>();
-                _history = new List<PipelinePattern>();
+                _sortedSampledElements = OptimizingMetricInfo.IsMaximizing ? new SortedList<double, Pipeline>(new ReversedComparer<double>()) :
+                        new SortedList<double, Pipeline>();
+                _history = new List<Pipeline>();
                 _mlContext = mlContext;
                 _trainData = trainData;
                 _validationData = validationData;
@@ -93,7 +94,7 @@ namespace Microsoft.ML.PipelineInference2
                             }
                             catch (Exception e)
                             {
-                                File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump1.txt", $"{candidate.Learner} Crashed {e}\r\n");
+                                File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump1.txt", $"{candidate.Trainer} Crashed {e}\r\n");
                                 PipelineSuggester.MarkPipelineAsFailed(candidate);
                                 stopwatch.Stop();
                             }
@@ -106,7 +107,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            private void ProcessPipeline(SweeperProbabilityUtils utils, Stopwatch stopwatch, PipelinePattern candidate)
+            private void ProcessPipeline(SweeperProbabilityUtils utils, Stopwatch stopwatch, Pipeline candidate)
             {
                 // run pipeline, and time how long it takes
                 stopwatch.Restart();
@@ -131,15 +132,15 @@ namespace Microsoft.ML.PipelineInference2
                     transformsSb.Append(transform);
                     transformsSb.Append(" ");
                 }
-                var commandLineStr = $"{transformsSb.ToString()} tr={candidate.Learner}";
+                var commandLineStr = $"{transformsSb.ToString()} tr={candidate.Trainer}";
                 File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_sortedSampledElements.Count}\t{candidate.Result}\t{MyGlobals.Stopwatch.Elapsed}\t{commandLineStr}\r\n");
             }
 
-            public IEnumerable<PipelinePattern> InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
+            public (Auto.ObjectModel.Pipeline[], ITransformer bestModel) InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
             {
                 // get available learners
                 var learners = RecipeInference.AllowedLearners(_mlContext, TrainerKind, _maxNumIterations);
-                PipelineSuggester.UpdateLearners(learners);
+                PipelineSuggester.UpdateTrainers(learners);
 
                 // get available transforms
                 var transforms = InferTransforms();
@@ -147,11 +148,14 @@ namespace Microsoft.ML.PipelineInference2
 
                 MainLearningLoop(batchSize);
 
+                // temporary hack: retrain best model
+                var bestModel = _sortedSampledElements.First().Value.TrainTransformer(_trainData);
+
                 // return pipelines
-                return _sortedSampledElements.Values;
+                return (_sortedSampledElements.Values.Select(p => p.ToObjectModel()).ToArray(), bestModel);
             }
             
-            private IEnumerable<TransformInference.SuggestedTransform> InferTransforms()
+            private IEnumerable<SuggestedTransform> InferTransforms()
             {
                 var data = _trainData;
                 var args = new TransformInference.Arguments

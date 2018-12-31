@@ -8,8 +8,8 @@ namespace Microsoft.ML.PipelineInference2
 {
     internal abstract class PipelineSuggesterBase : IPipelineSuggester
     {
-        protected IEnumerable<TransformInference.SuggestedTransform> AvailableTransforms;
-        protected IEnumerable<SuggestedLearner> AvailableLearners;
+        protected IEnumerable<SuggestedTransform> AvailableTransforms;
+        protected IEnumerable<SuggestedTrainer> AvailableTrainers;
         protected readonly MLContext MLContext;
         protected readonly HashSet<string> VisitedPipelines;        
         protected bool IsMaximizingMetric;
@@ -24,24 +24,24 @@ namespace Microsoft.ML.PipelineInference2
             FailedPipelines = new HashSet<string>();
         }
 
-        public abstract IEnumerable<PipelinePattern> GetNextPipelines(IEnumerable<PipelinePattern> history, int numberOfCandidates);
+        public abstract IEnumerable<Pipeline> GetNextPipelines(IEnumerable<Pipeline> history, int numberOfCandidates);
 
-        public virtual void UpdateLearners(IEnumerable<SuggestedLearner> availableLearners)
+        public virtual void UpdateTrainers(IEnumerable<SuggestedTrainer> availableTrainers)
         {
-            AvailableLearners = availableLearners;
+            AvailableTrainers = availableTrainers;
         }
 
-        public virtual void UpdateTransforms(IEnumerable<TransformInference.SuggestedTransform> availableTransforms)
+        public virtual void UpdateTransforms(IEnumerable<SuggestedTransform> availableTransforms)
         {
             AvailableTransforms = availableTransforms;
         }
 
-        public void MarkPipelineAsFailed(PipelinePattern failedPipeline)
+        public void MarkPipelineAsFailed(Pipeline failedPipeline)
         {
             FailedPipelines.Add(failedPipeline.ToString());
         }
 
-        public bool HasPipelineFailed(PipelinePattern failedPipeline)
+        public bool HasPipelineFailed(Pipeline failedPipeline)
         {
             return FailedPipelines.Contains(failedPipeline.ToString());
         }

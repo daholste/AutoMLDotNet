@@ -16,9 +16,74 @@ using Microsoft.ML.Transforms;
 using Microsoft.ML.Transforms.Categorical;
 using Microsoft.ML.Transforms.Conversions;
 using Microsoft.ML.Transforms.Text;
+using static Microsoft.ML.PipelineInference2.TransformInference;
 
 namespace Microsoft.ML.PipelineInference2
 {
+    public class SuggestedTransform
+    {
+        public readonly IEstimator<ITransformer> Estimator;
+        public readonly IDictionary<string, string> Properties;
+        // Stores which columns are consumed by this transform,
+        // and which are produced, at which level.
+        public ColumnRoutingStructure RoutingStructure { get; set; }
+
+        public SuggestedTransform(IEstimator<ITransformer> estimator,
+            ColumnRoutingStructure routingStructure = null, IDictionary<string, string> properties = null)
+        {
+            Estimator = estimator;
+            RoutingStructure = routingStructure;
+            Properties = properties;
+        }
+
+        public SuggestedTransform Clone()
+        {
+            return new SuggestedTransform(Estimator, RoutingStructure, Properties);
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            sb.Append(Estimator.GetType().FullName);
+            sb.Append("{");
+            if (RoutingStructure.ColumnsProduced.Count() > 1)
+            {
+                for (var i = 0; i < RoutingStructure.ColumnsProduced.Count(); i++)
+                {
+                    sb.Append($" col={RoutingStructure.ColumnsProduced[i].Name}:{RoutingStructure.ColumnsConsumed[i].Name}");
+                }
+            }
+            else
+            {
+                sb.Append($" col={RoutingStructure.ColumnsProduced.First().Name}:{string.Join(",", RoutingStructure.ColumnsConsumed.Select(c => c.Name))}");
+            }
+            if (Properties != null)
+            {
+                foreach (var property in Properties)
+                {
+                    sb.Append($" {property.Key}={property.Value}");
+                }
+            }
+            sb.Append("}");
+            return sb.ToString();
+        }
+
+        public Auto.ObjectModel.PipelineElement ToObjectModel()
+        {
+            var elementProperties = new Dictionary<string, object>();
+            elementProperties["InputColumns"] = RoutingStructure.ColumnsConsumed.Select(c => c.Name);
+            elementProperties["OutputColumns"] = RoutingStructure.ColumnsProduced.Select(c => c.Name);
+            if (Properties != null)
+            {
+                foreach (var property in Properties)
+                {
+                    elementProperties[property.Key] = property.Value;
+                }
+            }
+            return new Auto.ObjectModel.PipelineElement(Estimator.GetType().Name, Auto.ObjectModel.PipelineElementType.Transform, elementProperties);
+        }
+    }
+
     /// <summary>
     /// Auto-generate set of transforms for the data view, given the purposes of specified columns.
     ///
@@ -48,55 +113,6 @@ namespace Microsoft.ML.PipelineInference2
         }
 
         private const int MaxRowsToRead = 1000;
-
-        public struct SuggestedTransform
-        {
-            public readonly IEstimator<ITransformer> Estimator;
-            public readonly IDictionary<string, string> Properties;
-            // Stores which columns are consumed by this transform,
-            // and which are produced, at which level.
-            public ColumnRoutingStructure RoutingStructure { get; set; }
-
-            public SuggestedTransform(IEstimator<ITransformer> estimator,
-                ColumnRoutingStructure routingStructure = null, IDictionary<string, string> properties = null)
-            {
-                Estimator = estimator;
-                RoutingStructure = routingStructure;
-                Properties = properties;
-            }
-
-            public SuggestedTransform Clone()
-            {
-                return new SuggestedTransform(Estimator, RoutingStructure, Properties);
-            }
-
-            public override string ToString()
-            {
-                var sb = new StringBuilder();
-                sb.Append(Estimator.GetType().FullName);
-                sb.Append("{");
-                if(RoutingStructure.ColumnsProduced.Count() > 1)
-                {
-                    for(var i = 0; i < RoutingStructure.ColumnsProduced.Count(); i++)
-                    {
-                        sb.Append($" col={RoutingStructure.ColumnsProduced[i].Name}:{RoutingStructure.ColumnsConsumed[i].Name}");
-                    }
-                }
-                else
-                {
-                    sb.Append($" col={RoutingStructure.ColumnsProduced.First().Name}:{string.Join(",", RoutingStructure.ColumnsConsumed.Select(c => c.Name))}");
-                }
-                if(Properties != null)
-                {
-                    foreach (var property in Properties)
-                    {
-                        sb.Append($" {property.Key}={property.Value}");
-                    }
-                }
-                sb.Append("}");
-                return sb.ToString();
-            }
-        }
 
         public readonly struct InferenceResult
         {

@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.EntryPoints;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Training;
@@ -20,33 +21,35 @@ namespace Microsoft.ML.PipelineInference2
     /// A runnable pipeline. Contains a learner and set of transforms,
     /// along with a RunSummary if it has already been exectued.
     /// </summary>
-    public sealed class PipelinePattern
+    public sealed class Pipeline
     {
         private readonly MLContext _mlContext;
-        public readonly IList<TransformInference.SuggestedTransform> Transforms;
-        public readonly SuggestedLearner Learner;
+        public readonly IList<SuggestedTransform> Transforms;
+        public readonly SuggestedTrainer Trainer;
         public double Result { get; set; }
 
-        public PipelinePattern(IEnumerable<TransformInference.SuggestedTransform> transforms,
-            SuggestedLearner learner,
+        public Pipeline(IEnumerable<SuggestedTransform> transforms,
+            SuggestedTrainer trainer,
             MLContext mlContext)
         {
-            // Make sure internal pipeline nodes and sweep params are cloned, not shared.
-            // Cloning the transforms and learner rather than assigning outright
-            // ensures that this will be the case. Doing this here allows us to not
-            // worry about changing hyperparameter values in candidate pipelines
-            // possibly overwritting other pipelines.
             Transforms = transforms.Select(t => t.Clone()).ToList();
-            Learner = learner.Clone();
+            Trainer = trainer.Clone();
             _mlContext = mlContext;
             AddNormalizationTransforms();
         }
+        
+        public override string ToString() => $"{Trainer}+{string.Join("+", Transforms.Select(t => t.ToString()))}";
 
-        /// <summary>
-        /// This method will return some indentifying string for the pipeline,
-        /// based on transforms, learner, and (eventually) hyperparameters.
-        /// </summary>
-        public override string ToString() => $"{Learner}+{string.Join("+", Transforms.Select(t => t.ToString()))}";
+        public Auto.ObjectModel.Pipeline ToObjectModel()
+        {
+            var pipelineElements = new List<Auto.ObjectModel.PipelineElement>();
+            foreach(var transform in Transforms)
+            {
+                pipelineElements.Add(transform.ToObjectModel());
+            }
+            pipelineElements.Add(Trainer.ToObjectModel());
+            return new Auto.ObjectModel.Pipeline(pipelineElements.ToArray());
+        }
 
         /// <summary>
         /// Runs a train-test experiment on the current pipeline
@@ -95,7 +98,7 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             // get learner
-            var learner = Learner.BuildTrainer(_mlContext);
+            var learner = Trainer.BuildTrainer(_mlContext);
 
             // append learner to pipeline
             pipeline = pipeline.Append(learner);
@@ -106,7 +109,7 @@ namespace Microsoft.ML.PipelineInference2
         private void AddNormalizationTransforms()
         {
             // get learner
-            var learner = Learner.BuildTrainer(_mlContext);
+            var learner = Trainer.BuildTrainer(_mlContext);
 
             // only add normalization if learner needs it
             if (!learner.Info.NeedNormalization)
@@ -121,7 +124,7 @@ namespace Microsoft.ML.PipelineInference2
             {
                 { "mode", "MinMax" }
             };
-            var transform = new TransformInference.SuggestedTransform(estimator, 
+            var transform = new SuggestedTransform(estimator, 
                 routingStructure: routingStructure, properties: properties);
             Transforms.Add(transform);
         }

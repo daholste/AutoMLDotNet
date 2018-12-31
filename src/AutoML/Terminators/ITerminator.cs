@@ -13,6 +13,6 @@ namespace Microsoft.ML.PipelineInference2
     /// </summary>
     public interface ITerminator
     {
-        bool ShouldTerminate(IEnumerable<PipelinePattern> history);
+        bool ShouldTerminate(IEnumerable<Pipeline> history);
     }
 }

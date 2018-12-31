@@ -74,7 +74,7 @@ namespace Samples
 
             // run AutoML & train model
             var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
-            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 19, preprocessor);
+            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 10, preprocessor);
             // get best AutoML model
             var model = autoMlResult.BestModel;
             // print all AutoML pipelines

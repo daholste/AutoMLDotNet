@@ -16,12 +16,12 @@ namespace Microsoft.ML.PipelineInference2
             _finalHistoryLength = finalHistoryLength;
         }
 
-        public bool ShouldTerminate(IEnumerable<PipelinePattern> history)
+        public bool ShouldTerminate(IEnumerable<Pipeline> history)
         {
             return history.ToArray().Length >= _finalHistoryLength;
         }
 
-        public int RemainingIterations(IEnumerable<PipelinePattern> history) =>
+        public int RemainingIterations(IEnumerable<Pipeline> history) =>
             _finalHistoryLength - history.ToArray().Length;
     }
 }

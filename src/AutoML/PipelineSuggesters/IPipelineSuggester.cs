@@ -11,12 +11,12 @@ namespace Microsoft.ML.PipelineInference2
     /// </summary>
     internal interface IPipelineSuggester
     {
-        IEnumerable<PipelinePattern> GetNextPipelines(IEnumerable<PipelinePattern> history, int numberOfCandidates);
+        IEnumerable<Pipeline> GetNextPipelines(IEnumerable<Pipeline> history, int numberOfCandidates);
 
-        void UpdateLearners(IEnumerable<SuggestedLearner> availableLearners);
+        void UpdateTrainers(IEnumerable<SuggestedTrainer> availableLearners);
 
-        void UpdateTransforms(IEnumerable<TransformInference.SuggestedTransform> availableTransforms);
+        void UpdateTransforms(IEnumerable<SuggestedTransform> availableTransforms);
 
-        void MarkPipelineAsFailed(PipelinePattern failedPipeline);
+        void MarkPipelineAsFailed(Pipeline failedPipeline);
     }
 }

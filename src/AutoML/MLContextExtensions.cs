@@ -12,7 +12,7 @@ namespace Microsoft.ML.PipelineInference2
     public class AutoMLResult
     {
         public ITransformer BestModel;
-        public IEnumerable<PipelinePattern> AllPipelines;
+        public IEnumerable<Auto.ObjectModel.Pipeline> AllPipelines;
     }
 
     public static class MLContextExtensions
@@ -52,21 +52,19 @@ namespace Microsoft.ML.PipelineInference2
 
             var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, rocketEngine, task,
                    maxIterations, trainData, validationData);
-            var pipelineResults = auotFitter.InferPipelines(1, 1, 100);
+            var (pipelineResults, bestModel) = auotFitter.InferPipelines(1, 1, 100);
 
             var bestPipeline = pipelineResults.First();
-            // hack: retrain on best iteration
-            var model = bestPipeline.TrainTransformer(trainData);
 
             if (preprocessorTransform != null)
             {
                 // prepend preprocessors to AutoML model before returning
-                model = preprocessorTransform.Append(model);
+                bestModel = preprocessorTransform.Append(bestModel);
             }
 
             return new AutoMLResult()
             {
-                BestModel = model,
+                BestModel = bestModel,
                 AllPipelines = pipelineResults
             };
         }
