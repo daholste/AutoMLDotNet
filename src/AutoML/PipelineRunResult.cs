@@ -4,7 +4,7 @@
 
 using Microsoft.ML.Core.Data;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     internal class PipelineRunResult
     {

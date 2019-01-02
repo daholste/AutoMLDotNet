@@ -11,11 +11,11 @@ using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Training;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Runtime.Internal.Calibration;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Transforms.Normalizers;
-using static Microsoft.ML.PipelineInference2.TransformInference.ColumnRoutingStructure;
+using static Microsoft.ML.Auto.TransformInference.ColumnRoutingStructure;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// A runnable pipeline. Contains a learner and set of transforms,

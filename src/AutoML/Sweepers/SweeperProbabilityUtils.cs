@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.ML.Runtime.Internal.CpuMath;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public sealed class SweeperProbabilityUtils
     {

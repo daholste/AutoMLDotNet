@@ -6,11 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Automatic inference of column purposes for the data view.

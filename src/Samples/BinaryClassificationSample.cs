@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.ML;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.Data;
 
 namespace Samples

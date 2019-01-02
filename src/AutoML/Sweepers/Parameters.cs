@@ -14,7 +14,7 @@ using Microsoft.ML.Runtime.CommandLine;
 using Microsoft.ML.Runtime.Internal.Utilities;
 using Microsoft.ML.Runtime.Sweeper;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public delegate void SignatureSweeperParameter();
 

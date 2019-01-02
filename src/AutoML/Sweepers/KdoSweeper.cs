@@ -14,7 +14,7 @@ using Microsoft.ML.Trainers.FastTree.Internal;
 using Microsoft.ML.Runtime.Internal.Utilities;
 using Microsoft.ML.Runtime.Sweeper.Algorithms;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Kernel Density Optimization (KDO) is a sequential model-based optimization method originally developed by George D. Montanez (me).
@@ -261,7 +261,7 @@ public sealed class KdoSweeper : ISweeper
                             const double epsCutoff = 1e-10;
                             double eps = Math.Min(Math.Max(child[index], epsCutoff), 1 - epsCutoff);
                             double beta = alpha / eps - alpha;
-                            child[index] = (Float)PipelineInference2.Stats.SampleFromBeta(alpha, beta);
+                            child[index] = (Float)Stats.SampleFromBeta(alpha, beta);
                         }
                     }
                 }

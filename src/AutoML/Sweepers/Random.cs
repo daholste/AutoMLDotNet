@@ -6,7 +6,7 @@ using System.Linq;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Sweeper;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Random sweeper, it generates random values for each of the parameters.

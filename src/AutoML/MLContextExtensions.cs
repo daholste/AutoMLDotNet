@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.ML.Runtime;
 using System.Linq;
-using static Microsoft.ML.PipelineInference2.AutoInference;
+using static Microsoft.ML.Auto.AutoFitter;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public class AutoMLResult
     {
@@ -49,7 +49,7 @@ namespace Microsoft.ML.PipelineInference2
             var optimizingMetricfInfo = new OptimizingMetricInfo(OptimizingMetric.Accuracy);
             var terminator = new IterationBasedTerminator(maxIterations);
 
-            var auotFitter = new AutoInference(mlContext, optimizingMetricfInfo, terminator, task,
+            var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
                    maxIterations, trainData, validationData);
             var (pipelineResults, models, bestModel) = auotFitter.InferPipelines(1, 1, 100);
 

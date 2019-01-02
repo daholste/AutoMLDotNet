@@ -13,7 +13,7 @@ using Microsoft.ML.Trainers.SymSgd;
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
 

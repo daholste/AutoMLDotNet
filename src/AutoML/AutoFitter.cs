@@ -11,9 +11,9 @@ using System.Text;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Core.Data;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    internal class AutoInference
+    internal class AutoFitter
     {
         private readonly IList<PipelineRunResult> _history;
         private readonly int _targetMaxNumIterations;
@@ -24,7 +24,7 @@ namespace Microsoft.ML.PipelineInference2
         private readonly TaskKind _task;
         private readonly IDataView _validationData;
 
-        public AutoInference(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
+        public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
             TaskKind task, int targetMaxNumIterations,
             IDataView trainData, IDataView validationData)
         {

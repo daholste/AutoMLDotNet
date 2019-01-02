@@ -4,7 +4,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Interface that defines what an AutoML engine looks like

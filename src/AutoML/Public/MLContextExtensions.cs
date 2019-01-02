@@ -1,5 +1,5 @@
 ﻿using Microsoft.ML.Core.Data;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Data;
 using System;

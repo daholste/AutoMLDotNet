@@ -7,7 +7,7 @@ using Microsoft.ML.Auto.ObjectModel;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Training;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
 

@@ -4,7 +4,7 @@
 
 using System.Linq;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public enum OptimizingMetric
     {

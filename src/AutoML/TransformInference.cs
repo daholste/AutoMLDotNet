@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.CommandLine;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.EntryPoints;
@@ -16,9 +16,9 @@ using Microsoft.ML.Transforms;
 using Microsoft.ML.Transforms.Categorical;
 using Microsoft.ML.Transforms.Conversions;
 using Microsoft.ML.Transforms.Text;
-using static Microsoft.ML.PipelineInference2.TransformInference;
+using static Microsoft.ML.Auto.TransformInference;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public class SuggestedTransform
     {
@@ -181,7 +181,7 @@ namespace Microsoft.ML.PipelineInference2
                     while (cursor.MoveNext())
                     {
                         getter(ref value);
-                        if (PipelineInference2.VBufferUtils.HasNaNs(value))
+                        if (VBufferUtils.HasNaNs(value))
                             return true;
                     }
                     return false;

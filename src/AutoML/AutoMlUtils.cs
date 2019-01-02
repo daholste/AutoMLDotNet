@@ -9,7 +9,7 @@ using System.Reflection;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Data;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     internal static class AutoMlUtils
     {

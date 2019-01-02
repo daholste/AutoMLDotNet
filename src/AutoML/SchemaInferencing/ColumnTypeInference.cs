@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// This class incapsulates logic for automatic inference of column types for the text file.

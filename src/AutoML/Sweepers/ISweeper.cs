@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Signature for the loaders of sweepers.
