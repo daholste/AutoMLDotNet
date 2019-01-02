@@ -18,7 +18,7 @@ namespace Samples
             var mlContext = new MLContext();
 
             // auto-infer text loader args
-            var textLoaderArgs = RecipeInference.MyAutoMlInferTextLoaderArguments(mlContext, trainDataPath, "Label");
+            var textLoaderArgs = TmpSchemaApi.InferTextLoaderArguments(mlContext, trainDataPath, "Label");
 
             // load data from disk
             var textLoader = new TextLoader(mlContext, textLoaderArgs);

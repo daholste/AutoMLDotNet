@@ -992,7 +992,6 @@ namespace Microsoft.ML.Auto
             //using (var rootCh = h.Start("InferConcatNumericFeatures"))
             //{
             var list = new List<SuggestedTransform>();
-            int atomicGroupId = 0;
             var expert = new Experts.FeaturesColumnConcatRenameNumericOnly();
 
             //using (var ch = h.Start(expert.GetType().ToString()))

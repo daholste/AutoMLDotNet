@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Training;
 
 namespace Microsoft.ML.Auto
@@ -96,22 +95,6 @@ namespace Microsoft.ML.Auto
 
     internal static class RecipeInference
     {
-        public static TextLoader.Arguments MyAutoMlInferTextLoaderArguments(MLContext env,
-            string dataFile, string labelColName)
-        {
-            var sample = TextFileSample.CreateFromFullFile(dataFile);
-            var splitResult = TextFileContents.TrySplitColumns(sample, TextFileContents.DefaultSeparators);
-            var columnPurposes = InferenceUtils.InferColumnPurposes(env, sample, splitResult, out var hasHeader, labelColName);
-            return new TextLoader.Arguments
-            {
-                Column = ColumnGroupingInference.GenerateLoaderColumns(columnPurposes),
-                HasHeader = true,
-                Separator = splitResult.Separator,
-                AllowSparse = splitResult.AllowSparse,
-                AllowQuoting = splitResult.AllowQuote
-            };
-        }
-
         /// <summary>
         /// Given a predictor type & target max num of iterations, return a set of all permissible trainers (with their sweeper params, if defined).
         /// </summary>

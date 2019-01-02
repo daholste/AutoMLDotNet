@@ -10,9 +10,6 @@ using Microsoft.ML.Runtime.EntryPoints;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Training;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.Runtime.Internal.Calibration;
-using Microsoft.ML.Auto;
-using Microsoft.ML.Transforms.Normalizers;
 using static Microsoft.ML.Auto.TransformInference.ColumnRoutingStructure;
 
 namespace Microsoft.ML.Auto
