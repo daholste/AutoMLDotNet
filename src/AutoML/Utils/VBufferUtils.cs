@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Microsoft.ML.Auto
 {
-    public class VBufferUtils
+    internal class VBufferUtils
     {
         public static bool HasNaNs(in VBuffer<Single> buffer)
         {

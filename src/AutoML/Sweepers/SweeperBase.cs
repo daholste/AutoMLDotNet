@@ -20,9 +20,9 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// Base sweeper that ensures the suggestions are different from each other and from the previous runs.
     /// </summary>
-    public abstract class SweeperBase : ISweeper
+    internal abstract class SweeperBase : ISweeper
     {
-        public class ArgumentsBase
+        internal class ArgumentsBase
         {
             //[Argument(ArgumentType.Multiple, HelpText = "Swept parameters", ShortName = "p", SignatureType = typeof(SignatureSweeperParameter))]
             public IValueGenerator[] SweptParameters;

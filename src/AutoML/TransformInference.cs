@@ -20,7 +20,7 @@ using static Microsoft.ML.Auto.TransformInference;
 
 namespace Microsoft.ML.Auto
 {
-    public class SuggestedTransform
+    internal class SuggestedTransform
     {
         public readonly IEstimator<ITransformer> Estimator;
         public readonly IDictionary<string, string> Properties;
@@ -93,7 +93,7 @@ namespace Microsoft.ML.Auto
     /// this information is lazily calculated by the column object, not the expert itself, to allow the reuse
     /// of the same information by another expert.
     /// </summary>
-    public static class TransformInference
+    internal static class TransformInference
     {
         public sealed class Arguments
         {
@@ -124,7 +124,7 @@ namespace Microsoft.ML.Auto
             }
         }
 
-        public class IntermediateColumn
+        internal class IntermediateColumn
         {
             private readonly IDataView _data;
             private readonly int _columnId;
@@ -788,7 +788,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public class FeaturesColumnConcatRename : TransformInferenceExpertBase
+            internal class FeaturesColumnConcatRename : TransformInferenceExpertBase
             {
                 public virtual bool IgnoreColumn(ColumnPurpose purpose)
                 {

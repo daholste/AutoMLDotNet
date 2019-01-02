@@ -10,7 +10,7 @@ using Microsoft.ML.Runtime.Training;
 
 namespace Microsoft.ML.Auto
 {
-    public class SuggestedTrainer
+    internal class SuggestedTrainer
     {
         public IEnumerable<SweepableParam> SweepParams { get; }
         public string TrainerName { get; }

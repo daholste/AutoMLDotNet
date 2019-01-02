@@ -24,7 +24,7 @@ namespace Microsoft.ML.Auto
         public string Name;
     }
 
-    public abstract class NumericParamArguments : BaseParamArguments
+    internal abstract class NumericParamArguments : BaseParamArguments
     {
         //[Argument(ArgumentType.LastOccurenceWins, HelpText = "Number of steps for grid runthrough.", ShortName = "steps")]
         public int NumSteps = 100;
@@ -36,7 +36,7 @@ namespace Microsoft.ML.Auto
         public bool LogBase = false;
     }
 
-    public class FloatParamArguments : NumericParamArguments
+    internal class FloatParamArguments : NumericParamArguments
     {
         //[Argument(ArgumentType.Required, HelpText = "Minimum value")]
         public Float Min;
@@ -45,7 +45,7 @@ namespace Microsoft.ML.Auto
         public Float Max;
     }
 
-    public class LongParamArguments : NumericParamArguments
+    internal class LongParamArguments : NumericParamArguments
     {
         //[Argument(ArgumentType.Required, HelpText = "Minimum value")]
         public long Min;
@@ -54,7 +54,7 @@ namespace Microsoft.ML.Auto
         public long Max;
     }
 
-    public class DiscreteParamArguments : BaseParamArguments
+    internal class DiscreteParamArguments : BaseParamArguments
     {
         //[Argument(ArgumentType.Multiple, HelpText = "Values", ShortName = "v")]
         public string[] Values = null;
@@ -203,7 +203,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// The integer type parameter sweep.
     /// </summary>
-    public class LongValueGenerator : INumericValueGenerator
+    internal class LongValueGenerator : INumericValueGenerator
     {
         private readonly LongParamArguments _args;
         private IParameterValue[] _gridValues;
@@ -330,7 +330,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// The floating point type parameter sweep.
     /// </summary>
-    public class FloatValueGenerator : INumericValueGenerator
+    internal class FloatValueGenerator : INumericValueGenerator
     {
         private readonly FloatParamArguments _args;
         private IParameterValue[] _gridValues;
@@ -449,7 +449,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// The discrete parameter sweep.
     /// </summary>
-    public class DiscreteValueGenerator : IValueGenerator
+    internal class DiscreteValueGenerator : IValueGenerator
     {
         private readonly DiscreteParamArguments _args;
 
