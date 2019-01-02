@@ -5,13 +5,47 @@ using Microsoft.ML.Runtime.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using Pipeline = Microsoft.ML.Auto.ObjectModel.Pipeline;
+using Microsoft.ML;
+using Microsoft.ML.Data;
 
 namespace AutoML.Public
 {
     public static class PipelineSuggester
     {
-        public static Microsoft.ML.Auto.ObjectModel.Pipeline[] GetNextPipeLines(RunHistory history)
+        public static Pipeline[] GetNextPipeLines(RunHistory history)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Pipeline GetFirstPipeLine()
+        {
+            throw new NotImplementedException();
+        }
+    }
+    
+    public static class RegressionExtensions
+    {
+        public static (RegressionMetrics metrics, ITransformer model, IDataView scoredValidationData)[] AutoFit(this BinaryClassificationContext context,
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public static class BinaryClassificationExtensions
+    {
+        public static (BinaryClassificationMetrics metrics, ITransformer model, IDataView scoredValidationData)[] AutoFit(this BinaryClassificationContext context,
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public static class MulticlassExtensions
+    {
+        public static (MultiClassClassifierMetrics metrics, ITransformer model, IDataView scoredValidationData)[] AutoFit(this BinaryClassificationContext context,
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
         {
             throw new NotImplementedException();
         }
@@ -60,9 +94,7 @@ namespace AutoML.Public
         {
             throw new NotImplementedException();
         }
-
-
-
+        
         public enum MachineLearningTaskType
         {
             Regression,
@@ -75,4 +107,32 @@ namespace AutoML.Public
     {
 
     }
+
+    public interface IExperimentTerminator
+    {
+        bool ShouldTerminte();
+    }
+
+    public class CountBasedTerminator : IExperimentTerminator
+    {
+        public bool ShouldTerminte()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TimeBasedTerminator : IExperimentTerminator
+    {
+        public bool ShouldTerminte()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class AutoFitSettings
+    {
+        public IEnumerable<IExperimentTerminator> ExperimentTerminators;
+    }
+
+    
 }
