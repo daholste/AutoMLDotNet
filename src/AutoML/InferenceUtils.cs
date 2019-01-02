@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     internal static class InferenceUtils
     {
@@ -72,7 +72,7 @@ namespace Microsoft.ML.PipelineInference2
     }
 
     // REVIEW: Should this also have the base type (ITrainer<...>)?
-    public sealed class PredictorCategory
+    internal sealed class PredictorCategory
     {
         public readonly string Name;
         public readonly Type Signature;

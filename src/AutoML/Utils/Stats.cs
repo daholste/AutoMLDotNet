@@ -7,9 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public static class Stats
+    internal static class Stats
     {
         /// <summary>
         /// Generates a beta-distributed random variable

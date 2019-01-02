@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.CommandLine;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.EntryPoints;
@@ -16,11 +16,11 @@ using Microsoft.ML.Transforms;
 using Microsoft.ML.Transforms.Categorical;
 using Microsoft.ML.Transforms.Conversions;
 using Microsoft.ML.Transforms.Text;
-using static Microsoft.ML.PipelineInference2.TransformInference;
+using static Microsoft.ML.Auto.TransformInference;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public class SuggestedTransform
+    internal class SuggestedTransform
     {
         public readonly IEstimator<ITransformer> Estimator;
         public readonly IDictionary<string, string> Properties;
@@ -93,9 +93,9 @@ namespace Microsoft.ML.PipelineInference2
     /// this information is lazily calculated by the column object, not the expert itself, to allow the reuse
     /// of the same information by another expert.
     /// </summary>
-    public static class TransformInference
+    internal static class TransformInference
     {
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             /// <summary>
             /// Relative size of the inspected data view vs. the 'real' data size.
@@ -124,7 +124,7 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        public class IntermediateColumn
+        internal class IntermediateColumn
         {
             private readonly IDataView _data;
             private readonly int _columnId;
@@ -181,7 +181,7 @@ namespace Microsoft.ML.PipelineInference2
                     while (cursor.MoveNext())
                     {
                         getter(ref value);
-                        if (PipelineInference2.VBufferUtils.HasNaNs(value))
+                        if (VBufferUtils.HasNaNs(value))
                             return true;
                     }
                     return false;
@@ -213,7 +213,7 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        public sealed class ColumnRoutingStructure : IEquatable<ColumnRoutingStructure>
+        internal sealed class ColumnRoutingStructure : IEquatable<ColumnRoutingStructure>
         {
             public struct AnnotatedName
             {
@@ -246,7 +246,7 @@ namespace Microsoft.ML.PipelineInference2
             }
         }
 
-        public interface ITransformInferenceExpert
+        internal interface ITransformInferenceExpert
         {
             bool IncludeFeaturesOverride { get; set; }
 
@@ -305,9 +305,9 @@ namespace Microsoft.ML.PipelineInference2
             yield return new Experts.TextUniGramTriGram();
         }
 
-        public static class Experts
+        internal static class Experts
         {
-            public sealed class AutoLabel : TransformInferenceExpertBase
+            internal sealed class AutoLabel : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -376,7 +376,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class GroupIdHashRename : TransformInferenceExpertBase
+            internal sealed class GroupIdHashRename : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -434,7 +434,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class LabelAdvisory : TransformInferenceExpertBase
+            internal sealed class LabelAdvisory : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -481,7 +481,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class Categorical : TransformInferenceExpertBase
+            internal sealed class Categorical : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -567,7 +567,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class Boolean : TransformInferenceExpertBase
+            internal sealed class Boolean : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -678,7 +678,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class Text : TransformInferenceExpertBase
+            internal sealed class Text : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -714,7 +714,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class TextUniGramTriGram : TransformInferenceExpertBase
+            internal sealed class TextUniGramTriGram : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -755,7 +755,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class NumericMissing : TransformInferenceExpertBase
+            internal sealed class NumericMissing : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -788,7 +788,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public class FeaturesColumnConcatRename : TransformInferenceExpertBase
+            internal class FeaturesColumnConcatRename : TransformInferenceExpertBase
             {
                 public virtual bool IgnoreColumn(ColumnPurpose purpose)
                 {
@@ -836,7 +836,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class FeaturesColumnConcatRenameIgnoreText : FeaturesColumnConcatRename, ITransformInferenceExpert
+            internal sealed class FeaturesColumnConcatRenameIgnoreText : FeaturesColumnConcatRename, ITransformInferenceExpert
             {
                 public override bool IgnoreColumn(ColumnPurpose purpose)
                 {
@@ -844,7 +844,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class FeaturesColumnConcatRenameNumericOnly : FeaturesColumnConcatRename, ITransformInferenceExpert
+            internal sealed class FeaturesColumnConcatRenameNumericOnly : FeaturesColumnConcatRename, ITransformInferenceExpert
             {
                 public override bool IgnoreColumn(ColumnPurpose purpose)
                 {
@@ -852,7 +852,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class NameColumnConcatRename : TransformInferenceExpertBase
+            internal sealed class NameColumnConcatRename : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {

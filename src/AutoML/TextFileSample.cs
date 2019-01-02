@@ -9,12 +9,12 @@ using System.Linq;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// This class holds an in-memory sample of the text file, and serves as an <see cref="IMultiStreamSource"/> proxy to it.
     /// </summary>
-    public sealed class TextFileSample : IMultiStreamSource
+    internal sealed class TextFileSample : IMultiStreamSource
     {
         // REVIEW: consider including multiple files via IMultiStreamSource.
 

@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.ML.Runtime;
 using System.Linq;
-using static Microsoft.ML.PipelineInference2.AutoInference;
+using static Microsoft.ML.Auto.AutoFitter;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public class AutoMLResult
     {
@@ -20,19 +20,19 @@ namespace Microsoft.ML.PipelineInference2
         public static AutoMLResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor = null)
         {
-            return AutoFit(trainData, validationData, maxIterations, preprocessor, MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer,
+            return AutoFit(trainData, validationData, maxIterations, preprocessor, TaskKind.BinaryClassification,
                 OptimizingMetric.Accuracy);
         }
 
         public static AutoMLResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor = null)
         {
-            return AutoFit(trainData, validationData, maxIterations, preprocessor, MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer,
+            return AutoFit(trainData, validationData, maxIterations, preprocessor, TaskKind.MulticlassClassification,
                 OptimizingMetric.Accuracy);
         }
 
         public static AutoMLResult AutoFit(IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor,
-            MacroUtils.TrainerKinds task, OptimizingMetric metric)
+            TaskKind task, OptimizingMetric metric)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
@@ -47,12 +47,11 @@ namespace Microsoft.ML.PipelineInference2
             }
 
             var optimizingMetricfInfo = new OptimizingMetricInfo(OptimizingMetric.Accuracy);
-            var rocketEngine = new RocketPipelineSuggester(mlContext, optimizingMetricfInfo.IsMaximizing);
             var terminator = new IterationBasedTerminator(maxIterations);
 
-            var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, rocketEngine, task,
+            var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
                    maxIterations, trainData, validationData);
-            var (pipelineResults, bestModel) = auotFitter.InferPipelines(1, 1, 100);
+            var (pipelineResults, models, bestModel) = auotFitter.InferPipelines(1, 1, 100);
 
             var bestPipeline = pipelineResults.First();
 

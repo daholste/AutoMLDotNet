@@ -11,7 +11,7 @@ using Microsoft.ML.Trainers.FastTree;
 using Microsoft.ML.Trainers.HalLearners;
 using Microsoft.ML.Trainers.Online;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
 

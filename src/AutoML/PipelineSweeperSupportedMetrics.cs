@@ -4,7 +4,7 @@
 
 using System.Linq;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public enum OptimizingMetric
     {
@@ -39,7 +39,7 @@ namespace Microsoft.ML.PipelineInference2
         Dbi
     };
 
-    public sealed class OptimizingMetricInfo
+    internal sealed class OptimizingMetricInfo
     {
         public string Name { get; }
         public bool IsMaximizing { get; }

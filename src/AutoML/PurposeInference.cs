@@ -6,19 +6,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Automatic inference of column purposes for the data view.
     /// This is used in the context of text import wizard, but can be used outside as well.
     /// </summary>
-    public static class PurposeInference
+    internal static class PurposeInference
     {
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             public int MaxRowsToRead;
 
@@ -129,7 +129,7 @@ namespace Microsoft.ML.PipelineInference2
 
         private static class Experts
         {
-            public sealed class HeaderComprehension : IPurposeInferenceExpert
+            internal sealed class HeaderComprehension : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -160,7 +160,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class TextClassification : IPurposeInferenceExpert
+            internal sealed class TextClassification : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -214,7 +214,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class FirstNumericOrBooleanIsLabel : IPurposeInferenceExpert
+            internal sealed class FirstNumericOrBooleanIsLabel : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -232,7 +232,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class NumericAreFeatures : IPurposeInferenceExpert
+            internal sealed class NumericAreFeatures : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -246,7 +246,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class BooleanProcessing : IPurposeInferenceExpert
+            internal sealed class BooleanProcessing : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -260,7 +260,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class TextArraysAreText : IPurposeInferenceExpert
+            internal sealed class TextArraysAreText : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -274,7 +274,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class IgnoreEverythingElse : IPurposeInferenceExpert
+            internal sealed class IgnoreEverythingElse : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {

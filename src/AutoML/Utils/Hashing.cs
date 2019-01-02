@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public static class Hashing
+    internal static class Hashing
     {
         public static uint CombineHash(uint u1, uint u2)
         {

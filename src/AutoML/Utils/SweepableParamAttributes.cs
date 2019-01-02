@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Used to indicate suggested sweep ranges for parameter sweeping.
@@ -44,7 +44,7 @@ namespace Microsoft.ML.PipelineInference2
         public abstract SweepableParam Clone();
     }
 
-    public sealed class SweepableDiscreteParam : SweepableParam
+    internal sealed class SweepableDiscreteParam : SweepableParam
     {
         public object[] Options { get; }
 
@@ -126,7 +126,7 @@ namespace Microsoft.ML.PipelineInference2
         public override IComparable ProcessedValue() => (IComparable)Options[(int)RawValue];
     }
 
-    public sealed class SweepableFloatParam : SweepableParam
+    internal sealed class SweepableFloatParam : SweepableParam
     {
         public float Min { get; }
         public float Max { get; }
@@ -173,7 +173,7 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public sealed class SweepableLongParam : SweepableParam
+    internal sealed class SweepableLongParam : SweepableParam
     {
         public long Min { get; }
         public long Max { get; }

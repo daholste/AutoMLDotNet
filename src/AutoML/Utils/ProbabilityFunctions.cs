@@ -6,9 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public static class ProbabilityFunctions
+    internal static class ProbabilityFunctions
     {
         /// <summary>
         /// The approximate error function.

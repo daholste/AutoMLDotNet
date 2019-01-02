@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Internal.Utilities;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// This class incapsulates logic for automatic inference of column types for the text file.
@@ -22,7 +22,7 @@ namespace Microsoft.ML.PipelineInference2
         // or have a 'dumb' inference that would quickly figure everything out.
         private const int SmartColumnsLim = 10000;
 
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             public string Separator;
             public bool AllowSparse;
@@ -123,7 +123,7 @@ namespace Microsoft.ML.PipelineInference2
         /// </summary>
         private static class Experts
         {
-            public sealed class BooleanValues : ITypeInferenceExpert
+            internal sealed class BooleanValues : ITypeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -148,7 +148,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class AllNumericValues : ITypeInferenceExpert
+            internal sealed class AllNumericValues : ITypeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -173,7 +173,7 @@ namespace Microsoft.ML.PipelineInference2
                 }
             }
 
-            public sealed class EverythingText : ITypeInferenceExpert
+            internal sealed class EverythingText : ITypeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {

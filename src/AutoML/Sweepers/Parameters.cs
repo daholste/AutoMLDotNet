@@ -14,7 +14,7 @@ using Microsoft.ML.Runtime.CommandLine;
 using Microsoft.ML.Runtime.Internal.Utilities;
 using Microsoft.ML.Runtime.Sweeper;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public delegate void SignatureSweeperParameter();
 
@@ -24,7 +24,7 @@ namespace Microsoft.ML.PipelineInference2
         public string Name;
     }
 
-    public abstract class NumericParamArguments : BaseParamArguments
+    internal abstract class NumericParamArguments : BaseParamArguments
     {
         //[Argument(ArgumentType.LastOccurenceWins, HelpText = "Number of steps for grid runthrough.", ShortName = "steps")]
         public int NumSteps = 100;
@@ -36,7 +36,7 @@ namespace Microsoft.ML.PipelineInference2
         public bool LogBase = false;
     }
 
-    public class FloatParamArguments : NumericParamArguments
+    internal class FloatParamArguments : NumericParamArguments
     {
         //[Argument(ArgumentType.Required, HelpText = "Minimum value")]
         public Float Min;
@@ -45,7 +45,7 @@ namespace Microsoft.ML.PipelineInference2
         public Float Max;
     }
 
-    public class LongParamArguments : NumericParamArguments
+    internal class LongParamArguments : NumericParamArguments
     {
         //[Argument(ArgumentType.Required, HelpText = "Minimum value")]
         public long Min;
@@ -54,13 +54,13 @@ namespace Microsoft.ML.PipelineInference2
         public long Max;
     }
 
-    public class DiscreteParamArguments : BaseParamArguments
+    internal class DiscreteParamArguments : BaseParamArguments
     {
         //[Argument(ArgumentType.Multiple, HelpText = "Values", ShortName = "v")]
         public string[] Values = null;
     }
 
-    public sealed class LongParameterValue : IParameterValue<long>
+    internal sealed class LongParameterValue : IParameterValue<long>
     {
         private readonly string _name;
         private readonly string _valueText;
@@ -105,7 +105,7 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public sealed class FloatParameterValue : IParameterValue<Float>
+    internal sealed class FloatParameterValue : IParameterValue<Float>
     {
         private readonly string _name;
         private readonly string _valueText;
@@ -151,7 +151,7 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public sealed class StringParameterValue : IParameterValue<string>
+    internal sealed class StringParameterValue : IParameterValue<string>
     {
         private readonly string _name;
         private readonly string _value;
@@ -194,7 +194,7 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public interface INumericValueGenerator : IValueGenerator
+    internal interface INumericValueGenerator : IValueGenerator
     {
         Float NormalizeValue(IParameterValue value);
         bool InRange(IParameterValue value);
@@ -203,7 +203,7 @@ namespace Microsoft.ML.PipelineInference2
     /// <summary>
     /// The integer type parameter sweep.
     /// </summary>
-    public class LongValueGenerator : INumericValueGenerator
+    internal class LongValueGenerator : INumericValueGenerator
     {
         private readonly LongParamArguments _args;
         private IParameterValue[] _gridValues;
@@ -330,7 +330,7 @@ namespace Microsoft.ML.PipelineInference2
     /// <summary>
     /// The floating point type parameter sweep.
     /// </summary>
-    public class FloatValueGenerator : INumericValueGenerator
+    internal class FloatValueGenerator : INumericValueGenerator
     {
         private readonly FloatParamArguments _args;
         private IParameterValue[] _gridValues;
@@ -449,7 +449,7 @@ namespace Microsoft.ML.PipelineInference2
     /// <summary>
     /// The discrete parameter sweep.
     /// </summary>
-    public class DiscreteValueGenerator : IValueGenerator
+    internal class DiscreteValueGenerator : IValueGenerator
     {
         private readonly DiscreteParamArguments _args;
 

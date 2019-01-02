@@ -4,12 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public static class MyGlobals
+    internal static class MyGlobals
     {
         public static string OutputDir = ".";
-        public static ISet<string> FailedPipelineHashes = new HashSet<string>();
-        public static Stopwatch Stopwatch = Stopwatch.StartNew();
     }
 }

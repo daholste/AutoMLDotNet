@@ -7,9 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public class VBufferUtils
+    internal class VBufferUtils
     {
         public static bool HasNaNs(in VBuffer<Single> buffer)
         {

@@ -8,24 +8,24 @@ using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Training;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public class SuggestedTrainer
+    internal class SuggestedTrainer
     {
         public IEnumerable<SweepableParam> SweepParams { get; }
         public string TrainerName { get; }
         public ParameterSet HyperParamSet { get; set; }
 
         private readonly MLContext _mlContext;
-        private readonly ITrainerExtension _learnerCatalogItem;
+        private readonly ITrainerExtension _trainerExtension;
 
-        internal SuggestedTrainer(MLContext mlContext, ITrainerExtension learnerCatalogItem,
+        internal SuggestedTrainer(MLContext mlContext, ITrainerExtension trainerExtension,
             ParameterSet hyperParamSet = null)
         {
             _mlContext = mlContext;
-            _learnerCatalogItem = learnerCatalogItem;
-            SweepParams = _learnerCatalogItem.GetHyperparamSweepRanges();
-            TrainerName = _learnerCatalogItem.GetTrainerName().ToString();
+            _trainerExtension = trainerExtension;
+            SweepParams = _trainerExtension.GetHyperparamSweepRanges();
+            TrainerName = _trainerExtension.GetTrainerName().ToString();
             SetHyperparamValues(hyperParamSet);
         }
 
@@ -37,7 +37,7 @@ namespace Microsoft.ML.PipelineInference2
 
         public SuggestedTrainer Clone()
         {
-            return new SuggestedTrainer(_mlContext, _learnerCatalogItem, HyperParamSet?.Clone());
+            return new SuggestedTrainer(_mlContext, _trainerExtension, HyperParamSet?.Clone());
         }
 
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> BuildTrainer(MLContext env)
@@ -47,7 +47,7 @@ namespace Microsoft.ML.PipelineInference2
             {
                 sweepParams = SweepParams;
             }
-            return _learnerCatalogItem.CreateInstance(_mlContext, sweepParams);
+            return _trainerExtension.CreateInstance(_mlContext, sweepParams);
         }
 
         public override string ToString()
@@ -94,7 +94,7 @@ namespace Microsoft.ML.PipelineInference2
         }
     }
 
-    public static class RecipeInference
+    internal static class RecipeInference
     {
         public static TextLoader.Arguments MyAutoMlInferTextLoaderArguments(MLContext env,
             string dataFile, string labelColName)
@@ -113,21 +113,21 @@ namespace Microsoft.ML.PipelineInference2
         }
 
         /// <summary>
-        /// Given a predictor type returns a set of all permissible learners (with their sweeper params, if defined).
+        /// Given a predictor type & target max num of iterations, return a set of all permissible trainers (with their sweeper params, if defined).
         /// </summary>
         /// <returns>Array of viable learners.</returns>
-        public static IEnumerable<SuggestedTrainer> AllowedLearners(MLContext mlContext, MacroUtils.TrainerKinds task,
+        public static IEnumerable<SuggestedTrainer> AllowedTrainers(MLContext mlContext, TaskKind task,
             int maxNumIterations)
         {
-            var learnerCatalogItems = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);
+            var trainerExtensions = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);
 
-            var learners = new List<SuggestedTrainer>();
-            foreach (var learnerCatalogItem in learnerCatalogItems)
+            var trainers = new List<SuggestedTrainer>();
+            foreach (var trainerExtension in trainerExtensions)
             {
-                var learner = new SuggestedTrainer(mlContext, learnerCatalogItem);
-                learners.Add(learner);
+                var learner = new SuggestedTrainer(mlContext, trainerExtension);
+                trainers.Add(learner);
             }
-            return learners.ToArray();
+            return trainers.ToArray();
         }
     }
 }

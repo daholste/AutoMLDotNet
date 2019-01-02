@@ -8,9 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
-    public static class DataViewUtils
+    internal static class DataViewUtils
     {
         /// <summary>
         /// Generate a unique temporary column name for the given schema.

@@ -2,7 +2,7 @@
 using System.IO;
 using Microsoft.ML;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.PipelineInference2;
+using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.Data;
 
 namespace Samples
@@ -18,7 +18,7 @@ namespace Samples
             var mlContext = new MLContext();
 
             // auto-infer text loader args
-            var textLoaderArgs = RecipeInference.MyAutoMlInferTextLoaderArguments(mlContext, trainDataPath, "Label");
+            //var textLoaderArgs = RecipeInference.MyAutoMlInferTextLoaderArguments(mlContext, trainDataPath, "Label");
 
             // load data
             var textLoader = new TextLoader(mlContext,
@@ -74,7 +74,7 @@ namespace Samples
 
             // run AutoML & train model
             var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
-            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 10, preprocessor);
+            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 14, preprocessor);
             // get best AutoML model
             var model = autoMlResult.BestModel;
             // print all AutoML pipelines

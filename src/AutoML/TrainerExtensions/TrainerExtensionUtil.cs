@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     public enum TrainerName
     {
@@ -40,7 +40,7 @@ namespace Microsoft.ML.PipelineInference2
         SymSgdOva
     }
 
-    public static class TrainerExtensionUtil
+    internal static class TrainerExtensionUtil
     {
         public static Action<T> CreateArgsFunc<T>(IEnumerable<SweepableParam> sweepParams)
         {

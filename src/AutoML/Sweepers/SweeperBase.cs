@@ -10,19 +10,19 @@ using Microsoft.ML.Runtime.EntryPoints;
 using Microsoft.ML.Runtime.Internal.Utilities;
 using Microsoft.ML.Runtime.Sweeper;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Signature for the GUI loaders of sweepers.
     /// </summary>
-    public delegate void SignatureSweeperFromParameterList(IValueGenerator[] sweepParameters);
+    internal delegate void SignatureSweeperFromParameterList(IValueGenerator[] sweepParameters);
 
     /// <summary>
     /// Base sweeper that ensures the suggestions are different from each other and from the previous runs.
     /// </summary>
-    public abstract class SweeperBase : ISweeper
+    internal abstract class SweeperBase : ISweeper
     {
-        public class ArgumentsBase
+        internal class ArgumentsBase
         {
             //[Argument(ArgumentType.Multiple, HelpText = "Swept parameters", ShortName = "p", SignatureType = typeof(SignatureSweeperParameter))]
             public IValueGenerator[] SweptParameters;

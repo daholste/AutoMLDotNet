@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     using BL = Boolean;
     using R4 = Single;
@@ -14,7 +14,7 @@ namespace Microsoft.ML.PipelineInference2
     using U1 = Byte;
     using U8 = UInt64;
 
-    public static class Conversions
+    internal static class Conversions
     {
         /// <summary>
         /// This produces zero for empty. It returns false if the text is not parsable or overflows.

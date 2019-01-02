@@ -4,18 +4,14 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Interface that defines what an AutoML engine looks like
     /// </summary>
     internal interface IPipelineSuggester
     {
-        IEnumerable<Pipeline> GetNextPipelines(IEnumerable<Pipeline> history, int numberOfCandidates);
-
-        void UpdateTrainers(IEnumerable<SuggestedTrainer> availableLearners);
-
-        void UpdateTransforms(IEnumerable<SuggestedTransform> availableTransforms);
+        IEnumerable<Pipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int requestedBatchSize);
 
         void MarkPipelineAsFailed(Pipeline failedPipeline);
     }

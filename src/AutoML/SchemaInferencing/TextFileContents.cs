@@ -8,13 +8,13 @@ using System.Linq;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Runtime.Data.IO;
 
-namespace Microsoft.ML.PipelineInference2
+namespace Microsoft.ML.Auto
 {
     /// <summary>
     /// Utilities for various heuristics against text files.
     /// Currently, separator inference and column count detection.
     /// </summary>
-    public static class TextFileContents
+    internal static class TextFileContents
     {
         public readonly struct ColumnSplitResult
         {
