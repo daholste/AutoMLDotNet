@@ -71,7 +71,7 @@ namespace AutoML.Public
         }
     }
 
-    class RunHistory
+    public class RunHistory
     {
 
     }
