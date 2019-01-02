@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Microsoft.ML.Auto
 {
-    public static class Hashing
+    internal static class Hashing
     {
         public static uint CombineHash(uint u1, uint u2)
         {

@@ -22,7 +22,7 @@ namespace Microsoft.ML.Auto
         // or have a 'dumb' inference that would quickly figure everything out.
         private const int SmartColumnsLim = 10000;
 
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             public string Separator;
             public bool AllowSparse;
@@ -123,7 +123,7 @@ namespace Microsoft.ML.Auto
         /// </summary>
         private static class Experts
         {
-            public sealed class BooleanValues : ITypeInferenceExpert
+            internal sealed class BooleanValues : ITypeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -148,7 +148,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class AllNumericValues : ITypeInferenceExpert
+            internal sealed class AllNumericValues : ITypeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -173,7 +173,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class EverythingText : ITypeInferenceExpert
+            internal sealed class EverythingText : ITypeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {

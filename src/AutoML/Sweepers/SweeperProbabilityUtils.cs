@@ -12,7 +12,7 @@ using Microsoft.ML.Runtime.Internal.CpuMath;
 
 namespace Microsoft.ML.Auto
 {
-    public sealed class SweeperProbabilityUtils
+    internal sealed class SweeperProbabilityUtils
     {
         public SweeperProbabilityUtils()
         {

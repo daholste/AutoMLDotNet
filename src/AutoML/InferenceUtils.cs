@@ -72,7 +72,7 @@ namespace Microsoft.ML.Auto
     }
 
     // REVIEW: Should this also have the base type (ITrainer<...>)?
-    public sealed class PredictorCategory
+    internal sealed class PredictorCategory
     {
         public readonly string Name;
         public readonly Type Signature;

@@ -94,7 +94,7 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    public static class RecipeInference
+    internal static class RecipeInference
     {
         public static TextLoader.Arguments MyAutoMlInferTextLoaderArguments(MLContext env,
             string dataFile, string labelColName)

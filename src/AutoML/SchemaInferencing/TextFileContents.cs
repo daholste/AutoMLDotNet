@@ -14,7 +14,7 @@ namespace Microsoft.ML.Auto
     /// Utilities for various heuristics against text files.
     /// Currently, separator inference and column count detection.
     /// </summary>
-    public static class TextFileContents
+    internal static class TextFileContents
     {
         public readonly struct ColumnSplitResult
         {

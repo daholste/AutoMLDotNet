@@ -14,7 +14,7 @@ namespace Microsoft.ML.Auto
     using U1 = Byte;
     using U8 = UInt64;
 
-    public static class Conversions
+    internal static class Conversions
     {
         /// <summary>
         /// This produces zero for empty. It returns false if the text is not parsable or overflows.

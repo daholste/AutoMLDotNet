@@ -33,9 +33,9 @@ namespace Microsoft.ML.Auto
     /// taken independently.
     /// </summary>
 
-public sealed class KdoSweeper : ISweeper
+internal sealed class KdoSweeper : ISweeper
     {
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             //[Argument(ArgumentType.Multiple | ArgumentType.Required, HelpText = "Swept parameters", ShortName = "p", SignatureType = typeof(SignatureSweeperParameter))]
             public IValueGenerator[] SweptParameters;

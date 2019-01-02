@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Microsoft.ML.Auto
 {
-    public sealed class IterationBasedTerminator
+    internal sealed class IterationBasedTerminator
     {
         private readonly int _numTotalIterations;
 

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Microsoft.ML.Auto
 {
-    public static class ColumnTypeExtensions
+    internal static class ColumnTypeExtensions
     {
         public static bool IsNumber(this ColumnType columnType)
         {

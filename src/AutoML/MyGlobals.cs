@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Microsoft.ML.Auto
 {
-    public static class MyGlobals
+    internal static class MyGlobals
     {
         public static string OutputDir = ".";
     }

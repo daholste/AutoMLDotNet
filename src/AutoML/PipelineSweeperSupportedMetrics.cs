@@ -39,7 +39,7 @@ namespace Microsoft.ML.Auto
         Dbi
     };
 
-    public sealed class OptimizingMetricInfo
+    internal sealed class OptimizingMetricInfo
     {
         public string Name { get; }
         public bool IsMaximizing { get; }

@@ -11,7 +11,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// Random sweeper, it generates random values for each of the parameters.
     /// </summary>
-    public sealed class UniformRandomSweeper : SweeperBase
+    internal sealed class UniformRandomSweeper : SweeperBase
     {
         public UniformRandomSweeper(ArgumentsBase args)
             : base(args, "UniformRandom")

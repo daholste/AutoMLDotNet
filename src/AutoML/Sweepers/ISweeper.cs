@@ -30,7 +30,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// The main interface of the sweeper
     /// </summary>
-    public interface ISweeper
+    internal interface ISweeper
     {
         /// <summary>
         /// Returns between 0 and maxSweeps configurations to run.
@@ -44,7 +44,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// This is the interface that each type of parameter sweep needs to implement
     /// </summary>
-    public interface IValueGenerator
+    internal interface IValueGenerator
     {
         /// <summary>
         /// Given a value in the [0,1] range, return a value for this parameter.
@@ -67,7 +67,7 @@ namespace Microsoft.ML.Auto
         string Name { get; }
     }
 
-    public interface ISweepResultEvaluator<in TResults>
+    internal interface ISweepResultEvaluator<in TResults>
     {
         /// <summary>
         /// Return an IRunResult based on the results given as a TResults object.
@@ -82,7 +82,7 @@ namespace Microsoft.ML.Auto
     /// Implementations of this interface must also override object.GetHashCode() and object.Equals(object) so they are consistent
     /// with IEquatable.Equals(IParameterValue).
     /// </summary>
-    public interface IParameterValue : IEquatable<IParameterValue>
+    internal interface IParameterValue : IEquatable<IParameterValue>
     {
         string Name { get; }
         string ValueText { get; }
@@ -91,7 +91,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// Type safe version of the IParameterValue interface.
     /// </summary>
-    public interface IParameterValue<out TValue> : IParameterValue
+    internal interface IParameterValue<out TValue> : IParameterValue
     {
         TValue Value { get; }
     }
@@ -100,7 +100,7 @@ namespace Microsoft.ML.Auto
     /// A set of parameter values.
     /// The parameter set must be immutable.
     /// </summary>
-    public sealed class ParameterSet : IEquatable<ParameterSet>, IEnumerable<IParameterValue>
+    internal sealed class ParameterSet : IEquatable<ParameterSet>, IEnumerable<IParameterValue>
     {
         private readonly Dictionary<string, IParameterValue> _parameterValues;
         private readonly int _hash;
@@ -182,14 +182,14 @@ namespace Microsoft.ML.Auto
     /// Also contains the result of a run and the metric value that is used by smart sweepers to generate new configurations
     /// that try to maximize this metric.
     /// </summary>
-    public interface IRunResult : IComparable<IRunResult>
+    internal interface IRunResult : IComparable<IRunResult>
     {
         ParameterSet ParameterSet { get; }
         IComparable MetricValue { get; }
         bool IsMetricMaximizing { get; }
     }
 
-    public interface IRunResult<T> : IRunResult
+    internal interface IRunResult<T> : IRunResult
         where T : IComparable<T>
     {
         new T MetricValue { get; }
@@ -198,7 +198,7 @@ namespace Microsoft.ML.Auto
     /// <summary>
     /// Simple implementation of IRunResult
     /// </summary>
-    public sealed class RunResult : IRunResult<Double>
+    internal sealed class RunResult : IRunResult<Double>
     {
         private readonly ParameterSet _parameterSet;
         private readonly Double? _metricValue;
@@ -266,7 +266,7 @@ namespace Microsoft.ML.Auto
     /// just a simple view instead, and it is decoupled from RunResult so we can move
     /// in that direction in the future.
     /// </summary>
-    public sealed class RunMetric
+    internal sealed class RunMetric
     {
         private readonly Float _primaryMetric;
         private readonly Float[] _metricDistribution;

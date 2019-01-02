@@ -10,7 +10,7 @@ using System.Text;
 
 namespace Microsoft.ML.Auto
 {
-    public static class DataViewUtils
+    internal static class DataViewUtils
     {
         /// <summary>
         /// Generate a unique temporary column name for the given schema.

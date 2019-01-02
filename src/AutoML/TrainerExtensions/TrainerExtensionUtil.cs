@@ -40,7 +40,7 @@ namespace Microsoft.ML.Auto
         SymSgdOva
     }
 
-    public static class TrainerExtensionUtil
+    internal static class TrainerExtensionUtil
     {
         public static Action<T> CreateArgsFunc<T>(IEnumerable<SweepableParam> sweepParams)
         {

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Microsoft.ML.Auto
 {
-    public static class ProbabilityFunctions
+    internal static class ProbabilityFunctions
     {
         /// <summary>
         /// The approximate error function.

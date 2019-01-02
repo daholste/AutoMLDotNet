@@ -16,9 +16,9 @@ namespace Microsoft.ML.Auto
     /// Automatic inference of column purposes for the data view.
     /// This is used in the context of text import wizard, but can be used outside as well.
     /// </summary>
-    public static class PurposeInference
+    internal static class PurposeInference
     {
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             public int MaxRowsToRead;
 
@@ -129,7 +129,7 @@ namespace Microsoft.ML.Auto
 
         private static class Experts
         {
-            public sealed class HeaderComprehension : IPurposeInferenceExpert
+            internal sealed class HeaderComprehension : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -160,7 +160,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class TextClassification : IPurposeInferenceExpert
+            internal sealed class TextClassification : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -214,7 +214,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class FirstNumericOrBooleanIsLabel : IPurposeInferenceExpert
+            internal sealed class FirstNumericOrBooleanIsLabel : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -232,7 +232,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class NumericAreFeatures : IPurposeInferenceExpert
+            internal sealed class NumericAreFeatures : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -246,7 +246,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class BooleanProcessing : IPurposeInferenceExpert
+            internal sealed class BooleanProcessing : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -260,7 +260,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class TextArraysAreText : IPurposeInferenceExpert
+            internal sealed class TextArraysAreText : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {
@@ -274,7 +274,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class IgnoreEverythingElse : IPurposeInferenceExpert
+            internal sealed class IgnoreEverythingElse : IPurposeInferenceExpert
             {
                 public void Apply(IntermediateColumn[] columns)
                 {

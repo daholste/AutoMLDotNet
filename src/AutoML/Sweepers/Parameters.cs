@@ -60,7 +60,7 @@ namespace Microsoft.ML.Auto
         public string[] Values = null;
     }
 
-    public sealed class LongParameterValue : IParameterValue<long>
+    internal sealed class LongParameterValue : IParameterValue<long>
     {
         private readonly string _name;
         private readonly string _valueText;
@@ -105,7 +105,7 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    public sealed class FloatParameterValue : IParameterValue<Float>
+    internal sealed class FloatParameterValue : IParameterValue<Float>
     {
         private readonly string _name;
         private readonly string _valueText;
@@ -151,7 +151,7 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    public sealed class StringParameterValue : IParameterValue<string>
+    internal sealed class StringParameterValue : IParameterValue<string>
     {
         private readonly string _name;
         private readonly string _value;
@@ -194,7 +194,7 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    public interface INumericValueGenerator : IValueGenerator
+    internal interface INumericValueGenerator : IValueGenerator
     {
         Float NormalizeValue(IParameterValue value);
         bool InRange(IParameterValue value);

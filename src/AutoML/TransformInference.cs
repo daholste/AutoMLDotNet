@@ -95,7 +95,7 @@ namespace Microsoft.ML.Auto
     /// </summary>
     internal static class TransformInference
     {
-        public sealed class Arguments
+        internal sealed class Arguments
         {
             /// <summary>
             /// Relative size of the inspected data view vs. the 'real' data size.
@@ -213,7 +213,7 @@ namespace Microsoft.ML.Auto
             }
         }
 
-        public sealed class ColumnRoutingStructure : IEquatable<ColumnRoutingStructure>
+        internal sealed class ColumnRoutingStructure : IEquatable<ColumnRoutingStructure>
         {
             public struct AnnotatedName
             {
@@ -246,7 +246,7 @@ namespace Microsoft.ML.Auto
             }
         }
 
-        public interface ITransformInferenceExpert
+        internal interface ITransformInferenceExpert
         {
             bool IncludeFeaturesOverride { get; set; }
 
@@ -305,9 +305,9 @@ namespace Microsoft.ML.Auto
             yield return new Experts.TextUniGramTriGram();
         }
 
-        public static class Experts
+        internal static class Experts
         {
-            public sealed class AutoLabel : TransformInferenceExpertBase
+            internal sealed class AutoLabel : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -376,7 +376,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class GroupIdHashRename : TransformInferenceExpertBase
+            internal sealed class GroupIdHashRename : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -434,7 +434,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class LabelAdvisory : TransformInferenceExpertBase
+            internal sealed class LabelAdvisory : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -481,7 +481,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class Categorical : TransformInferenceExpertBase
+            internal sealed class Categorical : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -567,7 +567,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class Boolean : TransformInferenceExpertBase
+            internal sealed class Boolean : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -678,7 +678,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class Text : TransformInferenceExpertBase
+            internal sealed class Text : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -714,7 +714,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class TextUniGramTriGram : TransformInferenceExpertBase
+            internal sealed class TextUniGramTriGram : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -755,7 +755,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class NumericMissing : TransformInferenceExpertBase
+            internal sealed class NumericMissing : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {
@@ -836,7 +836,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class FeaturesColumnConcatRenameIgnoreText : FeaturesColumnConcatRename, ITransformInferenceExpert
+            internal sealed class FeaturesColumnConcatRenameIgnoreText : FeaturesColumnConcatRename, ITransformInferenceExpert
             {
                 public override bool IgnoreColumn(ColumnPurpose purpose)
                 {
@@ -844,7 +844,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class FeaturesColumnConcatRenameNumericOnly : FeaturesColumnConcatRename, ITransformInferenceExpert
+            internal sealed class FeaturesColumnConcatRenameNumericOnly : FeaturesColumnConcatRename, ITransformInferenceExpert
             {
                 public override bool IgnoreColumn(ColumnPurpose purpose)
                 {
@@ -852,7 +852,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            public sealed class NameColumnConcatRename : TransformInferenceExpertBase
+            internal sealed class NameColumnConcatRename : TransformInferenceExpertBase
             {
                 public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
                 {

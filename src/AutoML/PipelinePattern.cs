@@ -21,7 +21,7 @@ namespace Microsoft.ML.Auto
     /// A runnable pipeline. Contains a learner and set of transforms,
     /// along with a RunSummary if it has already been exectued.
     /// </summary>
-    public sealed class Pipeline
+    internal class Pipeline
     {
         private readonly MLContext _mlContext;
         public readonly IList<SuggestedTransform> Transforms;
