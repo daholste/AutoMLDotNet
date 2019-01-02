@@ -13,12 +13,12 @@ namespace AutoML.Public
 {
     public static class PipelineSuggester
     {
-        public static Pipeline[] GetNextPipeLines(RunHistory history)
+        public static Pipeline[] GetNextPipeLines(RunHistory history, IDataView testData)
         {
             throw new NotImplementedException();
         }
 
-        public static Pipeline GetFirstPipeLine()
+        public static Pipeline GetFirstPipeLine(IDataView dataView)
         {
             throw new NotImplementedException();
         }
