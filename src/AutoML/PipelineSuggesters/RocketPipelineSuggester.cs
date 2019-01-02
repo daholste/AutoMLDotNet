@@ -10,14 +10,15 @@ namespace Microsoft.ML.PipelineInference2
 {
     internal class RocketPipelineSuggester : PipelineSuggesterBase
     {
-        private const int TopKLearners = 1;
-        private const int SecondRoundTrialsPerLearner = 5;
+        private const int TopKTrainers = 2;
+        private const int SecondStageTrialsPerTrainer = 2;
 
-        private int _currentStage;
-        private int _remainingStageOneTrials;
-        private int _remainingStageTwoTrials;
-        private int _currentLearnerIndex;
         private readonly Dictionary<string, ISweeper> _hyperSweepers;
+        private readonly ISet<Pipeline> _visitedPipelines;
+
+        private int _currentTrainerIndex;
+        private int _currentStage;
+        private int _remainingTrialsInCurrStage;
 
         private enum Stage
         {
@@ -26,63 +27,58 @@ namespace Microsoft.ML.PipelineInference2
             Third
         }
 
-        public RocketPipelineSuggester(MLContext mlContext, bool isMaximizingMetric) : base(mlContext, isMaximizingMetric)
+        public RocketPipelineSuggester(MLContext mlContext, bool isMaximizingMetric, 
+            IEnumerable<SuggestedTrainer> availableTrainers, IEnumerable<SuggestedTransform> availableTransforms) 
+            : base(mlContext, isMaximizingMetric, availableTrainers, availableTransforms)
         {
             _currentStage = (int)Stage.First;
             _hyperSweepers = new Dictionary<string, ISweeper>();
+            _visitedPipelines = new HashSet<Pipeline>();
+            _remainingTrialsInCurrStage = availableTrainers.Count();
         }
 
-        public override void UpdateTrainers(IEnumerable<SuggestedTrainer> availableLearners)
+        public override IEnumerable<Pipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int requestedBatchSize)
         {
-            base.UpdateTrainers(availableLearners);
-            switch(_currentStage)
-            {
-                case (int)Stage.First:
-                    _remainingStageOneTrials = AvailableTrainers.Count();
-                    break;
-                case (int)Stage.Second:
-                    _remainingStageTwoTrials = AvailableTrainers.Count() * SecondRoundTrialsPerLearner;
-                    break;
-            }
-        }
+            MoveToNextStageIfNeeded(history);
 
-        public override IEnumerable<Pipeline> GetNextPipelines(IEnumerable<Pipeline> history, int numberOfCandidates)
-        {
+            var batchSize = GetBatchSize(requestedBatchSize);
+
             var pipelnes = new List<Pipeline>();
-            for (var i = 0; i < numberOfCandidates; i++)
+            for (var i = 0; i < batchSize; i++)
             {
                 var pipeline = GetNextPipeline(history);
                 pipelnes.Add(pipeline);
+                _remainingTrialsInCurrStage--;
             }
             return pipelnes;
         }
 
-        private IEnumerable<SuggestedTrainer> GetTopLearners(IEnumerable<Pipeline> history)
+        private IEnumerable<SuggestedTrainer> GetTopTrainers(IEnumerable<PipelineRunResult> history)
         {
-            history = history.GroupBy(h => h.Trainer.TrainerName).Select(g => g.First());
-            IEnumerable<Pipeline> sortedHistory = history.OrderBy(h => h.Result);
+            history = history.GroupBy(r => r.Pipeline.Trainer.TrainerName).Select(g => g.First());
+            IEnumerable<PipelineRunResult> sortedHistory = history.OrderBy(r => r.Result);
             if(IsMaximizingMetric)
             {
                 sortedHistory = sortedHistory.Reverse();
             }
-            var topLearners = sortedHistory.Take(TopKLearners).Select(h => h.Trainer);
-            return topLearners;
+            var topTrainers = sortedHistory.Take(TopKTrainers).Select(r => r.Pipeline.Trainer);
+            return topTrainers;
         }
 
-        private Pipeline GetNextPipeline(IEnumerable<Pipeline> history)
+        private Pipeline GetNextPipeline(IEnumerable<PipelineRunResult> history)
         {
             Pipeline pipeline;
 
             if (_currentStage == (int)Stage.First)
             {
-                pipeline = GetNextStageOnePipeline();
+                pipeline = GetNextFirstStagePipeline();
             }
             else
             {
-                var learner = AvailableTrainers.ElementAt(_currentLearnerIndex).Clone();
-                _currentLearnerIndex = (_currentLearnerIndex + 1) % AvailableTrainers.Count();
+                var trainer = AvailableTrainers.ElementAt(_currentTrainerIndex).Clone();
+                _currentTrainerIndex = (_currentTrainerIndex + 1) % AvailableTrainers.Count();
 
-                SampleHyperparameters(learner, history);
+                SampleHyperparameters(trainer, history);
 
                 // make sure we have not seen pipeline before.
                 // repeat until passes or runs out of chances.
@@ -91,63 +87,69 @@ namespace Microsoft.ML.PipelineInference2
                 bool valid;
                 do
                 {
-                    pipeline = new Pipeline(AvailableTransforms, learner, MLContext);
-                    valid = !VisitedPipelines.Contains(pipeline.ToString()) && !HasPipelineFailed(pipeline);
+                    pipeline = new Pipeline(AvailableTransforms, trainer, MLContext);
+                    valid = !_visitedPipelines.Contains(pipeline) && !HasPipelineFailed(pipeline);
                     count++;
                 } while (!valid && count <= maxNumberAttempts);
 
                 // keep only valid pipelines
                 if (valid)
                 {
-                    VisitedPipelines.Add(pipeline.ToString());
+                    _visitedPipelines.Add(pipeline);
                 }
             }
 
-            IncrementStageState(history);
-
             return pipeline;
         }
-        
-        private void IncrementStageState(IEnumerable<Pipeline> history)
+
+        private void MoveToNextStageIfNeeded(IEnumerable<PipelineRunResult> history)
         {
             switch (_currentStage)
             {
                 case (int)Stage.First:
-                    _remainingStageOneTrials--;
-                    if (_remainingStageOneTrials == 0)
+                    if (_remainingTrialsInCurrStage != 0)
                     {
-                        _currentStage++;
-
-                        // select top k learners, update stage, then get requested
-                        // number of candidates, using second stage logic
-                        var topLearners = GetTopLearners(history);
-                        UpdateTrainers(topLearners);
-                        foreach(var learner in topLearners)
-                        {
-                            InitHyperparamSweepers(learner);
-                        }
-
-                        _currentLearnerIndex = 0;
+                        break;
                     }
+
+                    _currentStage++;
+
+                    // select and use only top trainers from here on out
+                    var topTrainers = GetTopTrainers(history);
+                    AvailableTrainers = topTrainers;
+
+                    foreach (var trainer in topTrainers)
+                    {
+                        InitHyperparamSweepers(trainer);
+                    }
+
+                    // reset current trainer index
+                    _currentTrainerIndex = 0;
+
+                    // set # of trials for second stage
+                    _remainingTrialsInCurrStage = TopKTrainers * SecondStageTrialsPerTrainer;
+
                     break;
 
                 case (int)Stage.Second:
-                    _remainingStageTwoTrials--;
-                    if(_remainingStageTwoTrials == 0)
+                    if (_remainingTrialsInCurrStage != 0)
                     {
-                        _currentStage++;
+                        break;
                     }
+
+                    _currentStage++;
+
                     break;
             }
         }
 
-        private Pipeline GetNextStageOnePipeline()
+        private Pipeline GetNextFirstStagePipeline()
         {
-            var learner = AvailableTrainers.ElementAt(_currentLearnerIndex);
-            var pipeline = new Pipeline(AvailableTransforms, learner, MLContext);
+            var trainer = AvailableTrainers.ElementAt(_currentTrainerIndex);
+            var pipeline = new Pipeline(AvailableTransforms, trainer, MLContext);
 
             // update current index
-            _currentLearnerIndex = (_currentLearnerIndex + 1) % AvailableTrainers.Count();
+            _currentTrainerIndex++;
 
             return pipeline;
         }
@@ -155,35 +157,41 @@ namespace Microsoft.ML.PipelineInference2
         /// <summary>
         /// if first time optimizing hyperparams, create new hyperparameter sweepers
         /// </summary>
-        private void InitHyperparamSweepers(SuggestedTrainer learner)
+        private void InitHyperparamSweepers(SuggestedTrainer trainer)
         {
-            if (!_hyperSweepers.ContainsKey(learner.TrainerName))
-            {
-                var sps = AutoMlUtils.ConvertToValueGenerators(learner.SweepParams);
-                _hyperSweepers[learner.TrainerName] = new KdoSweeper(
-                    new KdoSweeper.Arguments
-                    {
-                        SweptParameters = sps,
-                        NumberInitialPopulation = SecondRoundTrialsPerLearner
-                    });
-            }
+            var sps = AutoMlUtils.ConvertToValueGenerators(trainer.SweepParams);
+            _hyperSweepers[trainer.TrainerName] = new KdoSweeper(
+                new KdoSweeper.Arguments
+                {
+                    SweptParameters = sps,
+                    NumberInitialPopulation = SecondStageTrialsPerTrainer
+                });
         }
 
-        private void SampleHyperparameters(SuggestedTrainer learner, IEnumerable<Pipeline> history)
+        private void SampleHyperparameters(SuggestedTrainer trainer, IEnumerable<PipelineRunResult> history)
         {
-            var sweeper = _hyperSweepers[learner.TrainerName];
-            IEnumerable<Pipeline> historyToUse = new Pipeline[0];
+            var sweeper = _hyperSweepers[trainer.TrainerName];
+            IEnumerable<PipelineRunResult> historyToUse = new PipelineRunResult[0];
             if (_currentStage == (int)Stage.Third)
             {
-                historyToUse = history.Where(p => p.Trainer.TrainerName == learner.TrainerName && p.Trainer.HyperParamSet != null);
+                historyToUse = history.Where(r => r.Pipeline.Trainer.TrainerName == trainer.TrainerName && r.Pipeline.Trainer.HyperParamSet != null);
             }
 
             // get new set of hyperparameter values
-            var proposedParamSet = sweeper.ProposeSweeps(1, AutoMlUtils.ConvertToRunResults(history, IsMaximizingMetric)).First();
+            var proposedParamSet = sweeper.ProposeSweeps(1, AutoMlUtils.ConvertToRunResults(historyToUse, IsMaximizingMetric)).First();
 
-            // associate proposed param set with learner, so that smart hyperparam
+            // associate proposed param set with trainer, so that smart hyperparam
             // sweepers (like KDO) can map them back.
-            learner.SetHyperparamValues(proposedParamSet);
+            trainer.SetHyperparamValues(proposedParamSet);
+        }
+
+        private int GetBatchSize(int requestedBatchSize)
+        {
+            if (_currentStage == (int)Stage.Third)
+            {
+                return requestedBatchSize;
+            }
+            return Math.Min(_remainingTrialsInCurrStage, requestedBatchSize);
         }
     }
 }

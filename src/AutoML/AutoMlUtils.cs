@@ -94,9 +94,9 @@ namespace Microsoft.ML.PipelineInference2
             return new RunResult(learner.HyperParamSet, result, isMetricMaximizing);
         }
 
-        public static IRunResult[] ConvertToRunResults(IEnumerable<Pipeline> history, bool isMetricMaximizing)
+        public static IRunResult[] ConvertToRunResults(IEnumerable<PipelineRunResult> history, bool isMetricMaximizing)
         {
-            return history.Where(h => h.Trainer.HyperParamSet != null).Select(h => ConvertToRunResult(h.Trainer, h.Result, isMetricMaximizing)).ToArray();
+            return history.Where(h => h.Pipeline.Trainer.HyperParamSet != null).Select(h => ConvertToRunResult(h.Pipeline.Trainer, h.Result, isMetricMaximizing)).ToArray();
         }
 
         public static IValueGenerator[] ConvertToValueGenerators(IEnumerable<SweepableParam> hps)

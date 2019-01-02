@@ -13,157 +13,145 @@ using Microsoft.ML.Core.Data;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    /// <summary>
-    /// Class for generating potential recipes/pipelines, testing them, and zeroing in on the best ones.
-    /// For now, only works with maximizing metrics (AUC, Accuracy, etc.).
-    /// </summary>
-    public class AutoInference
+    internal class AutoInference
     {
-        public sealed class ReversedComparer<T> : IComparer<T>
+        private readonly IList<PipelineRunResult> _history;
+        private readonly int _targetMaxNumIterations;
+        private readonly MLContext _mlContext;
+        private readonly OptimizingMetricInfo _optimizingMetricInfo;
+        private readonly IterationBasedTerminator _terminator;
+        private readonly IDataView _trainData;
+        private readonly MacroUtils.TrainerKinds _task;
+        private readonly IDataView _validationData;
+
+        public AutoInference(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
+            MacroUtils.TrainerKinds task, int targetMaxNumIterations,
+            IDataView trainData, IDataView validationData)
         {
-            public int Compare(T x, T y)
+            _history = new List<PipelineRunResult>();
+            _targetMaxNumIterations = targetMaxNumIterations;
+            _mlContext = mlContext;
+            _optimizingMetricInfo = metricInfo;
+            _terminator = terminator;
+            _trainData = trainData;
+            _task = task;
+            _validationData = validationData;
+        }
+
+        public (Auto.ObjectModel.Pipeline[] pipelines, ITransformer[] models, ITransformer bestModel) InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
+        {
+            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _targetMaxNumIterations);
+            var availableTransforms = InferTransforms();
+            var pipelineSuggester = new RocketPipelineSuggester(_mlContext, _optimizingMetricInfo.IsMaximizing,
+                availableTrainers, availableTransforms);
+
+            MainLearningLoop(pipelineSuggester, batchSize);
+
+            IEnumerable<PipelineRunResult> pipelineResults;
+            if (_optimizingMetricInfo.IsMaximizing)
             {
-                return Comparer<T>.Default.Compare(y, x);
+                pipelineResults = _history.OrderByDescending(r => r.Result);
+            }
+            else
+            {
+                pipelineResults = _history.OrderBy(r => r.Result);
+            }
+
+            // return
+            var pipelineObjectModels = pipelineResults.Select(p => p.Pipeline.ToObjectModel()).ToArray();
+            var models = pipelineResults.Select(p => p.Model).ToArray();
+            return (pipelineObjectModels, models, models[0]);
+        }
+
+        private void MainLearningLoop(IPipelineSuggester pipelineSuggester, int batchSize)
+        {
+            while (!_terminator.ShouldTerminate(_history.Count))
+            {
+                try
+                {
+                    // get next set of candidates
+                    var currentBatchSize = batchSize;
+                    if (_terminator is IterationBasedTerminator itr)
+                    {
+                        currentBatchSize = Math.Min(itr.RemainingIterations(_history.Count), batchSize);
+                    }
+                    var pipelines = pipelineSuggester.GetNextPipelines(_history, currentBatchSize);
+
+                    // break if no candidates returned, means no valid pipeline available
+                    if (!pipelines.Any())
+                    {
+                        break;
+                    }
+
+                    // evaluate candidates
+                    foreach (var pipeline in pipelines)
+                    {
+                        try
+                        {
+                            ProcessPipeline(pipeline);
+                        }
+                        catch (Exception e)
+                        {
+                            File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump1.txt", $"{pipeline.Trainer} Crashed {e}\r\n");
+                            pipelineSuggester.MarkPipelineAsFailed(pipeline);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump2.txt", $"{e}\r\n");
+                }
             }
         }
 
-        /// <summary>
-        /// Class that holds state for an autoML search-in-progress. Should be able to resume search, given this object.
-        /// </summary>
-        internal sealed class AutoFitter
+        private void ProcessPipeline(Pipeline pipeline)
         {
-            private readonly SortedList<double, Pipeline> _sortedSampledElements;
-            private readonly List<Pipeline> _history;
-            private readonly MLContext _mlContext;
-            private IDataView _trainData;
-            private IDataView _validationData;
-            private IDataView _transformedData;
-            private ITerminator _terminator;
-            private int _maxNumIterations;
-            public IPipelineSuggester PipelineSuggester { get; set; }
-            public OptimizingMetricInfo OptimizingMetricInfo { get; }
-            public MacroUtils.TrainerKinds TrainerKind { get; }
+            // run pipeline
+            var stopwatch = Stopwatch.StartNew();
+            var pipelineModel = pipeline.TrainTransformer(_trainData);
+            var scoredValidationData = pipelineModel.Transform(_validationData);
+            var metric = GetEvaluatedMetricValue(scoredValidationData);
 
-            public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, ITerminator terminator, IPipelineSuggester pipelineSuggester,
-                MacroUtils.TrainerKinds trainerKind, int maxNumIterations,
-                IDataView trainData, IDataView validationData)
+            // save pipeline run
+            var runResult = new PipelineRunResult(pipeline, metric, pipelineModel);
+            _history.Add(runResult);
+
+            stopwatch.Stop();
+
+            var transformsSb = new StringBuilder();
+            foreach (var transform in pipeline.Transforms)
             {
-                OptimizingMetricInfo = metricInfo;
-                _sortedSampledElements = OptimizingMetricInfo.IsMaximizing ? new SortedList<double, Pipeline>(new ReversedComparer<double>()) :
-                        new SortedList<double, Pipeline>();
-                _history = new List<Pipeline>();
-                _mlContext = mlContext;
-                _trainData = trainData;
-                _validationData = validationData;
-                _terminator = terminator;
-                _maxNumIterations = maxNumIterations;
-                PipelineSuggester = pipelineSuggester;
-                TrainerKind = trainerKind;
+                transformsSb.Append("xf=");
+                transformsSb.Append(transform);
+                transformsSb.Append(" ");
             }
-
-            private void MainLearningLoop(int batchSize)
-            {
-                var overallExecutionTime = Stopwatch.StartNew();
-                var stopwatch = new Stopwatch();
-                var probabilityUtils = new SweeperProbabilityUtils();
-
-                while (!_terminator.ShouldTerminate(_history))
-                {
-                    try
-                    {
-                        // get next set of candidates
-                        var currentBatchSize = batchSize;
-                        if (_terminator is IterationBasedTerminator itr)
-                        {
-                            currentBatchSize = Math.Min(itr.RemainingIterations(_history), batchSize);
-                        }
-                        var candidates = PipelineSuggester.GetNextPipelines(_sortedSampledElements.Values, currentBatchSize);
-
-                        // break if no candidates returned, means no valid pipeline available
-                        if (!candidates.Any())
-                        {
-                            break;
-                        }
-
-                        // evaluate them on subset of data
-                        foreach (var candidate in candidates)
-                        {
-                            try
-                            {
-                                ProcessPipeline(probabilityUtils, stopwatch, candidate);
-                            }
-                            catch (Exception e)
-                            {
-                                File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump1.txt", $"{candidate.Trainer} Crashed {e}\r\n");
-                                PipelineSuggester.MarkPipelineAsFailed(candidate);
-                                stopwatch.Stop();
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump2.txt", $"{e}\r\n");
-                    }
-                }
-            }
-
-            private void ProcessPipeline(SweeperProbabilityUtils utils, Stopwatch stopwatch, Pipeline candidate)
-            {
-                // run pipeline, and time how long it takes
-                stopwatch.Restart();
-                candidate.RunTrainTestExperiment(_trainData, _validationData, TrainerKind, _mlContext, out var testMetricVal);
-                stopwatch.Stop();
-
-                // handle key collisions on sorted list
-                while (_sortedSampledElements.ContainsKey(testMetricVal))
-                {
-                    testMetricVal += 1e-10;
-                }
-
-                // save performance score
-                candidate.Result = testMetricVal;
-                _sortedSampledElements.Add(testMetricVal, candidate);
-                _history.Add(candidate);
-
-                var transformsSb = new StringBuilder();
-                foreach (var transform in candidate.Transforms)
-                {
-                    transformsSb.Append("xf=");
-                    transformsSb.Append(transform);
-                    transformsSb.Append(" ");
-                }
-                var commandLineStr = $"{transformsSb.ToString()} tr={candidate.Trainer}";
-                File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_sortedSampledElements.Count}\t{candidate.Result}\t{MyGlobals.Stopwatch.Elapsed}\t{commandLineStr}\r\n");
-            }
-
-            public (Auto.ObjectModel.Pipeline[], ITransformer bestModel) InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
-            {
-                // get available learners
-                var learners = RecipeInference.AllowedLearners(_mlContext, TrainerKind, _maxNumIterations);
-                PipelineSuggester.UpdateTrainers(learners);
-
-                // get available transforms
-                var transforms = InferTransforms();
-                PipelineSuggester.UpdateTransforms(transforms);
-
-                MainLearningLoop(batchSize);
-
-                // temporary hack: retrain best model
-                var bestModel = _sortedSampledElements.First().Value.TrainTransformer(_trainData);
-
-                // return pipelines
-                return (_sortedSampledElements.Values.Select(p => p.ToObjectModel()).ToArray(), bestModel);
-            }
+            var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
+            File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_history.Count}\t{metric}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
+        }
             
-            private IEnumerable<SuggestedTransform> InferTransforms()
+        private IEnumerable<SuggestedTransform> InferTransforms()
+        {
+            var data = _trainData;
+            var args = new TransformInference.Arguments
             {
-                var data = _trainData;
-                var args = new TransformInference.Arguments
-                {
-                    EstimatedSampleFraction = 1.0,
-                    ExcludeFeaturesConcatTransforms = true
-                };
-                return TransformInference.InferTransforms(_mlContext, data, args);
+                EstimatedSampleFraction = 1.0,
+                ExcludeFeaturesConcatTransforms = true
+            };
+            return TransformInference.InferTransforms(_mlContext, data, args);
+        }
+
+        private double GetEvaluatedMetricValue(IDataView scoredData)
+        {
+            switch(_task)
+            {
+                case MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer:
+                    return _mlContext.BinaryClassification.EvaluateNonCalibrated(scoredData).Accuracy;
+                case MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer:
+                    return _mlContext.MulticlassClassification.Evaluate(scoredData).AccuracyMicro;
+                case MacroUtils.TrainerKinds.SignatureRegressorTrainer:
+                    return _mlContext.Regression.Evaluate(scoredData).RSquared;
+                default:
+                    throw new NotSupportedException("unsupported task type");
             }
         }
     }

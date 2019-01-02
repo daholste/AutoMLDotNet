@@ -26,7 +26,6 @@ namespace Microsoft.ML.PipelineInference2
         private readonly MLContext _mlContext;
         public readonly IList<SuggestedTransform> Transforms;
         public readonly SuggestedTrainer Trainer;
-        public double Result { get; set; }
 
         public Pipeline(IEnumerable<SuggestedTransform> transforms,
             SuggestedTrainer trainer,
@@ -40,6 +39,11 @@ namespace Microsoft.ML.PipelineInference2
         
         public override string ToString() => $"{Trainer}+{string.Join("+", Transforms.Select(t => t.ToString()))}";
 
+        public override int GetHashCode()
+        {
+            return ToString().GetHashCode();
+        }
+
         public Auto.ObjectModel.Pipeline ToObjectModel()
         {
             var pipelineElements = new List<Auto.ObjectModel.PipelineElement>();
@@ -49,39 +53,6 @@ namespace Microsoft.ML.PipelineInference2
             }
             pipelineElements.Add(Trainer.ToObjectModel());
             return new Auto.ObjectModel.Pipeline(pipelineElements.ToArray());
-        }
-
-        /// <summary>
-        /// Runs a train-test experiment on the current pipeline
-        /// </summary>
-        public void RunTrainTestExperiment(IDataView trainData, IDataView validationData,
-            MacroUtils.TrainerKinds task, MLContext mlContext,
-            out double testMetricValue)
-        {
-            var pipelineTransformer = TrainTransformer(trainData);
-            var scoredTestData = pipelineTransformer.Transform(validationData);
-            testMetricValue = GetTestMetricValue(mlContext, task, scoredTestData);
-        }
-
-        private static double GetTestMetricValue(MLContext mlContext, MacroUtils.TrainerKinds task, IDataView scoredData)
-        {
-            if (task == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
-            {
-                return mlContext.BinaryClassification.EvaluateNonCalibrated(scoredData).Accuracy;
-            }
-            if (task == MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer)
-            {
-                return mlContext.MulticlassClassification.Evaluate(scoredData).AccuracyMicro;
-            }
-            if (task == MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer)
-            {
-                return mlContext.Regression.Evaluate(scoredData).RSquared;
-            }
-            else
-            {
-                // todo: better error handling?
-                throw new Exception("unsupported task");
-            }
         }
 
         public ITransformer TrainTransformer(IDataView trainData)

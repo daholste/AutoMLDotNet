@@ -7,21 +7,23 @@ using System.Linq;
 
 namespace Microsoft.ML.PipelineInference2
 {
-    public sealed class IterationBasedTerminator : ITerminator
+    public sealed class IterationBasedTerminator
     {
-        private readonly int _finalHistoryLength;
+        private readonly int _numTotalIterations;
 
-        public IterationBasedTerminator(int finalHistoryLength)
+        public IterationBasedTerminator(int numTotalIterations)
         {
-            _finalHistoryLength = finalHistoryLength;
+            _numTotalIterations = numTotalIterations;
         }
 
-        public bool ShouldTerminate(IEnumerable<Pipeline> history)
+        public bool ShouldTerminate(int numPreviousIterations)
         {
-            return history.ToArray().Length >= _finalHistoryLength;
+            return numPreviousIterations >= _numTotalIterations;
         }
 
-        public int RemainingIterations(IEnumerable<Pipeline> history) =>
-            _finalHistoryLength - history.ToArray().Length;
+        public int RemainingIterations(int numPreviousIterations)
+        {
+            return _numTotalIterations - numPreviousIterations;
+        }
     }
 }

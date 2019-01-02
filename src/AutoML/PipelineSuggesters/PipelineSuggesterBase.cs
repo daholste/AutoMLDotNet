@@ -8,42 +8,34 @@ namespace Microsoft.ML.PipelineInference2
 {
     internal abstract class PipelineSuggesterBase : IPipelineSuggester
     {
-        protected IEnumerable<SuggestedTransform> AvailableTransforms;
         protected IEnumerable<SuggestedTrainer> AvailableTrainers;
+        protected IEnumerable<SuggestedTransform> AvailableTransforms;
+
+        private readonly HashSet<Pipeline> FailedPipelines;
+        protected readonly bool IsMaximizingMetric;
         protected readonly MLContext MLContext;
-        protected readonly HashSet<string> VisitedPipelines;        
-        protected bool IsMaximizingMetric;
 
-        private readonly HashSet<string> FailedPipelines;
-
-        protected PipelineSuggesterBase(MLContext mlContext, bool isMaximizingMetric)
-        {
-            MLContext = mlContext;
-            IsMaximizingMetric = isMaximizingMetric;
-            VisitedPipelines = new HashSet<string>();
-            FailedPipelines = new HashSet<string>();
-        }
-
-        public abstract IEnumerable<Pipeline> GetNextPipelines(IEnumerable<Pipeline> history, int numberOfCandidates);
-
-        public virtual void UpdateTrainers(IEnumerable<SuggestedTrainer> availableTrainers)
+        protected PipelineSuggesterBase(MLContext mlContext, bool isMaximizingMetric,
+            IEnumerable<SuggestedTrainer> availableTrainers, IEnumerable<SuggestedTransform> availableTransforms)
         {
             AvailableTrainers = availableTrainers;
+            AvailableTransforms = availableTransforms;
+
+            FailedPipelines = new HashSet<Pipeline>();
+            MLContext = mlContext;
+            IsMaximizingMetric = isMaximizingMetric;
         }
 
-        public virtual void UpdateTransforms(IEnumerable<SuggestedTransform> availableTransforms)
-        {
-            AvailableTransforms = availableTransforms;
-        }
+        public abstract IEnumerable<Pipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int numberOfCandidates);
 
         public void MarkPipelineAsFailed(Pipeline failedPipeline)
         {
-            FailedPipelines.Add(failedPipeline.ToString());
+            FailedPipelines.Add(failedPipeline);
         }
 
-        public bool HasPipelineFailed(Pipeline failedPipeline)
+        protected bool HasPipelineFailed(Pipeline failedPipeline)
         {
-            return FailedPipelines.Contains(failedPipeline.ToString());
+            return FailedPipelines.Contains(failedPipeline);
         }
     }
 }

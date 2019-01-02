@@ -10,6 +10,5 @@ namespace Microsoft.ML.PipelineInference2
     {
         public static string OutputDir = ".";
         public static ISet<string> FailedPipelineHashes = new HashSet<string>();
-        public static Stopwatch Stopwatch = Stopwatch.StartNew();
     }
 }
