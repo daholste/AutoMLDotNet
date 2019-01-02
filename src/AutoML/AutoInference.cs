@@ -21,11 +21,11 @@ namespace Microsoft.ML.PipelineInference2
         private readonly OptimizingMetricInfo _optimizingMetricInfo;
         private readonly IterationBasedTerminator _terminator;
         private readonly IDataView _trainData;
-        private readonly MacroUtils.TrainerKinds _task;
+        private readonly TaskKind _task;
         private readonly IDataView _validationData;
 
         public AutoInference(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
-            MacroUtils.TrainerKinds task, int targetMaxNumIterations,
+            TaskKind task, int targetMaxNumIterations,
             IDataView trainData, IDataView validationData)
         {
             _history = new List<PipelineRunResult>();
@@ -144,11 +144,11 @@ namespace Microsoft.ML.PipelineInference2
         {
             switch(_task)
             {
-                case MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer:
+                case TaskKind.BinaryClassification:
                     return _mlContext.BinaryClassification.EvaluateNonCalibrated(scoredData).Accuracy;
-                case MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer:
+                case TaskKind.MulticlassClassification:
                     return _mlContext.MulticlassClassification.Evaluate(scoredData).AccuracyMicro;
-                case MacroUtils.TrainerKinds.SignatureRegressorTrainer:
+                case TaskKind.Regression:
                     return _mlContext.Regression.Evaluate(scoredData).RSquared;
                 default:
                     throw new NotSupportedException("unsupported task type");

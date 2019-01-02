@@ -10,8 +10,8 @@ namespace Microsoft.ML.PipelineInference2
 {
     internal class RocketPipelineSuggester : PipelineSuggesterBase
     {
-        private const int TopKTrainers = 2;
-        private const int SecondStageTrialsPerTrainer = 2;
+        private const int TopKTrainers = 3;
+        private const int SecondStageTrialsPerTrainer = 5;
 
         private readonly Dictionary<string, ISweeper> _hyperSweepers;
         private readonly ISet<Pipeline> _visitedPipelines;

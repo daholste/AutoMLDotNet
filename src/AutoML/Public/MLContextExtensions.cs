@@ -11,7 +11,7 @@ namespace AutoML.Public
 {
     public static class PipelineSuggester
     {
-        public static Pipeline[] GetNextPipeLines(RunHistory history)
+        public static Microsoft.ML.Auto.ObjectModel.Pipeline[] GetNextPipeLines(RunHistory history)
         {
             throw new NotImplementedException();
         }
@@ -71,7 +71,7 @@ namespace AutoML.Public
         }
     }
 
-    class RunHistory
+    public class RunHistory
     {
 
     }

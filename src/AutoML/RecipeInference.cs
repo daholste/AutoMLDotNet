@@ -116,7 +116,7 @@ namespace Microsoft.ML.PipelineInference2
         /// Given a predictor type & target max num of iterations, return a set of all permissible trainers (with their sweeper params, if defined).
         /// </summary>
         /// <returns>Array of viable learners.</returns>
-        public static IEnumerable<SuggestedTrainer> AllowedTrainers(MLContext mlContext, MacroUtils.TrainerKinds task,
+        public static IEnumerable<SuggestedTrainer> AllowedTrainers(MLContext mlContext, TaskKind task,
             int maxNumIterations)
         {
             var trainerExtensions = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);

@@ -20,19 +20,19 @@ namespace Microsoft.ML.PipelineInference2
         public static AutoMLResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor = null)
         {
-            return AutoFit(trainData, validationData, maxIterations, preprocessor, MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer,
+            return AutoFit(trainData, validationData, maxIterations, preprocessor, TaskKind.BinaryClassification,
                 OptimizingMetric.Accuracy);
         }
 
         public static AutoMLResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor = null)
         {
-            return AutoFit(trainData, validationData, maxIterations, preprocessor, MacroUtils.TrainerKinds.SignatureMultiClassClassifierTrainer,
+            return AutoFit(trainData, validationData, maxIterations, preprocessor, TaskKind.MulticlassClassification,
                 OptimizingMetric.Accuracy);
         }
 
         public static AutoMLResult AutoFit(IDataView trainData, IDataView validationData, int maxIterations, IEstimator<ITransformer> preprocessor,
-            MacroUtils.TrainerKinds task, OptimizingMetric metric)
+            TaskKind task, OptimizingMetric metric)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();

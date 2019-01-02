@@ -10,17 +10,17 @@ namespace Microsoft.ML.PipelineInference2
 {
     internal class TrainerExtensionCatalog
     {
-        public static IEnumerable<ITrainerExtension> GetTrainers(MacroUtils.TrainerKinds trainerKind, int maxNumIterations)
+        public static IEnumerable<ITrainerExtension> GetTrainers(TaskKind trainerKind, int maxNumIterations)
         {
-            if(trainerKind == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
+            if(trainerKind == TaskKind.BinaryClassification)
             {
                 return GetBinaryLearners(maxNumIterations);
             }
-            else if (trainerKind == MacroUtils.TrainerKinds.SignatureBinaryClassifierTrainer)
+            else if (trainerKind == TaskKind.BinaryClassification)
             {
                 return GetMultiLearners(maxNumIterations);
             }
-            else if (trainerKind == MacroUtils.TrainerKinds.SignatureRegressorTrainer)
+            else if (trainerKind == TaskKind.Regression)
             {
                 return GetRegressionLearners();
             }
