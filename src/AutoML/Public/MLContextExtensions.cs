@@ -9,7 +9,7 @@ using System.Text;
 
 namespace AutoML.Public
 {
-    internal static class PipelineSuggester
+    public static class PipelineSuggester
     {
         public static Microsoft.ML.Auto.ObjectModel.Pipeline[] GetNextPipeLines(RunHistory history)
         {
@@ -17,7 +17,7 @@ namespace AutoML.Public
         }
     }
 
-    internal static class TransformExtensions
+    public static class TransformExtensions
     {
         public static IEstimator<ITransformer> InferTransforms(this TransformsCatalog catalog, IDataView dataView)
         {
@@ -25,7 +25,7 @@ namespace AutoML.Public
         }
     }
 
-    internal static class DataExtensions
+    public static class DataExtensions
     {
         // Delimiter, header, column datatype inference
         public static (bool hasHeader, string separator, TextLoader.Column[] columns) InferColumns(this DataOperations catalog, string path, bool? hasHeader = null, string separator = null, TextLoader.Column[] columns = null)
