@@ -160,7 +160,7 @@ namespace Microsoft.ML.Auto.Public
 
     public class RunHistory
     {
-        List<(Pipeline pipeline)>
+        
     }
 
     public interface IExperimentTerminator
