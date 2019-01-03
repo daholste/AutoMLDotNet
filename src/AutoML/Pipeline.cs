@@ -41,15 +41,15 @@ namespace Microsoft.ML.Auto
             return ToString().GetHashCode();
         }
 
-        public Auto.ObjectModel.Pipeline ToObjectModel()
+        public Public.Pipeline ToObjectModel()
         {
-            var pipelineElements = new List<Auto.ObjectModel.PipelineElement>();
+            var pipelineElements = new List<Public.PipelineElement>();
             foreach(var transform in Transforms)
             {
                 pipelineElements.Add(transform.ToObjectModel());
             }
             pipelineElements.Add(Trainer.ToObjectModel());
-            return new Auto.ObjectModel.Pipeline(pipelineElements.ToArray());
+            return new Public.Pipeline(pipelineElements.ToArray());
         }
 
         public ITransformer TrainTransformer(IDataView trainData)

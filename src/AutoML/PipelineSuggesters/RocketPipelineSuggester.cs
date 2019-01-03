@@ -56,7 +56,7 @@ namespace Microsoft.ML.Auto
         private IEnumerable<SuggestedTrainer> GetTopTrainers(IEnumerable<PipelineRunResult> history)
         {
             history = history.GroupBy(r => r.Pipeline.Trainer.TrainerName).Select(g => g.First());
-            IEnumerable<PipelineRunResult> sortedHistory = history.OrderBy(r => r.Result);
+            IEnumerable<PipelineRunResult> sortedHistory = history.OrderBy(r => r.Score);
             if(IsMaximizingMetric)
             {
                 sortedHistory = sortedHistory.Reverse();

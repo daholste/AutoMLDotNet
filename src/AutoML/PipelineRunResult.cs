@@ -3,20 +3,26 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.ML.Core.Data;
+using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
     internal class PipelineRunResult
     {
+        public readonly object EvaluatedMetrics;
         public readonly Pipeline Pipeline;
-        public readonly double Result;
-        public readonly ITransformer Model;
+        public readonly double Score;
+        public readonly IDataView ScoredValidationData;
 
-        public PipelineRunResult(Pipeline pipeline, double result, ITransformer model)
+        public ITransformer Model { get; set; }
+
+        public PipelineRunResult(object evaluatedMetrics, ITransformer model, Pipeline pipeline, double score, IDataView scoredValidationData)
         {
-            Pipeline = pipeline;
-            Result = result;
+            EvaluatedMetrics = evaluatedMetrics;
             Model = model;
+            Pipeline = pipeline;
+            Score = score;
+            ScoredValidationData = scoredValidationData;
         }
     }
 }

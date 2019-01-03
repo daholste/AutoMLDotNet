@@ -4,6 +4,7 @@ using Microsoft.ML;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Auto.Public;
 
 namespace Samples
 {
@@ -27,15 +28,10 @@ namespace Samples
             var testData = textLoader.Read(testDataPath);
 
             // run AutoML & train model
-            var autoMlResult = mlContext.MulticlassClassification.AutoFit(trainData, validationData, 5);
+            var autoMlResult = mlContext.MulticlassClassification.AutoFit(trainData, "Label", validationData,
+                settings: new AutoFitSettings() { MaxIterations = 14 });
             // get best AutoML model
-            var model = autoMlResult.BestModel;
-            // print all AutoML pipelines
-            var allPipelines = autoMlResult.AllPipelines;
-            foreach (var pipeline in allPipelines)
-            {
-                Console.WriteLine(pipeline);
-            }
+            var model = autoMlResult.BestPipeline.Model;
 
             // run AutoML on test data
             var transformedOutput = model.Transform(testData);

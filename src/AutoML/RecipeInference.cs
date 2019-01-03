@@ -59,7 +59,7 @@ namespace Microsoft.ML.Auto
             return $"{TrainerName}{{{paramsStr}}}";
         }
 
-        public Auto.ObjectModel.PipelineElement ToObjectModel()
+        public Public.PipelineElement ToObjectModel()
         {
             var hyperParams = SweepParams.Where(p => p != null && p.RawValue != null);
             var elementProperties = new Dictionary<string, object>();
@@ -67,7 +67,7 @@ namespace Microsoft.ML.Auto
             {
                 elementProperties[hyperParam.Name] = hyperParam.ProcessedValue();
             }
-            return new Auto.ObjectModel.PipelineElement(TrainerName, Auto.ObjectModel.PipelineElementType.Trainer, elementProperties);
+            return new Public.PipelineElement(TrainerName, Public.PipelineElementType.Trainer, elementProperties);
         }
 
         /// <summary>

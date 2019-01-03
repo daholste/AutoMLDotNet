@@ -1,53 +1,90 @@
-﻿using Microsoft.ML.Core.Data;
-using Microsoft.ML.Auto;
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using Pipeline = Microsoft.ML.Auto.ObjectModel.Pipeline;
-using Microsoft.ML;
+using System.Linq;
+using Microsoft.ML.Core.Data;
 using Microsoft.ML.Data;
+using Microsoft.ML.Runtime;
+using Microsoft.ML.Runtime.Data;
 
-namespace AutoML.Public
+namespace Microsoft.ML.Auto.Public
 {
     public static class PipelineSuggester
     {
-        public static Pipeline[] GetNextPipeLines(RunHistory history, IDataView testData)
+        public static Pipeline[] GetNextPipelines(RunHistory history, IDataView testData)
         {
             throw new NotImplementedException();
         }
 
-        public static Pipeline GetFirstPipeLine(IDataView dataView)
+        public static Pipeline GetFirstPipeline(IDataView dataView)
         {
             throw new NotImplementedException();
         }
     }
-    
+
     public static class RegressionExtensions
     {
-        public static (RegressionMetrics metrics, ITransformer model, IDataView scoredValidationData)[] AutoFit(this BinaryClassificationContext context,
+        public static RegressionResult AutoFit(this RegressionContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
         {
-            throw new NotImplementedException();
+            // todo: respect passed-in label
+
+            // run autofit & get all pipelines run in that process
+            var (allPipelines, bestPipeline) = MLContextExtensionUtil.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
+
+            var results = new RegressionPipelineResult[allPipelines.Length];
+            for (var i = 0; i < results.Length; i++)
+            {
+                var pipelineResult = allPipelines[i];
+                var result = new RegressionPipelineResult((RegressionMetrics)pipelineResult.EvaluatedMetrics, pipelineResult.Model, pipelineResult.ScoredValidationData);
+                results[i] = result;
+            }
+            var bestResult = new RegressionPipelineResult((RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            return new RegressionResult(bestResult, results);
         }
     }
 
     public static class BinaryClassificationExtensions
     {
-        public static (BinaryClassificationMetrics metrics, ITransformer model, IDataView scoredValidationData)[] AutoFit(this BinaryClassificationContext context,
+        public static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
         {
-            throw new NotImplementedException();
+            // todo: respect passed-in label
+
+            // run autofit & get all pipelines run in that process
+            var (allPipelines, bestPipeline) = MLContextExtensionUtil.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
+
+            var results = new BinaryClassificationPipelineResult[allPipelines.Length];
+            for(var i = 0; i < results.Length; i++)
+            {
+                var pipelineResult = allPipelines[i];
+                var result = new BinaryClassificationPipelineResult((BinaryClassificationMetrics)pipelineResult.EvaluatedMetrics, pipelineResult.Model, pipelineResult.ScoredValidationData);
+                results[i] = result;
+            }
+            var bestResult = new BinaryClassificationPipelineResult((BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            return new BinaryClassificationResult(bestResult, results);
         }
     }
 
     public static class MulticlassExtensions
     {
-        public static (MultiClassClassifierMetrics metrics, ITransformer model, IDataView scoredValidationData)[] AutoFit(this BinaryClassificationContext context,
+        public static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
         {
-            throw new NotImplementedException();
+            // todo: respect passed-in label
+
+            // run autofit & get all pipelines run in that process
+            var (allPipelines, bestPipeline) = MLContextExtensionUtil.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
+
+            var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
+            for (var i = 0; i < results.Length; i++)
+            {
+                var pipelineResult = allPipelines[i];
+                var result = new MulticlassClassificationPipelineResult((MultiClassClassifierMetrics)pipelineResult.EvaluatedMetrics, pipelineResult.Model, pipelineResult.ScoredValidationData);
+                results[i] = result;
+            }
+            var bestResult = new MulticlassClassificationPipelineResult((MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            return new MulticlassClassificationResult(bestResult, results);
         }
     }
 
@@ -94,7 +131,7 @@ namespace AutoML.Public
         {
             throw new NotImplementedException();
         }
-        
+
         public enum MachineLearningTaskType
         {
             Regression,
@@ -132,7 +169,90 @@ namespace AutoML.Public
     public class AutoFitSettings
     {
         public IEnumerable<IExperimentTerminator> ExperimentTerminators;
+        public int MaxIterations;
     }
 
-    
+    public class BinaryClassificationResult
+    {
+        public readonly BinaryClassificationPipelineResult BestPipeline;
+        public readonly BinaryClassificationPipelineResult[] PipelineResults;
+
+        public BinaryClassificationResult(BinaryClassificationPipelineResult bestPipeline,
+            BinaryClassificationPipelineResult[] pipelineResults)
+        {
+            BestPipeline = bestPipeline;
+            PipelineResults = pipelineResults;
+        }
+    }
+
+    public class MulticlassClassificationResult
+    {
+        public readonly MulticlassClassificationPipelineResult BestPipeline;
+        public readonly MulticlassClassificationPipelineResult[] PipelineResults;
+
+        public MulticlassClassificationResult(MulticlassClassificationPipelineResult bestPipeline,
+            MulticlassClassificationPipelineResult[] pipelineResults)
+        {
+            BestPipeline = bestPipeline;
+            PipelineResults = pipelineResults;
+        }
+    }
+
+    public class RegressionResult
+    {
+        public readonly RegressionPipelineResult BestPipeline;
+        public readonly RegressionPipelineResult[] PipelineResults;
+
+        public RegressionResult(RegressionPipelineResult bestPipeline,
+            RegressionPipelineResult[] pipelineResults)
+        {
+            BestPipeline = bestPipeline;
+            PipelineResults = pipelineResults;
+        }
+    }
+
+    public class BinaryClassificationPipelineResult : PipelineResult
+    {
+        public readonly BinaryClassificationMetrics Metrics;
+
+        public BinaryClassificationPipelineResult(BinaryClassificationMetrics metrics,
+            ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
+        {
+            Metrics = metrics;
+        }
+    }
+
+    public class MulticlassClassificationPipelineResult : PipelineResult
+    {
+        public readonly MultiClassClassifierMetrics Metrics;
+
+        public MulticlassClassificationPipelineResult(MultiClassClassifierMetrics metrics,
+            ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
+        {
+            Metrics = metrics;
+        }
+    }
+
+    public class RegressionPipelineResult : PipelineResult
+    {
+        public readonly RegressionMetrics Metrics;
+
+        public RegressionPipelineResult(RegressionMetrics metrics,
+            ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
+        {
+            Metrics = metrics;
+        }
+    }
+
+    public class PipelineResult
+    {
+        public readonly ITransformer Model;
+        public readonly IDataView ScoredValidationData;
+
+        public PipelineResult(ITransformer model, IDataView scoredValidationData)
+        {
+            Model = model;
+            ScoredValidationData = scoredValidationData;
+        }
+    }
 }

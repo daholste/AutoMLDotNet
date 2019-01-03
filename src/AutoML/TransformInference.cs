@@ -68,7 +68,7 @@ namespace Microsoft.ML.Auto
             return sb.ToString();
         }
 
-        public Auto.ObjectModel.PipelineElement ToObjectModel()
+        public Public.PipelineElement ToObjectModel()
         {
             var elementProperties = new Dictionary<string, object>();
             elementProperties["InputColumns"] = RoutingStructure.ColumnsConsumed.Select(c => c.Name);
@@ -80,7 +80,7 @@ namespace Microsoft.ML.Auto
                     elementProperties[property.Key] = property.Value;
                 }
             }
-            return new Auto.ObjectModel.PipelineElement(Estimator.GetType().Name, Auto.ObjectModel.PipelineElementType.Transform, elementProperties);
+            return new Public.PipelineElement(Estimator.GetType().Name, Public.PipelineElementType.Transform, elementProperties);
         }
     }
 

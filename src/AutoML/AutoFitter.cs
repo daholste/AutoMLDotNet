@@ -10,6 +10,7 @@ using System.IO;
 using System.Text;
 using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Core.Data;
+using Microsoft.ML.Data;
 
 namespace Microsoft.ML.Auto
 {
@@ -38,7 +39,7 @@ namespace Microsoft.ML.Auto
             _validationData = validationData;
         }
 
-        public (Auto.ObjectModel.Pipeline[] pipelines, ITransformer[] models, ITransformer bestModel) InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
+        public PipelineRunResult[] InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
         {
             var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _targetMaxNumIterations);
             var availableTransforms = InferTransforms();
@@ -47,20 +48,7 @@ namespace Microsoft.ML.Auto
 
             MainLearningLoop(pipelineSuggester, batchSize);
 
-            IEnumerable<PipelineRunResult> pipelineResults;
-            if (_optimizingMetricInfo.IsMaximizing)
-            {
-                pipelineResults = _history.OrderByDescending(r => r.Result);
-            }
-            else
-            {
-                pipelineResults = _history.OrderBy(r => r.Result);
-            }
-
-            // return
-            var pipelineObjectModels = pipelineResults.Select(p => p.Pipeline.ToObjectModel()).ToArray();
-            var models = pipelineResults.Select(p => p.Model).ToArray();
-            return (pipelineObjectModels, models, models[0]);
+            return _history.ToArray();
         }
 
         private void MainLearningLoop(IPipelineSuggester pipelineSuggester, int batchSize)
@@ -110,10 +98,11 @@ namespace Microsoft.ML.Auto
             var stopwatch = Stopwatch.StartNew();
             var pipelineModel = pipeline.TrainTransformer(_trainData);
             var scoredValidationData = pipelineModel.Transform(_validationData);
-            var metric = GetEvaluatedMetricValue(scoredValidationData);
+            var evaluatedMetrics = GetEvaluatedMetrics(scoredValidationData);
+            var score = GetPipelineScore(evaluatedMetrics);
 
             // save pipeline run
-            var runResult = new PipelineRunResult(pipeline, metric, pipelineModel);
+            var runResult = new PipelineRunResult(evaluatedMetrics, pipelineModel, pipeline, score, scoredValidationData);
             _history.Add(runResult);
 
             stopwatch.Stop();
@@ -126,7 +115,7 @@ namespace Microsoft.ML.Auto
                 transformsSb.Append(" ");
             }
             var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
-            File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_history.Count}\t{metric}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
+            File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
         }
             
         private IEnumerable<SuggestedTransform> InferTransforms()
@@ -140,19 +129,37 @@ namespace Microsoft.ML.Auto
             return TransformInference.InferTransforms(_mlContext, data, args);
         }
 
-        private double GetEvaluatedMetricValue(IDataView scoredData)
+        private object GetEvaluatedMetrics(IDataView scoredData)
         {
             switch(_task)
             {
                 case TaskKind.BinaryClassification:
-                    return _mlContext.BinaryClassification.EvaluateNonCalibrated(scoredData).Accuracy;
+                    return _mlContext.BinaryClassification.EvaluateNonCalibrated(scoredData);
                 case TaskKind.MulticlassClassification:
-                    return _mlContext.MulticlassClassification.Evaluate(scoredData).AccuracyMicro;
+                    return _mlContext.MulticlassClassification.Evaluate(scoredData);
                 case TaskKind.Regression:
-                    return _mlContext.Regression.Evaluate(scoredData).RSquared;
+                    return _mlContext.Regression.Evaluate(scoredData);
                 default:
                     throw new NotSupportedException("unsupported task type");
             }
+        }
+
+        private double GetPipelineScore(object evaluatedMetrics)
+        {
+            var type = evaluatedMetrics.GetType();
+            if(type == typeof(BinaryClassificationMetrics))
+            {
+                return ((BinaryClassificationMetrics)evaluatedMetrics).Accuracy;
+            }
+            if (type == typeof(MultiClassClassifierMetrics))
+            {
+                return ((MultiClassClassifierMetrics)evaluatedMetrics).AccuracyMicro;
+            }
+            if (type == typeof(RegressionMetrics))
+            {
+                return ((RegressionMetrics)evaluatedMetrics).RSquared;
+            }
+            throw new NotSupportedException("unsupported task type");
         }
     }
 }

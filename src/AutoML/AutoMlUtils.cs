@@ -96,7 +96,7 @@ namespace Microsoft.ML.Auto
 
         public static IRunResult[] ConvertToRunResults(IEnumerable<PipelineRunResult> history, bool isMetricMaximizing)
         {
-            return history.Where(h => h.Pipeline.Trainer.HyperParamSet != null).Select(h => ConvertToRunResult(h.Pipeline.Trainer, h.Result, isMetricMaximizing)).ToArray();
+            return history.Where(h => h.Pipeline.Trainer.HyperParamSet != null).Select(h => ConvertToRunResult(h.Pipeline.Trainer, h.Score, isMetricMaximizing)).ToArray();
         }
 
         public static IValueGenerator[] ConvertToValueGenerators(IEnumerable<SweepableParam> hps)

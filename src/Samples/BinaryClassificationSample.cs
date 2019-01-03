@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.ML;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Auto;
+using Microsoft.ML.Auto.Public;
 using Microsoft.ML.Runtime.Data;
 
 namespace Samples
@@ -74,15 +75,10 @@ namespace Samples
 
             // run AutoML & train model
             var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
-            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, validationData, 14, preprocessor);
+            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, "Label", validationData, preprocessor, 
+                new AutoFitSettings() { MaxIterations = 14 });
             // get best AutoML model
-            var model = autoMlResult.BestModel;
-            // print all AutoML pipelines
-            var allPipelines = autoMlResult.AllPipelines;
-            foreach (var pipeline in allPipelines)
-            {
-                Console.WriteLine(pipeline);
-            }
+            var model = autoMlResult.BestPipeline.Model;
 
             // run AutoML on test data
             var transformedOutput = model.Transform(testData);
