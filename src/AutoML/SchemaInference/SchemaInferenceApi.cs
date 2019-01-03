@@ -2,7 +2,7 @@
 
 namespace Microsoft.ML.Auto
 {
-    public static class TmpSchemaApi
+    internal static class SchemaInferenceApi
     {
         public static TextLoader.Arguments InferTextLoaderArguments(MLContext env,
             string dataFile, string labelColName)

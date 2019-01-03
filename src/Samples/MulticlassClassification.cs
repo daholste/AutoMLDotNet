@@ -8,7 +8,7 @@ using Microsoft.ML.Auto.Public;
 
 namespace Samples
 {
-    public class MulticlassClassificationSample
+    public class MulticlassClassification
     {
         public static void Run()
         {
@@ -18,14 +18,10 @@ namespace Samples
 
             var mlContext = new MLContext();
 
-            // auto-infer text loader args
-            var textLoaderArgs = TmpSchemaApi.InferTextLoaderArguments(mlContext, trainDataPath, "Label");
-
-            // load data from disk
-            var textLoader = new TextLoader(mlContext, textLoaderArgs);
-            var trainData = textLoader.Read(trainDataPath);
-            var validationData = textLoader.Read(validationDataPath);
-            var testData = textLoader.Read(testDataPath);
+            // auto-load data from disk
+            var trainData = mlContext.Data.AutoRead(trainDataPath);
+            var validationData = mlContext.Data.AutoRead(validationDataPath);
+            var testData = mlContext.Data.AutoRead(testDataPath);
 
             // run AutoML & train model
             var autoMlResult = mlContext.MulticlassClassification.AutoFit(trainData, "Label", validationData,

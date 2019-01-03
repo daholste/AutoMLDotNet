@@ -8,7 +8,7 @@ using Microsoft.ML.Runtime.Data;
 
 namespace Samples
 {
-    public class BinaryClassificationSample
+    public class BinaryClassification
     {
         public static void Run()
         {
@@ -17,9 +17,6 @@ namespace Samples
             const string testDataPath = @"C:\data\sample_test2.csv";
 
             var mlContext = new MLContext();
-
-            // auto-infer text loader args
-            var textLoaderArgs = TmpSchemaApi.InferTextLoaderArguments(mlContext, trainDataPath, "Label");
 
             // load data
             var textLoader = new TextLoader(mlContext,

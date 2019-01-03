@@ -16,9 +16,15 @@ namespace Microsoft.ML.Auto.Public
             throw new NotImplementedException();
         }
 
-        public static Pipeline GetFirstPipeline(IDataView dataView)
+        public static Pipeline GetFirstPipeline(IDataView dataView, TaskKind task, string label)
         {
-            throw new NotImplementedException();
+            // todo: respect passed-in label
+
+            var mlContext = new MLContext();
+            var availableTransforms = TransformInferenceApi.InferTransforms(mlContext, dataView);
+            var availableTrainers = RecipeInference.AllowedTrainers(mlContext, task, 1);
+            var pipeline = new Auto.Pipeline(availableTransforms, availableTrainers.First(), mlContext);
+            return pipeline.ToObjectModel();
         }
     }
 
@@ -30,7 +36,7 @@ namespace Microsoft.ML.Auto.Public
             // todo: respect passed-in label
 
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = MLContextExtensionUtil.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
 
             var results = new RegressionPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -52,7 +58,7 @@ namespace Microsoft.ML.Auto.Public
             // todo: respect passed-in label
 
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = MLContextExtensionUtil.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
 
             var results = new BinaryClassificationPipelineResult[allPipelines.Length];
             for(var i = 0; i < results.Length; i++)
@@ -74,7 +80,7 @@ namespace Microsoft.ML.Auto.Public
             // todo: respect passed-in label
 
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = MLContextExtensionUtil.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, settings.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
 
             var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -90,9 +96,17 @@ namespace Microsoft.ML.Auto.Public
 
     public static class TransformExtensions
     {
-        public static IEstimator<ITransformer> InferTransforms(this TransformsCatalog catalog, IDataView dataView)
+        public static IEstimator<ITransformer> InferTransforms(this TransformsCatalog catalog, IDataView data)
         {
-            throw new NotImplementedException();
+            var mlContext = new MLContext();
+            var suggestedTransforms = TransformInferenceApi.InferTransforms(mlContext, data);
+            var estimators = suggestedTransforms.Select(s => s.Estimator);
+            var pipeline = new EstimatorChain<ITransformer>();
+            foreach(var estimator in estimators)
+            {
+                pipeline = pipeline.Append(estimator);
+            }
+            return pipeline;
         }
     }
 
@@ -110,9 +124,13 @@ namespace Microsoft.ML.Auto.Public
             throw new NotImplementedException();
         }
 
+        // todo: should this return text loader args to ensure train/test/validation schemas return identically? (maybe not, not sure)
         public static IDataView AutoRead(this DataOperations catalog, string path)
         {
-            throw new NotImplementedException();
+            var mlContext = new MLContext();
+            var textLoaderArgs = SchemaInferenceApi.InferTextLoaderArguments(mlContext, path, "Label"); // todo: remove label from here?
+            var textLoader = new TextLoader(mlContext, textLoaderArgs);
+            return textLoader.Read(path);
         }
 
         public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source)

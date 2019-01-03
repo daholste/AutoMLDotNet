@@ -17,7 +17,7 @@ namespace Microsoft.ML.Auto
     internal class AutoFitter
     {
         private readonly IList<PipelineRunResult> _history;
-        private readonly int _targetMaxNumIterations;
+        private readonly int _maxIterations;
         private readonly MLContext _mlContext;
         private readonly OptimizingMetricInfo _optimizingMetricInfo;
         private readonly IterationBasedTerminator _terminator;
@@ -26,11 +26,11 @@ namespace Microsoft.ML.Auto
         private readonly IDataView _validationData;
 
         public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
-            TaskKind task, int targetMaxNumIterations,
+            TaskKind task, int maxIterations,
             IDataView trainData, IDataView validationData)
         {
             _history = new List<PipelineRunResult>();
-            _targetMaxNumIterations = targetMaxNumIterations;
+            _maxIterations = maxIterations;
             _mlContext = mlContext;
             _optimizingMetricInfo = metricInfo;
             _terminator = terminator;
@@ -39,10 +39,10 @@ namespace Microsoft.ML.Auto
             _validationData = validationData;
         }
 
-        public PipelineRunResult[] InferPipelines(int numTransformLevels, int batchSize, int numOfTrainingRows)
+        public PipelineRunResult[] InferPipelines(int batchSize)
         {
-            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _targetMaxNumIterations);
-            var availableTransforms = InferTransforms();
+            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _maxIterations);
+            var availableTransforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData);
             var pipelineSuggester = new RocketPipelineSuggester(_mlContext, _optimizingMetricInfo.IsMaximizing,
                 availableTrainers, availableTransforms);
 
@@ -116,17 +116,6 @@ namespace Microsoft.ML.Auto
             }
             var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
             File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
-        }
-            
-        private IEnumerable<SuggestedTransform> InferTransforms()
-        {
-            var data = _trainData;
-            var args = new TransformInference.Arguments
-            {
-                EstimatedSampleFraction = 1.0,
-                ExcludeFeaturesConcatTransforms = true
-            };
-            return TransformInference.InferTransforms(_mlContext, data, args);
         }
 
         private object GetEvaluatedMetrics(IDataView scoredData)

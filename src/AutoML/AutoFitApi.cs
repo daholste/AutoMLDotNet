@@ -4,7 +4,7 @@ using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto.Public
 {
-    internal static class MLContextExtensionUtil
+    internal static class AutoFitApi
     {
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFit(IDataView trainData, IDataView validationData, int maxIterations, 
             IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric)
@@ -26,7 +26,7 @@ namespace Microsoft.ML.Auto.Public
             var terminator = new IterationBasedTerminator(maxIterations);
             var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
                    maxIterations, trainData, validationData);
-            var allPipelines = auotFitter.InferPipelines(1, 1, 100);
+            var allPipelines = auotFitter.InferPipelines(1);
 
             // apply preprocessor to returned models
             if (preprocessorTransform != null)

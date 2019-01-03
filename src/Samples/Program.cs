@@ -8,8 +8,10 @@ namespace Samples
     {
         public static void Main(string[] args)
         {
-            BinaryClassificationSample.Run();
-            //MulticlassClassificationSample.Run();
+            //BinaryClassification.Run();
+            //MulticlassClassification.Run();
+
+            GetFirstPipeline.Run();
         }
     }
 }
