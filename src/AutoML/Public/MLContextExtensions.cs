@@ -9,9 +9,9 @@ using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto.Public
 {
-    public static class PipelineSuggester
+    public static class RegressionPipelineSuggester
     {
-        public static Pipeline[] GetNextPipelines(RunHistory history, IDataView testData)
+        public static Pipeline[] GetNextPipelines(Pipeline[] history, RegressionMetrics[] metrics, IDataView trainData, string label, List<string> whiteListeTrainers = null, List<string> blockListTrainers = null)
         {
             throw new NotImplementedException();
         }
@@ -159,7 +159,7 @@ namespace Microsoft.ML.Auto.Public
 
     public class RunHistory
     {
-
+        
     }
 
     public interface IExperimentTerminator
