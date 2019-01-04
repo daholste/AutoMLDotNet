@@ -49,7 +49,7 @@ namespace Microsoft.ML.Auto
             {
                 argsFunc = (args) =>
                 {
-                    AutoMlUtils.UpdateFields(args, sweepParams);
+                    AutoFitterUtil.UpdateFields(args, sweepParams);
                 };
             }
             return argsFunc;
@@ -66,8 +66,8 @@ namespace Microsoft.ML.Auto
                 {
                     var treeBoosterParams = sweepParams.Where(p => _treeBoosterParamNames.Contains(p.Name));
                     var parentArgParams = sweepParams.Except(treeBoosterParams);
-                    AutoMlUtils.UpdateFields(args, parentArgParams);
-                    AutoMlUtils.UpdateFields(args.Booster, treeBoosterParams);
+                    AutoFitterUtil.UpdateFields(args, parentArgParams);
+                    AutoFitterUtil.UpdateFields(args.Booster, treeBoosterParams);
                 };
             }
             return argsFunc;

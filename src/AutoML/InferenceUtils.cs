@@ -71,24 +71,6 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    // REVIEW: Should this also have the base type (ITrainer<...>)?
-    internal sealed class PredictorCategory
-    {
-        public readonly string Name;
-        public readonly Type Signature;
-
-        public PredictorCategory(string name, Type sig)
-        {
-            Name = name;
-            Signature = sig;
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
-    }
-
     public enum ColumnPurpose
     {
         Ignore = 0,

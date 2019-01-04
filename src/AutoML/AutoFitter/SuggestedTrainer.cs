@@ -1,8 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Training;
@@ -42,7 +38,7 @@ namespace Microsoft.ML.Auto
         public ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor> BuildTrainer(MLContext env)
         {
             IEnumerable<SweepableParam> sweepParams = null;
-            if(HyperParamSet != null)
+            if (HyperParamSet != null)
             {
                 sweepParams = SweepParams;
             }
@@ -52,7 +48,7 @@ namespace Microsoft.ML.Auto
         public override string ToString()
         {
             var paramsStr = string.Empty;
-            if(SweepParams != null)
+            if (SweepParams != null)
             {
                 paramsStr = string.Join(", ", SweepParams.Where(p => p != null && p.RawValue != null).Select(p => $"{p.Name}:{p.ProcessedValue()}"));
             }
@@ -63,7 +59,7 @@ namespace Microsoft.ML.Auto
         {
             var hyperParams = SweepParams.Where(p => p != null && p.RawValue != null);
             var elementProperties = new Dictionary<string, object>();
-            foreach(var hyperParam in hyperParams)
+            foreach (var hyperParam in hyperParams)
             {
                 elementProperties[hyperParam.Name] = hyperParam.ProcessedValue();
             }
@@ -75,7 +71,7 @@ namespace Microsoft.ML.Auto
         /// </summary>
         private void PropagateParamSetValues()
         {
-            if(HyperParamSet == null)
+            if (HyperParamSet == null)
             {
                 return;
             }
@@ -90,27 +86,6 @@ namespace Microsoft.ML.Auto
                     sp.SetUsingValueText(hp.ValueText);
                 }
             }
-        }
-    }
-
-    internal static class RecipeInference
-    {
-        /// <summary>
-        /// Given a predictor type & target max num of iterations, return a set of all permissible trainers (with their sweeper params, if defined).
-        /// </summary>
-        /// <returns>Array of viable learners.</returns>
-        public static IEnumerable<SuggestedTrainer> AllowedTrainers(MLContext mlContext, TaskKind task,
-            int maxNumIterations)
-        {
-            var trainerExtensions = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);
-
-            var trainers = new List<SuggestedTrainer>();
-            foreach (var trainerExtension in trainerExtensions)
-            {
-                var learner = new SuggestedTrainer(mlContext, trainerExtension);
-                trainers.Add(learner);
-            }
-            return trainers.ToArray();
         }
     }
 }

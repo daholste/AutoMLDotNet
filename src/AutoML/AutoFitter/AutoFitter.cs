@@ -5,12 +5,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Text;
-using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Core.Data;
 using Microsoft.ML.Data;
+using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
@@ -80,14 +79,14 @@ namespace Microsoft.ML.Auto
                         }
                         catch (Exception e)
                         {
-                            File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump1.txt", $"{pipeline.Trainer} Crashed {e}\r\n");
+                            File.AppendAllText($"crash_dump1.txt", $"{pipeline.Trainer} Crashed {e}\r\n");
                             pipelineSuggester.MarkPipelineAsFailed(pipeline);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    File.AppendAllText($"{MyGlobals.OutputDir}/crash_dump2.txt", $"{e}\r\n");
+                    File.AppendAllText($"crash_dump2.txt", $"{e}\r\n");
                 }
             }
         }
@@ -115,7 +114,7 @@ namespace Microsoft.ML.Auto
                 transformsSb.Append(" ");
             }
             var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
-            File.AppendAllText($"{MyGlobals.OutputDir}/output.tsv", $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
+            File.AppendAllText($"output.tsv", $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
         }
 
         private object GetEvaluatedMetrics(IDataView scoredData)

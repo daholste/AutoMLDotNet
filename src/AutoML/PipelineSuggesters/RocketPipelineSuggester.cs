@@ -159,7 +159,7 @@ namespace Microsoft.ML.Auto
         /// </summary>
         private void InitHyperparamSweepers(SuggestedTrainer trainer)
         {
-            var sps = AutoMlUtils.ConvertToValueGenerators(trainer.SweepParams);
+            var sps = AutoFitterUtil.ConvertToValueGenerators(trainer.SweepParams);
             _hyperSweepers[trainer.TrainerName] = new KdoSweeper(
                 new KdoSweeper.Arguments
                 {
@@ -178,7 +178,7 @@ namespace Microsoft.ML.Auto
             }
 
             // get new set of hyperparameter values
-            var proposedParamSet = sweeper.ProposeSweeps(1, AutoMlUtils.ConvertToRunResults(historyToUse, IsMaximizingMetric)).First();
+            var proposedParamSet = sweeper.ProposeSweeps(1, AutoFitterUtil.ConvertToRunResults(historyToUse, IsMaximizingMetric)).First();
 
             // associate proposed param set with trainer, so that smart hyperparam
             // sweepers (like KDO) can map them back.
