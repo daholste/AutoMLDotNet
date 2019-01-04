@@ -85,17 +85,7 @@ internal sealed class KdoSweeper : ISweeper
 
         public KdoSweeper(Arguments args)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //_host = env.Register("Sweeper");
-
-            //_host.CheckUserArg(args.NumberInitialPopulation > 1, nameof(args.NumberInitialPopulation), "Must be greater than 1");
-            //_host.CheckUserArg(args.HistoryLength > 1, nameof(args.HistoryLength), "Must be greater than 1");
-            //_host.CheckUserArg(args.MinimumMutationSpread >= 0, nameof(args.MinimumMutationSpread), "Must be nonnegative");
-            //_host.CheckUserArg(0 <= args.ProportionRandom && args.ProportionRandom <= 1, nameof(args.ProportionRandom), "Must be in [0, 1]");
-            //_host.CheckUserArg(args.WeightRescalingPower >= 1, nameof(args.WeightRescalingPower), "Must be greater or equal to 1");
-
             _args = args;
-            //_host.CheckUserArg(Utils.Size(args.SweptParameters) > 0, nameof(args.SweptParameters), "KDO sweeper needs at least one parameter to sweep over");
             _sweepParameters = args.SweptParameters.ToArray();
             _randomSweeper = new UniformRandomSweeper(new SweeperBase.ArgumentsBase(), _sweepParameters);
             _redundantSweeper = new UniformRandomSweeper(new SweeperBase.ArgumentsBase { Retries = 0 }, _sweepParameters);
@@ -230,7 +220,6 @@ internal sealed class KdoSweeper : ISweeper
                     else
                     {
                         var parameterNumeric = sweepParam as INumericValueGenerator;
-                        //_host.Check(parameterNumeric != null, "KDO sweeper can only sweep over discrete and numeric parameters");
                         numericParamIndices.Add(i);
                         numericParamValues.Add(child[i]);
                     }

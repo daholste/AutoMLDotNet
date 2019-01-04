@@ -85,9 +85,6 @@ namespace Microsoft.ML.Auto
         /// </summary>
         public static TextFileSample CreateFromFullFile(string path)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //Contracts.CheckNonEmpty(path, nameof(path));
-
             using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 if (!fs.CanSeek)
@@ -99,7 +96,6 @@ namespace Microsoft.ML.Auto
 
                 var firstChunk = new byte[FirstChunkSizeMb * (1 << 20)];
                 int count = fs.Read(firstChunk, 0, firstChunk.Length);
-                //Contracts.Assert(count == firstChunk.Length);
                 if (!IsEncodingOkForSampling(firstChunk))
                     return CreateFromHead(path);
                 // REVIEW: CreateFromHead still truncates the file before the last 0x0A byte. For multi-byte encoding,
@@ -109,7 +105,6 @@ namespace Microsoft.ML.Auto
                 var lineCount = firstChunk.Count(x => x == '\n');
                 if (lineCount == 0)
                     throw new Exception("Counldn't identify line breaks. File is not text?");
-                    //throw Contracts.Except("Counldn't identify line breaks. File is not text?");
 
                 long approximateRowCount = (long)(lineCount * fileSize * 1.0 / firstChunk.Length);
                 var firstNewline = Array.FindIndex(firstChunk, x => x == '\n');
@@ -131,7 +126,6 @@ namespace Microsoft.ML.Auto
 
                 // determine the start of each remaining chunk
                 long fileSizeRemaining = fileSize - firstChunk.Length - ((long)chunkSize) * chunkCount;
-                //Contracts.Assert(fileSizeRemaining > 0);
 
                 var rnd = AutoMlUtils.Random;
                 var chunkStartIndices = Enumerable.Range(0, chunkCount)
@@ -145,7 +139,6 @@ namespace Microsoft.ML.Auto
                     fs.Seek(chunkStartIndex, SeekOrigin.Begin);
                     byte[] chunk = new byte[chunkSize];
                     int readCount = fs.Read(chunk, 0, chunkSize);
-                    //Contracts.Assert(readCount > 0);
                     Array.Resize(ref chunk, chunkSize);
                     chunks.Add(chunk);
                 }
@@ -157,9 +150,8 @@ namespace Microsoft.ML.Auto
         /// <summary>
         /// Create a <see cref="TextFileSample"/> by reading one chunk from the beginning.
         /// </summary>
-        public static TextFileSample CreateFromHead(string path)
+        private static TextFileSample CreateFromHead(string path)
         {
-            //Contracts.CheckNonEmpty(path, nameof(path));
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 var buf = new byte[BufferSizeMb * (1 << 20)];
@@ -184,9 +176,6 @@ namespace Microsoft.ML.Auto
         /// <returns></returns>
         private static byte[] StitchChunks(bool wholeFile, params byte[][] chunks)
         {
-            //Contracts.AssertValue(chunks);
-            //Contracts.Assert(chunks.All(x => x != null));
-
             using (var resultStream = new MemoryStream(BufferSizeMb * (1 << 20)))
             {
                 for (int i = 0; i < chunks.Length; i++)
@@ -206,8 +195,10 @@ namespace Microsoft.ML.Auto
                 }
 
                 var resultBuffer = resultStream.ToArray();
-                //if (Utils.Size(resultBuffer) == 0)
-                //    throw Contracts.Except("File is not text, or couldn't detect line breaks");
+                if (resultBuffer.Length == 0)
+                {
+                    throw new Exception("File is not text, or couldn't detect line breaks");
+                }
 
                 return resultBuffer;
             }

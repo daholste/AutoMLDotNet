@@ -60,7 +60,7 @@ namespace Microsoft.ML.Auto
             var typedData = textLoader.Read(sample);
 
             var purposeInferenceResult = PurposeInference.InferPurposes(env, typedData,
-                Enumerable.Range(0, typedLoaderArgs.Column.Length), new PurposeInference.Arguments(),
+                Enumerable.Range(0, typedLoaderArgs.Column.Length),
                 label: colLabelName);
 
             // detecting column grouping and generating column names

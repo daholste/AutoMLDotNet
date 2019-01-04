@@ -65,14 +65,7 @@ namespace Microsoft.ML.Auto
         /// <returns>The struct containing an array of grouped columns specifications.</returns>
         public static InferenceResult InferGroupingAndNames(MLContext env, bool hasHeader, ColumnTypeInference.Column[] types, PurposeInference.Column[] purposes)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //Contracts.CheckNonEmpty(types, nameof(types));
-            //Contracts.CheckNonEmpty(purposes, nameof(purposes));
-            //Contracts.Check(types.Length == purposes.Length);
-
             var result = new List<GroupingColumn>();
-            //using (var ch = env.Register("InferGrouping").Start("InferGrouping"))
-            //{
             var tuples = types.Zip(purposes, Tuple.Create).ToList();
             var grouped =
                 from t in tuples

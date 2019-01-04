@@ -36,12 +36,6 @@ namespace Microsoft.ML.Auto
 
         protected SweeperBase(ArgumentsBase args, string name)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //env.CheckNonWhiteSpace(name, nameof(name));
-            //Host = env.Register(name);
-            //Host.CheckValue(args, nameof(args));
-            //Host.CheckNonEmpty(args.SweptParameters, nameof(args.SweptParameters));
-
             _args = args;
 
             SweepParameters = args.SweptParameters.ToArray();
@@ -49,12 +43,6 @@ namespace Microsoft.ML.Auto
 
         protected SweeperBase(ArgumentsBase args, IValueGenerator[] sweepParameters, string name)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //env.CheckNonWhiteSpace(name, nameof(name));
-            //Host = env.Register(name);
-            //Host.CheckValue(args, nameof(args));
-            //Host.CheckValue(sweepParameters, nameof(sweepParameters));
-
             _args = args;
             SweepParameters = sweepParameters;
         }

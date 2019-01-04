@@ -18,15 +18,7 @@ namespace Microsoft.ML.Auto
     /// </summary>
     internal static class PurposeInference
     {
-        internal sealed class Arguments
-        {
-            public int MaxRowsToRead;
-
-            public Arguments()
-            {
-                MaxRowsToRead = 1000;
-            }
-        }
+        public const int MaxRowsToRead = 1000;
 
         public readonly struct Column
         {
@@ -100,7 +92,6 @@ namespace Microsoft.ML.Auto
 
             public Column GetColumn()
             {
-                //Contracts.Assert(_isPurposeSuggested);
                 return new Column(_columnId, _suggestedPurpose, _type.Value.RawKind());
             }
 
@@ -155,7 +146,6 @@ namespace Microsoft.ML.Auto
                             column.SuggestedPurpose = ColumnPurpose.Ignore;
                         else
                             continue;
-                        //ch.Info("Column '{0}' is {1} based on header.", column.ColumnName, column.SuggestedPurpose);
                     }
                 }
             }
@@ -208,26 +198,6 @@ namespace Microsoft.ML.Auto
                         }
                         else
                             column.SuggestedPurpose = ColumnPurpose.ImagePath;
-
-                        //ch.Info("Text column '{0}' purpose detected as '{1}' based on values.", column.ColumnName, column.SuggestedPurpose);
-                    }
-                }
-            }
-
-            internal sealed class FirstNumericOrBooleanIsLabel : IPurposeInferenceExpert
-            {
-                public void Apply(IntermediateColumn[] columns)
-                {
-                    if (columns.Any(x => x.IsPurposeSuggested && x.SuggestedPurpose == ColumnPurpose.Label))
-                        return;
-
-                    var firstNumeric =
-                        columns.FirstOrDefault(x => !x.IsPurposeSuggested && !x.Type.IsVector() && (x.Type.IsNumber() || x.Type.IsBool()));
-
-                    if (firstNumeric != null)
-                    {
-                        //firstNumeric.SuggestedPurpose = ColumnPurpose.Label;
-                        //ch.Info("Column '{0}' auto-designated as label.", firstNumeric.ColumnName);
                     }
                 }
             }
@@ -298,8 +268,6 @@ namespace Microsoft.ML.Auto
             // Vector-value text columns are always treated as text.
             // REVIEW: could be improved.
             yield return new Experts.TextArraysAreText();
-            // If there's no label column yet, first single-value numeric column is a label.
-            yield return new Experts.FirstNumericOrBooleanIsLabel();
             // Check column on boolean only values.
             yield return new Experts.BooleanProcessing();
             // All numeric columns are features.
@@ -317,27 +285,16 @@ namespace Microsoft.ML.Auto
         /// <param name="args">Additional arguments to inference.</param>
         /// <param name="label">User-defined label col</param>
         /// <returns>The result includes the array of auto-detected column purposes.</returns>
-        public static InferenceResult InferPurposes(MLContext env, IDataView data, IEnumerable<int> columnIndices, Arguments args,
+        public static InferenceResult InferPurposes(MLContext env, IDataView data, IEnumerable<int> columnIndices,
             string label = null)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //var host = env.Register("InferPurposes");
-            //host.CheckValue(data, nameof(data));
-            //host.CheckValue(columnIndices, nameof(columnIndices));
-
-            InferenceResult result;
-            //using (var ch = host.Start("InferPurposes"))
-            //{
-            var takenData = data.Take(args.MaxRowsToRead);
+            var takenData = data.Take(MaxRowsToRead);
             var cols = columnIndices.Select(x => new IntermediateColumn(takenData, x)).ToList();
             data = takenData;
 
             foreach (var expert in GetExperts())
             {
-                //using (var expertChannel = host.Start(expert.GetType().ToString()))
-                //{
                 expert.Apply(cols.ToArray());
-                //}
             }
 
             if (label == null)
@@ -352,13 +309,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            //ch.Check(cols.All(x => x.IsPurposeSuggested), "Purpose inference must be conclusive");
-
-            result = new InferenceResult(cols.Select(x => x.GetColumn()).ToArray());
-
-                //ch.Info("Automatic purpose inference complete");
-            //}
-            return result;
+            return new InferenceResult(cols.Select(x => x.GetColumn()).ToArray());
         }
     }
 }

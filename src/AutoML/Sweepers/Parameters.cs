@@ -128,7 +128,6 @@ namespace Microsoft.ML.Auto
 
         public FloatParameterValue(string name, Float value)
         {
-            //Contracts.Check(!Float.IsNaN(value));
             _name = name;
             _value = value;
             _valueText = _value.ToString("R");
@@ -212,11 +211,6 @@ namespace Microsoft.ML.Auto
 
         public LongValueGenerator(LongParamArguments args)
         {
-            //Contracts.Check(args.Min < args.Max, "min must be less than max");
-            // REVIEW: this condition can be relaxed if we change the math below to deal with it
-            //Contracts.Check(!args.LogBase || args.Min > 0, "min must be positive if log scale is used");
-            //Contracts.Check(!args.LogBase || args.StepSize == null || args.StepSize > 1, "StepSize must be greater than 1 if log scale is used");
-            //Contracts.Check(args.LogBase || args.StepSize == null || args.StepSize > 0, "StepSize must be greater than 0 if linear scale is used");
             _args = args;
         }
 
@@ -307,8 +301,6 @@ namespace Microsoft.ML.Auto
         public Float NormalizeValue(IParameterValue value)
         {
             var valueTyped = value as LongParameterValue;
-            //Contracts.Check(valueTyped != null, "LongValueGenerator could not normalized parameter because it is not of the correct type");
-            //Contracts.Check(_args.Min <= valueTyped.Value && valueTyped.Value <= _args.Max, "Value not in correct range");
 
             if (_args.LogBase)
             {
@@ -322,7 +314,6 @@ namespace Microsoft.ML.Auto
         public bool InRange(IParameterValue value)
         {
             var valueTyped = value as LongParameterValue;
-            //Contracts.Check(valueTyped != null, "Parameter should be of type LongParameterValue");
             return (_args.Min <= valueTyped.Value && valueTyped.Value <= _args.Max);
         }
     }
@@ -339,11 +330,6 @@ namespace Microsoft.ML.Auto
 
         public FloatValueGenerator(FloatParamArguments args)
         {
-            //Contracts.Check(args.Min < args.Max, "min must be less than max");
-            // REVIEW: this condition can be relaxed if we change the math below to deal with it
-            //Contracts.Check(!args.LogBase || args.Min > 0, "min must be positive if log scale is used");
-            //Contracts.Check(!args.LogBase || args.StepSize == null || args.StepSize > 1, "StepSize must be greater than 1 if log scale is used");
-            //Contracts.Check(args.LogBase || args.StepSize == null || args.StepSize > 0, "StepSize must be greater than 0 if linear scale is used");
             _args = args;
         }
 
@@ -426,8 +412,6 @@ namespace Microsoft.ML.Auto
         public Float NormalizeValue(IParameterValue value)
         {
             var valueTyped = value as FloatParameterValue;
-            //Contracts.Check(valueTyped != null, "FloatValueGenerator could not normalized parameter because it is not of the correct type");
-            //Contracts.Check(_args.Min <= valueTyped.Value && valueTyped.Value <= _args.Max, "Value not in correct range");
 
             if (_args.LogBase)
             {
@@ -441,7 +425,6 @@ namespace Microsoft.ML.Auto
         public bool InRange(IParameterValue value)
         {
             var valueTyped = value as FloatParameterValue;
-            //Contracts.Check(valueTyped != null, "Parameter should be of type FloatParameterValue");
             return (_args.Min <= valueTyped.Value && valueTyped.Value <= _args.Max);
         }
     }
@@ -457,7 +440,6 @@ namespace Microsoft.ML.Auto
 
         public DiscreteValueGenerator(DiscreteParamArguments args)
         {
-            //Contracts.Check(args.Values.Length > 0);
             _args = args;
         }
 

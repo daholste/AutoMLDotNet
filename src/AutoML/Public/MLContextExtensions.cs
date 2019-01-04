@@ -16,13 +16,13 @@ namespace Microsoft.ML.Auto.Public
             throw new NotImplementedException();
         }
 
-        public static Pipeline GetFirstPipeline(IDataView dataView, TaskKind task, string label)
+        public static Pipeline GetFirstPipeline(IDataView dataView, string label)
         {
             // todo: respect passed-in label
 
             var mlContext = new MLContext();
             var availableTransforms = TransformInferenceApi.InferTransforms(mlContext, dataView);
-            var availableTrainers = RecipeInference.AllowedTrainers(mlContext, task, 1);
+            var availableTrainers = RecipeInference.AllowedTrainers(mlContext, TaskKind.Regression, 1);
             var pipeline = new Auto.Pipeline(availableTransforms, availableTrainers.First(), mlContext);
             return pipeline.ToObjectModel();
         }

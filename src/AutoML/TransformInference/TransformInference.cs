@@ -7,10 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.Auto;
-using Microsoft.ML.Runtime.CommandLine;
 using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Runtime.EntryPoints;
 using Microsoft.ML.Runtime.Internal.Utilities;
 using Microsoft.ML.Transforms;
 using Microsoft.ML.Transforms.Categorical;
@@ -323,7 +320,6 @@ namespace Microsoft.ML.Auto
                     if (col.Type.IsText())
                     {
                         col.GetUniqueValueCounts<ReadOnlyMemory<char>>(out var unique, out var _, out var _);
-                        //ch.Info("Label column '{0}' is text. Suggested auto-labeling.", col.ColumnName);
 
                         string dest = DefaultColumnNames.Label;
                         string source = columnName.ToString();
@@ -340,19 +336,6 @@ namespace Microsoft.ML.Auto
                             }
                         );
                         yield return new SuggestedTransform(input, routingStructure);
-
-                        if (unique == 1)
-                        {
-                            //ch.Warning("Label column '{0}' has only one value in the sample. Maybe the label column is incorrect?", col.ColumnName);
-                        }
-                        else if (unique > 100)
-                        {
-                            //ch.Warning("Label column '{0}' has {1} different values in the sample. Multi-class classification might not be desirable with so many values.", col.ColumnName, unique);
-                        }
-                        else if (unique > 2)
-                        {
-                            //ch.Info("Label column '{0}' has {1} different values in the sample.", col.ColumnName, unique);
-                        }
                     }
                     else if (col.ColumnName != DefaultColumnNames.Label)
                     {
@@ -391,7 +374,6 @@ namespace Microsoft.ML.Auto
 
                     if (col.Type.IsText())
                     {
-                        //ch.Info("Group Id column '{0}' is text. Suggested hashing.", col.ColumnName);
                         // REVIEW: we could potentially apply HashJoin to vectors of text.
                         string dest = DefaultColumnNames.GroupId;
                         string source = columnName.ToString();
@@ -413,7 +395,6 @@ namespace Microsoft.ML.Auto
                     }
                     else if (col.ColumnName != DefaultColumnNames.GroupId)
                     {
-                        //ch.Warning("Group Id column '{0}' is not text. Couldn't determine correct transformation.");
                         string dest = DefaultColumnNames.GroupId;
                         string source = columnName.ToString();
                         var input = new ColumnCopyingEstimator(Env, source, dest);
@@ -441,7 +422,6 @@ namespace Microsoft.ML.Auto
                     var firstLabelColId = Array.FindIndex(columns, x => x.Purpose == ColumnPurpose.Label);
                     if (firstLabelColId < 0)
                     {
-                        //ch.Info("Label column not present in the dataset. This is likely an unsupervised learning problem.");
                         yield break;
                     }
 
@@ -451,13 +431,11 @@ namespace Microsoft.ML.Auto
 
                     if (col.Type.IsKnownSizeVector() && col.Type.ItemType() == NumberType.R4)
                     {
-                        //ch.Info("Label column '{0}' has type {1}, this can be only a multi-output regression problem.", col.ColumnName, col.Type);
                         yield break;
                     }
 
                     if (col.Type != NumberType.R4)
                     {
-                        //ch.Warning("Label column '{0}' has type {1} which is not supported by any learner.", col.ColumnName, col.Type);
                         yield break;
                     }
 
@@ -465,19 +443,6 @@ namespace Microsoft.ML.Auto
                     int singleton;
                     int total;
                     col.GetUniqueValueCounts<Single>(out unique, out singleton, out total);
-
-                    if (unique == 1)
-                    {
-                        //ch.Warning("Label column '{0}' has only one value in the sample. Maybe the label column is incorrect?", col.ColumnName);
-                    }
-                    else if (unique > 100)
-                    {
-                        //ch.Info("Label column '{0}' has {1} different values in the sample. This is likely a regression problem.", col.ColumnName, unique);
-                    }
-                    else if (unique > 2)
-                    {
-                        //ch.Info("Label column '{0}' has {1} different values in the sample. This can be treated as multi-class or regression problem.", col.ColumnName, unique);
-                    }
                 }
             }
 
@@ -506,7 +471,6 @@ namespace Microsoft.ML.Auto
                         }
                         else
                         {
-                            //ch.Info("Categorical column '{0}' has extremely high cardinality. Suggested hash-based category encoding.", column.ColumnName);
                             foundCatHash = true;
                             catHashColumnsNew.Add(new OneHotHashEncodingEstimator.ColumnInfo(columnName.ToString(), columnName.ToString()));
                         }
@@ -522,8 +486,7 @@ namespace Microsoft.ML.Auto
 
                         var input = new OneHotEncodingEstimator(Env, catColumnsNew.ToArray());
                         featureCols.AddRange(catColumnsNew.Select(c => c.Output));
-
-                        //ch.Info("Suggested dictionary-based category encoding for categorical columns.");
+                        
                         yield return new SuggestedTransform(input, routingStructure);
                     }
 
@@ -536,8 +499,7 @@ namespace Microsoft.ML.Auto
                         var routingStructure = new ColumnRoutingStructure(columnsSource, columnsDest);
 
                         var input = new OneHotHashEncodingEstimator(Env, catHashColumnsNew.ToArray());
-
-                        //ch.Info("Suggested hash-based category encoding for categorical columns.");
+                        
                         yield return new SuggestedTransform(input, routingStructure);
                     }
 
@@ -552,7 +514,6 @@ namespace Microsoft.ML.Auto
                 {
                     if (column.Type.IsVector())
                         return false;
-                    //Contracts.Assert(dataSampleFraction > 0);
                     int total;
                     int unique;
                     int singletons;
@@ -586,7 +547,6 @@ namespace Microsoft.ML.Auto
 
                     if (columnName.Length > 0)
                     {
-                        //ch.Info("Suggested conversion to numeric for boolean features.");
                         var input = new TypeConvertingEstimator(Env, newColumns.ToArray());
                         ColumnRoutingStructure.AnnotatedName[] columnsSource =
                             newColumns.Select(c => new ColumnRoutingStructure.AnnotatedName { IsNumeric = false, Name = c.Input }).ToArray();
@@ -688,7 +648,6 @@ namespace Microsoft.ML.Auto
                     {
                         if (!column.Type.ItemType().IsText() || column.Purpose != ColumnPurpose.TextFeature)
                             continue;
-                        //ch.Info("Suggested text featurization for text column '{0}'.", column.ColumnName);
 
                         var columnDestSuffix = "_tf";
                         var columnNameSafe = column.ColumnName;
@@ -767,8 +726,7 @@ namespace Microsoft.ML.Auto
                             continue;
                         if (!column.HasMissing)
                             continue;
-
-                        //ch.Info("Column '{0}' has missing values. Suggested missing indicator encoding.", column.ColumnName);
+                        
                         found = true;
                         
                         columnName.AppendFormat("{0}", column.ColumnName);
@@ -895,13 +853,10 @@ namespace Microsoft.ML.Auto
                     }
                     else if (count > 1)
                     {
-                        //if (!isAllText)
-                        //    ch.Warning("Not all name columns are textual. Ignored non-textual name columns.");
                         if (string.IsNullOrWhiteSpace(colSpecTextOnly.ToString()))
                             yield break;
 
-                        //ch.Info("Suggested grouping name columns into one vector.");
-
+                        // suggested grouping name columns into one vector
                         var input = new ColumnConcatenatingEstimator(Env, DefaultColumnNames.Name, columnList.ToArray());
 
                         ColumnRoutingStructure.AnnotatedName[] columnsSource =
@@ -938,35 +893,16 @@ namespace Microsoft.ML.Auto
 
         public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, Arguments args)
         {
-            //Contracts.CheckValue(env, nameof(env));
-            //var h = env.Register("InferTransforms");
-            //h.CheckValue(data, nameof(data));
-            //h.CheckValue(args, nameof(args));
-            //h.Check(args.EstimatedSampleFraction > 0);
-
             var dataSample = data.Take(MaxRowsToRead);
 
             // Infer column purposes from data sample.
-            var piArgs = new PurposeInference.Arguments { MaxRowsToRead = MaxRowsToRead };
             var columnIndices = Enumerable.Range(0, dataSample.Schema.Count);
-            var piResult = PurposeInference.InferPurposes(env, dataSample, columnIndices, piArgs);
+            var piResult = PurposeInference.InferPurposes(env, dataSample, columnIndices);
             var purposes = piResult.Columns;
 
             // Infer transforms
             var inferenceResult = InferTransforms(env, data, purposes, args);
             return inferenceResult.SuggestedTransforms;
-
-            // Keep viable transforms, where all transforms in the atomic group have pipeline nodes.
-            // First clause: ensure transform t has a pipeline node (is runnable).
-            // Second clause: ensure transform is in module catalog entry point list for this platform.
-            // Third clause: ensure all members of t's atoimic group are also available, since it is all
-            // or nothing for atomic groups (hence the name atomic -- 'uncuttable').
-            /*return inferenceResult.SuggestedTransforms.Where(t => t.PipelineNode != null
-                && availableTransforms.Any(a => a.Name.Equals(t.PipelineNode.GetEpName()))
-                && !inferenceResult.SuggestedTransforms
-                .Where(t2 => t2.PipelineNode == null)
-                .Select(t2 => t2.AtomicGroupId)
-                .Contains(t.AtomicGroupId)).ToArray();*/
         }
     }
 }
