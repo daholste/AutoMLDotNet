@@ -15,7 +15,7 @@ namespace Samples
         {
             var mlContext = new MLContext();
             var data = mlContext.Data.AutoRead(trainDataPath);
-            var pipeline = RegressionPipelineSuggester.GetFirstPipeline(data, "Label");
+            var pipeline = BinaryClassificationPipelineSuggester.GetFirstPipeline(data, "Label");
         }
     }
 }
