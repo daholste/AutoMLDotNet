@@ -113,7 +113,7 @@ namespace Microsoft.ML.Auto.Public
     public static class DataExtensions
     {
         // Delimiter, header, column datatype inference
-        public static (bool hasHeader, string separator, TextLoader.Column[] columns) InferColumns(this DataOperations catalog, string path, bool? hasHeader = null, string separator = null, TextLoader.Column[] columns = null)
+        public static (bool hasHeader, string separator, TextLoader.Column[] columns, ColumnPurpose[] purposes) InferColumns(this DataOperations catalog, string path, bool? hasHeader = null, string separator = null, TextLoader.Column[] columns = null)
         {
             throw new NotImplementedException();
         }
@@ -137,12 +137,6 @@ namespace Microsoft.ML.Auto.Public
             throw new NotImplementedException();
         }
 
-        // Purpose Inference
-        public static (ColumnPurpose purpose, IEnumerable<TextLoader.Column> columns)[] InferColumPurposes(this DataOperations catalog, IDataView dataView, (ColumnPurpose purpose, IEnumerable<TextLoader.Column> columns)[] knownColumnPurposes = null)
-        {
-            throw new NotImplementedException();
-        }
-
         // Task inference
         public static MachineLearningTaskType InferTask(this DataOperations catalog, IDataView dataView)
         {
@@ -162,31 +156,18 @@ namespace Microsoft.ML.Auto.Public
         
     }
 
-    public interface IExperimentTerminator
-    {
-        bool ShouldTerminte();
-    }
-
-    public class CountBasedTerminator : IExperimentTerminator
-    {
-        public bool ShouldTerminte()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    public class TimeBasedTerminator : IExperimentTerminator
-    {
-        public bool ShouldTerminte()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class AutoFitSettings
     {
-        public IEnumerable<IExperimentTerminator> ExperimentTerminators;
+        public StoppingCriteria StoppingCriteria;
         public int MaxIterations;
+    }
+
+    public class StoppingCriteria
+    {
+        public int MaxIterations;
+        public int MaxSeconds;
+        public bool StopAfterConverging;
+        public double ExitScore;
     }
 
     public class BinaryClassificationResult
