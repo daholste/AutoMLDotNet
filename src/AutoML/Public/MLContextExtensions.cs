@@ -124,7 +124,6 @@ namespace Microsoft.ML.Auto.Public
             throw new NotImplementedException();
         }
 
-        // todo: should this return text loader args to ensure train/test/validation schemas return identically? (maybe not, not sure)
         public static IDataView AutoRead(this DataOperations catalog, string path)
         {
             var mlContext = new MLContext();

@@ -315,11 +315,10 @@ namespace Microsoft.ML.Auto
         /// <param name="data">The data to use for inference.</param>
         /// <param name="columnIndices">Indices of columns that we're interested in.</param>
         /// <param name="args">Additional arguments to inference.</param>
-        /// <param name="dataRoles">(Optional) User defined Role mappings for data.</param>
-        /// <param name="colLabelName">(Optional) User defined Role mappings for data.</param>
+        /// <param name="label">User-defined label col</param>
         /// <returns>The result includes the array of auto-detected column purposes.</returns>
         public static InferenceResult InferPurposes(MLContext env, IDataView data, IEnumerable<int> columnIndices, Arguments args,
-            string colLabelName = null)
+            string label = null)
         {
             //Contracts.CheckValue(env, nameof(env));
             //var host = env.Register("InferPurposes");
@@ -341,13 +340,13 @@ namespace Microsoft.ML.Auto
                 //}
             }
 
-            if (colLabelName == null)
+            if (label == null)
             {
-                colLabelName = "Label";
+                label = "Label";
             }
             foreach (var col in cols)
             {
-                if (col.ColumnName == colLabelName)
+                if (col.ColumnName == label)
                 {
                     col.SuggestedPurpose = ColumnPurpose.Label;
                 }

@@ -968,37 +968,5 @@ namespace Microsoft.ML.Auto
                 .Select(t2 => t2.AtomicGroupId)
                 .Contains(t.AtomicGroupId)).ToArray();*/
         }
-
-        public static SuggestedTransform[] InferConcatNumericFeatures(MLContext env, IDataView data, Arguments args)
-        {
-            //Contracts.CheckValue(env, nameof(env));
-            //var h = env.Register("InferConcatNumericFeatures");
-            //h.CheckValue(data, nameof(data));
-            //h.CheckValue(args, nameof(args));
-            //h.Check(args.EstimatedSampleFraction > 0);
-
-            data = data.Take(MaxRowsToRead);
-
-            // Infer column purposes from data sample.
-            var piArgs = new PurposeInference.Arguments { MaxRowsToRead = MaxRowsToRead };
-            var columnIndices = Enumerable.Range(0, data.Schema.Count);
-            var piResult = PurposeInference.InferPurposes(env, data, columnIndices, piArgs);
-            var purposes = piResult.Columns;
-
-            var cols = purposes.Where(x => !data.Schema[x.ColumnIndex].IsHidden
-                && !args.ExcludedColumnIndices.Contains(x.ColumnIndex))
-                .Select(x => new IntermediateColumn(data, x))
-                .ToArray();
-            //using (var rootCh = h.Start("InferConcatNumericFeatures"))
-            //{
-            var list = new List<SuggestedTransform>();
-            var expert = new Experts.FeaturesColumnConcatRenameNumericOnly();
-
-            //using (var ch = h.Start(expert.GetType().ToString()))
-            //{
-            SuggestedTransform[] suggestions = expert.Apply(cols, args).ToArray();
-            list.AddRange(suggestions);
-            return list.ToArray();
-        }
     }
 }
