@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Data;
 using Microsoft.ML.Runtime;
@@ -31,7 +33,8 @@ namespace Microsoft.ML.Auto.Public
     public static class RegressionExtensions
     {
         public static RegressionResult AutoFit(this RegressionContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default(CancellationToken), IProgress<RegressionPipelineResult> iterationCallback = null)
         {
             // todo: respect passed-in label
 
@@ -53,7 +56,8 @@ namespace Microsoft.ML.Auto.Public
     public static class BinaryClassificationExtensions
     {
         public static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null, 
+            CancellationToken cancellationToken = default(CancellationToken), IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
         {
             // todo: respect passed-in label
 
@@ -75,7 +79,8 @@ namespace Microsoft.ML.Auto.Public
     public static class MulticlassExtensions
     {
         public static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default(CancellationToken), IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
         {
             // todo: respect passed-in label
 
@@ -168,9 +173,10 @@ namespace Microsoft.ML.Auto.Public
         internal bool EnableModelExplainability;
         internal bool EnableAutoTransformation;
 
-        // spec question: Is this automatic or user setting?
+        // spec question: Are following automatic or a user setting?
         internal bool EnableSubSampling;
         internal bool EnableCaching;
+        internal TraceLevel TraceLevel; // Should this be controlled through code or appconfig?
         
         //remove
         internal int MaxIterations;
@@ -303,6 +309,7 @@ namespace Microsoft.ML.Auto.Public
     {
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
+        internal readonly Pipeline Pipeline;
 
         public PipelineResult(ITransformer model, IDataView scoredValidationData)
         {
