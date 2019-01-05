@@ -170,6 +170,7 @@ namespace Microsoft.ML.Auto.Public
 
         // spec question: Is this automatic or user setting?
         internal bool EnableSubSampling;
+        internal bool EnableCaching;
         
         //remove
         internal int MaxIterations;
@@ -192,7 +193,7 @@ namespace Microsoft.ML.Auto.Public
         internal bool PreferExplainability;
         internal bool PreferInferenceSpeed;
         internal bool PreferSmallDeploymentSize;
-        internal bool PreferStreamProcessing;
+        internal bool PreferSmallMemoryFootprint;
     }
 
     public class IterationStoppingCriteria
