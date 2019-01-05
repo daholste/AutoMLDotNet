@@ -311,10 +311,40 @@ namespace Microsoft.ML.Auto.Public
         public readonly IDataView ScoredValidationData;
         internal readonly Pipeline Pipeline;
 
-        public PipelineResult(ITransformer model, IDataView scoredValidationData)
+        public PipelineResult(ITransformer model, IDataView scoredValidationData, Pipeline pipeline = null)
         {
             Model = model;
             ScoredValidationData = scoredValidationData;
+            Pipeline = pipeline;
+        }
+    }
+
+    public enum InferenceType
+    {
+        Seperator,
+        Header,
+        Label,
+        Task,
+        ColumnDataKind,
+        ColumnPurpose,
+        Tranform,
+        Trainer,
+        Hyperparams
+    }
+
+    // Following exception is used when the data
+    public class InferenceException : Exception
+    {
+        public InferenceType InferenceType;
+
+        public InferenceException(InferenceType inferenceType, string message)
+        : base(message)
+        {
+        }
+
+        public InferenceException(InferenceType inferenceType, string message, Exception inner)
+            : base(message, inner)
+        {
         }
     }
 }
