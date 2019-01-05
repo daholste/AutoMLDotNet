@@ -158,16 +158,72 @@ namespace Microsoft.ML.Auto.Public
 
     public class AutoFitSettings
     {
-        public StoppingCriteria StoppingCriteria;
-        public int MaxIterations;
+        public ExperimentStoppingCriteria StoppingCriteria;
+        internal IterationStoppingCriteria IterationStoppingCriteria;
+        internal Concurrency Concurrency;
+        internal Filters Filters;
+        internal CrossValidationSettings CrossValidationSettings;
+        internal OptimizingMetric OptimizingMetric;
+        internal bool EnableEnsembling;
+        internal bool EnableModelExplainability;
+        internal bool EnableAutoTransformation;
+
+        // spec question: Is this automatic or user setting?
+        internal bool EnableSubSampling;
+        
+        //remove
+        internal int MaxIterations;
     }
 
-    public class StoppingCriteria
+    public class ExperimentStoppingCriteria
     {
         public int MaxIterations;
-        public int MaxSeconds;
-        public bool StopAfterConverging;
-        public double ExitScore;
+        public int TimeOutInMinutes;
+        internal bool StopAfterConverging;
+        internal double ExperimentExitScore;
+    }
+
+    internal class Filters
+    {
+        internal IEnumerable<Trainers> WhitelistTrainers;
+        internal IEnumerable<Trainers> BlackListTrainers;
+        internal IEnumerable<Transformers> WhitelistTransformers;
+        internal IEnumerable<Transformers> BlacklistTransformers;
+        internal bool PreferExplainability;
+        internal bool PreferInferenceSpeed;
+        internal bool PreferSmallDeploymentSize;
+        internal bool PreferStreamProcessing;
+    }
+
+    public class IterationStoppingCriteria
+    {
+        internal int TimeOutInSeconds;
+        internal bool TerminateOnLowAccuracy;
+    }
+
+    public class Concurrency
+    {
+        internal int MaxConcurrentIterations;
+        internal int MaxCoresPerIteration;
+    }
+
+    internal enum Trainers
+    {
+        RegressionLightGBM,
+        ClassficationRandomForest,
+        ClassificationLightGBM
+    }
+
+    internal enum Transformers
+    {
+
+    }
+
+    internal class CrossValidationSettings
+    {
+        internal int NumberOfFolds;
+        internal int ValidationSizePercentage;
+        internal IEnumerable<string> StratificationColumnNames;
     }
 
     public class BinaryClassificationResult
