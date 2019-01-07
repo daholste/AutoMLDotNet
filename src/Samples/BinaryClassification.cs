@@ -73,7 +73,10 @@ namespace Samples
             // run AutoML & train model
             var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
             var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, "Label", validationData, preprocessor, 
-                new AutoFitSettings() { MaxIterations = 14 });
+                new AutoFitSettings()
+                {
+                    StoppingCriteria = new ExperimentStoppingCriteria() { MaxIterations = 10 }
+                });
             // get best AutoML model
             var model = autoMlResult.BestPipeline.Model;
 

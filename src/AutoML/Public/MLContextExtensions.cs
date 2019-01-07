@@ -35,8 +35,8 @@ namespace Microsoft.ML.Auto.Public
             CancellationToken cancellationToken = default(CancellationToken), IProgress<RegressionPipelineResult> iterationCallback = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, settings.MaxIterations, 
-                preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, 
+                settings.StoppingCriteria.MaxIterations,  preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
 
             var results = new RegressionPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -57,8 +57,8 @@ namespace Microsoft.ML.Auto.Public
             CancellationToken cancellationToken = default(CancellationToken), IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, settings.MaxIterations, 
-                preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, 
+                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
 
             var results = new BinaryClassificationPipelineResult[allPipelines.Length];
             for(var i = 0; i < results.Length; i++)
@@ -79,8 +79,8 @@ namespace Microsoft.ML.Auto.Public
             CancellationToken cancellationToken = default(CancellationToken), IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, settings.MaxIterations,
-                preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, 
+                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
 
             var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -219,9 +219,6 @@ namespace Microsoft.ML.Auto.Public
         internal bool EnableSubSampling;
         internal bool EnableCaching;
         internal TraceLevel TraceLevel; // Should this be controlled through code or appconfig?
-        
-        //remove
-        internal int MaxIterations;
     }
 
     public class ExperimentStoppingCriteria

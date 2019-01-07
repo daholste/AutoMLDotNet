@@ -22,7 +22,10 @@ namespace Samples
 
             // run AutoML & train model
             var autoMlResult = mlContext.MulticlassClassification.AutoFit(trainData, "Label", validationData,
-                settings: new AutoFitSettings() { MaxIterations = 14 });
+                settings: new AutoFitSettings()
+                {
+                    StoppingCriteria = new ExperimentStoppingCriteria() { MaxIterations = 10 }
+                });
             // get best AutoML model
             var model = autoMlResult.BestPipeline.Model;
 
