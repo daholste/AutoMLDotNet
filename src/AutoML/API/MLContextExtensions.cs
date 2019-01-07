@@ -32,10 +32,11 @@ namespace Microsoft.ML.Auto
     {
         public static RegressionResult AutoFit(this RegressionContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            CancellationToken cancellationToken = default(CancellationToken), IProgress<RegressionPipelineResult> iterationCallback = null)
+            CancellationToken cancellationToken = default(CancellationToken), InferredColumn[] inferredColumns = null,
+            IProgress<RegressionPipelineResult> iterationCallback = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, 
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
                 settings.StoppingCriteria.MaxIterations,  preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
 
             var results = new RegressionPipelineResult[allPipelines.Length];
@@ -53,11 +54,12 @@ namespace Microsoft.ML.Auto
     public static class BinaryClassificationExtensions
     {
         public static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null, 
-            CancellationToken cancellationToken = default(CancellationToken), IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken), 
+            IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, 
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
                 settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
 
             var results = new BinaryClassificationPipelineResult[allPipelines.Length];
@@ -76,10 +78,11 @@ namespace Microsoft.ML.Auto
     {
         public static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            CancellationToken cancellationToken = default(CancellationToken), IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken), 
+            IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, 
+            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
                 settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
 
             var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
@@ -202,7 +205,7 @@ namespace Microsoft.ML.Auto
             ColumnPurpose = columnPurpose;
         }
 
-        public TextLoader.Column ToTextLoaderColumn()
+        internal TextLoader.Column ToTextLoaderColumn()
         {
             return new TextLoader.Column()
             {
@@ -210,6 +213,18 @@ namespace Microsoft.ML.Auto
                 Type = Type,
                 Source = Source
             };
+        }
+
+        internal PurposeInference.Column[] ToInternalColumnPurposes()
+        {
+            var columnIndexList = AutoMlUtils.GetColumnIndexList(Source);
+            var result = new PurposeInference.Column[columnIndexList.Count];
+            for(var i = 0; i < columnIndexList.Count; i++)
+            {
+                var internalColumn = new PurposeInference.Column(columnIndexList[i], ColumnPurpose, Type);
+                result[i] = internalColumn;
+            }
+            return result;
         }
     }
 

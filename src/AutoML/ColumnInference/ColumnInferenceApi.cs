@@ -84,9 +84,7 @@ namespace Microsoft.ML.Auto
             var textLoader = context.Data.CreateTextReader(typedLoaderArgs);
             var dataView = createDataView(textLoader);
 
-            var purposeInferenceResult = PurposeInference.InferPurposes(context, dataView,
-                Enumerable.Range(0, typeInference.Columns.Length),
-                label);
+            var purposeInferenceResult = PurposeInference.InferPurposes(context, dataView, label);
 
             // infer column grouping and generate column names
             var groupingResult = ColumnGroupingInference.InferGroupingAndNames(context, hasHeader,

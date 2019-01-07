@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Runtime.Data;
 
@@ -7,8 +8,8 @@ namespace Microsoft.ML.Auto
     internal static class AutoFitApi
     {
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFit(IDataView trainData, 
-            IDataView validationData, string label, int maxIterations, IEstimator<ITransformer> preprocessor, 
-            TaskKind task, OptimizingMetric metric)
+            IDataView validationData, string label, InferredColumn[] inferredColumns, int maxIterations, 
+            IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
@@ -25,9 +26,10 @@ namespace Microsoft.ML.Auto
             // infer pipelines
             var optimizingMetricfInfo = new OptimizingMetricInfo(metric);
             var terminator = new IterationBasedTerminator(maxIterations);
-            var auotFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
-                   maxIterations, label, trainData, validationData);
-            var allPipelines = auotFitter.InferPipelines(1);
+            var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
+                   maxIterations, label, ToInternalColumnPurposes(inferredColumns), 
+                   trainData, validationData);
+            var allPipelines = autoFitter.InferPipelines(1);
 
             // apply preprocessor to returned models
             if (preprocessorTransform != null)
@@ -42,6 +44,16 @@ namespace Microsoft.ML.Auto
             var bestPipeline = allPipelines.First(p => p.Score == bestScore);
 
             return (allPipelines, bestPipeline);
+        }
+
+        private static PurposeInference.Column[] ToInternalColumnPurposes(InferredColumn[] inferredColumns)
+        {
+            var result = new List<PurposeInference.Column>();
+            foreach(var inferredColumn in inferredColumns)
+            {
+                result.AddRange(inferredColumn.ToInternalColumnPurposes());
+            }
+            return result.ToArray();
         }
     }
 }

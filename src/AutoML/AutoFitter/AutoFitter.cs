@@ -20,13 +20,14 @@ namespace Microsoft.ML.Auto
         private readonly int _maxIterations;
         private readonly MLContext _mlContext;
         private readonly OptimizingMetricInfo _optimizingMetricInfo;
+        private readonly PurposeInference.Column[] _puproseOverrides;
         private readonly IterationBasedTerminator _terminator;
         private readonly IDataView _trainData;
         private readonly TaskKind _task;
         private readonly IDataView _validationData;
 
         public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
-            TaskKind task, int maxIterations, string label,
+            TaskKind task, int maxIterations, string label, PurposeInference.Column[] puproseOverrides,
             IDataView trainData, IDataView validationData)
         {
             _history = new List<PipelineRunResult>();
@@ -34,6 +35,7 @@ namespace Microsoft.ML.Auto
             _maxIterations = maxIterations;
             _mlContext = mlContext;
             _optimizingMetricInfo = metricInfo;
+            _puproseOverrides = puproseOverrides;
             _terminator = terminator;
             _trainData = trainData;
             _task = task;
@@ -43,7 +45,7 @@ namespace Microsoft.ML.Auto
         public PipelineRunResult[] InferPipelines(int batchSize)
         {
             var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _maxIterations);
-            var availableTransforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label);
+            var availableTransforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label, _puproseOverrides);
             var pipelineSuggester = new RocketPipelineSuggester(_mlContext, _optimizingMetricInfo.IsMaximizing,
                 availableTrainers, availableTransforms);
 
