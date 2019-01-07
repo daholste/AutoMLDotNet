@@ -297,7 +297,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            return intermediateCols.Select(x => x.GetColumn()).ToArray();
+            return result;
         }
         
         private static IntermediateColumn[] InferPurposes(MLContext context, IDataView data, IEnumerable<int> columnIndices)
