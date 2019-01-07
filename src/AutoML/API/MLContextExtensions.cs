@@ -233,6 +233,7 @@ namespace Microsoft.ML.Auto
         // spec question: Are following automatic or a user setting?
         internal bool EnableSubSampling;
         internal bool EnableCaching;
+        internal bool ExternalizeTraining;
         internal TraceLevel TraceLevel; // Should this be controlled through code or appconfig?
     }
 
