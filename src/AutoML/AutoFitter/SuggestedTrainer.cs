@@ -63,7 +63,8 @@ namespace Microsoft.ML.Auto
             {
                 elementProperties[hyperParam.Name] = hyperParam.ProcessedValue();
             }
-            return new Public.PipelineElement(TrainerName, Public.PipelineElementType.Trainer, elementProperties);
+            return new Public.PipelineElement(TrainerName, Public.PipelineElementType.Trainer, 
+                new[] { "Features" }, new[] { "Score" }, elementProperties);
         }
 
         /// <summary>

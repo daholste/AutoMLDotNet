@@ -67,9 +67,10 @@ namespace Microsoft.ML.Auto
 
         public Public.PipelineElement ToObjectModel()
         {
+            var inputColumns = RoutingStructure.ColumnsConsumed.Select(c => c.Name).ToArray();
+            var outputColumns = RoutingStructure.ColumnsProduced.Select(c => c.Name).ToArray();
+
             var elementProperties = new Dictionary<string, object>();
-            elementProperties["InputColumns"] = RoutingStructure.ColumnsConsumed.Select(c => c.Name);
-            elementProperties["OutputColumns"] = RoutingStructure.ColumnsProduced.Select(c => c.Name);
             if (Properties != null)
             {
                 foreach (var property in Properties)
@@ -77,7 +78,9 @@ namespace Microsoft.ML.Auto
                     elementProperties[property.Key] = property.Value;
                 }
             }
-            return new Public.PipelineElement(Estimator.GetType().Name, Public.PipelineElementType.Transform, elementProperties);
+
+            return new Public.PipelineElement(Estimator.GetType().Name, Public.PipelineElementType.Transform,
+                inputColumns, outputColumns, elementProperties);
         }
     }
 
