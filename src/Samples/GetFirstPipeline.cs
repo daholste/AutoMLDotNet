@@ -12,7 +12,7 @@ namespace Samples
         {
             var mlContext = new MLContext();
             var columnInference = mlContext.Data.InferColumns(trainDataPath, label, true);
-            var textLoader = columnInference.BuildTextLoader();
+            var textLoader = mlContext.Data.CreateTextReader(columnInference);
             var data = textLoader.Read(trainDataPath);
             var pipeline = BinaryClassificationPipelineSuggester.GetFirstPipeline(data, label);
         }

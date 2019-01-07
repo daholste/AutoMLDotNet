@@ -145,6 +145,11 @@ namespace Microsoft.ML.Auto
             return textLoader.Read(source);
         }
 
+        public static TextLoader CreateTextReader(this DataOperations catalog, ColumnInferenceResult columnInferenceResult)
+        {
+            return columnInferenceResult.BuildTextLoader();
+        }
+
         // Task inference
         public static MachineLearningTaskType InferTask(this DataOperations catalog, IDataView dataView)
         {
@@ -175,8 +180,7 @@ namespace Microsoft.ML.Auto
             Separator = separator;
         }
 
-        // todo: should we keep public, or make this private?
-        public TextLoader BuildTextLoader()
+        internal TextLoader BuildTextLoader()
         {
             var context = new MLContext();
             return new TextLoader(context, new TextLoader.Arguments() {
