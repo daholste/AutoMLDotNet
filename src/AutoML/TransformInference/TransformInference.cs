@@ -259,9 +259,6 @@ namespace Microsoft.ML.Auto
             // For name column, rename to Name (or, if multiple and text, concat and rename to Name).
             yield return new Experts.NameColumnConcatRename();
 
-            // Check cardinality and type for numeric labels.
-            yield return new Experts.LabelAdvisory();
-
             // For boolean columns use convert transform
             yield return new Experts.Boolean();
 
@@ -391,37 +388,6 @@ namespace Microsoft.ML.Auto
 
                         yield return new SuggestedTransform(input, routingStructure);
                     }
-                }
-            }
-
-            internal sealed class LabelAdvisory : TransformInferenceExpertBase
-            {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
-                {
-                    var firstLabelColId = Array.FindIndex(columns, x => x.Purpose == ColumnPurpose.Label);
-                    if (firstLabelColId < 0)
-                    {
-                        yield break;
-                    }
-
-                    var col = columns[firstLabelColId];
-                    if (col.Type.IsText())
-                        yield break;
-
-                    if (col.Type.IsKnownSizeVector() && col.Type.ItemType() == NumberType.R4)
-                    {
-                        yield break;
-                    }
-
-                    if (col.Type != NumberType.R4)
-                    {
-                        yield break;
-                    }
-
-                    int unique;
-                    int singleton;
-                    int total;
-                    col.GetUniqueValueCounts<Single>(out unique, out singleton, out total);
                 }
             }
 
