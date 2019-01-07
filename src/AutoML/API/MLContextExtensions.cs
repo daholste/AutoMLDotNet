@@ -11,20 +11,11 @@ using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
-    public static class BinaryClassificationPipelineSuggester
+    public class BinaryClassificationPipelineSuggester
     {
-        public static Pipeline[] GetNextPipelines(Pipeline[] history, RegressionMetrics[] metrics, IDataView trainData, string label, List<string> whiteListeTrainers = null, List<string> blockListTrainers = null)
+        public Pipeline[] GetNextPipelines(Pipeline[] history, RegressionMetrics[] metrics, IDataView trainData, string label, List<string> whiteListeTrainers = null, List<string> blockListTrainers = null)
         {
             throw new NotImplementedException();
-        }
-
-        public static Pipeline GetFirstPipeline(IDataView dataView, string label)
-        {
-            var mlContext = new MLContext();
-            var availableTransforms = TransformInferenceApi.InferTransforms(mlContext, dataView, label);
-            var availableTrainers = RecipeInference.AllowedTrainers(mlContext, TaskKind.BinaryClassification, 1);
-            var pipeline = new Auto.InferredPipeline(availableTransforms, availableTrainers.First(), mlContext);
-            return pipeline.ToPipeline();
         }
     }
 
@@ -49,6 +40,11 @@ namespace Microsoft.ML.Auto
             var bestResult = new RegressionPipelineResult((RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
             return new RegressionResult(bestResult, results);
         }
+
+        public static Pipeline GetPipeline(this RegressionContext context, IDataView dataView, string label)
+        {
+            return PipelineSuggesterApi.GetPipeline(TaskKind.Regression, dataView, label);
+        }
     }
 
     public static class BinaryClassificationExtensions
@@ -72,6 +68,11 @@ namespace Microsoft.ML.Auto
             var bestResult = new BinaryClassificationPipelineResult((BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
             return new BinaryClassificationResult(bestResult, results);
         }
+
+        public static Pipeline GetPipeline(this BinaryClassificationContext context, IDataView dataView, string label)
+        {
+            return PipelineSuggesterApi.GetPipeline(TaskKind.BinaryClassification, dataView, label);
+        }
     }
 
     public static class MulticlassExtensions
@@ -94,6 +95,11 @@ namespace Microsoft.ML.Auto
             }
             var bestResult = new MulticlassClassificationPipelineResult((MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
             return new MulticlassClassificationResult(bestResult, results);
+        }
+
+        public static Pipeline GetPipeline(this MulticlassClassificationContext context, IDataView dataView, string label)
+        {
+            return PipelineSuggesterApi.GetPipeline(TaskKind.MulticlassClassification, dataView, label);
         }
     }
 

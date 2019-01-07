@@ -14,7 +14,7 @@ namespace Samples
             var columnInference = mlContext.Data.InferColumns(trainDataPath, label, true);
             var textLoader = mlContext.Data.CreateTextReader(columnInference);
             var data = textLoader.Read(trainDataPath);
-            var pipeline = BinaryClassificationPipelineSuggester.GetFirstPipeline(data, label);
+            var pipeline = mlContext.BinaryClassification.GetPipeline(data, label);
         }
     }
 }
