@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
     internal static class TransformInferenceApi
     {
-        public static IEnumerable<SuggestedTransform> InferTransforms(MLContext mlContext, IDataView data, string label)
+        public static IEnumerable<SuggestedTransform> InferTransforms(MLContext context, IDataView data, string label)
         {
-            var args = new TransformInference.Arguments
-            {
-                EstimatedSampleFraction = 1.0,
-                ExcludeFeaturesConcatTransforms = false
-            };
-            return TransformInference.InferTransforms(mlContext, data, args, label);
+            // infer column purposes
+            var columnIndices = Enumerable.Range(0, data.Schema.Count);
+            var purposes = PurposeInference.InferPurposes(context, data, columnIndices, label);
+
+            return TransformInference.InferTransforms(context, data, purposes);
         }
     }
 }
