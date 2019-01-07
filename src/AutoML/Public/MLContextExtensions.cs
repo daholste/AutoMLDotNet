@@ -130,7 +130,7 @@ namespace Microsoft.ML.Auto.Public
         {
             var mlContext = new MLContext();
             var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
-            var textLoader = columnInferenceResult.BuildTextLoader(mlContext);
+            var textLoader = columnInferenceResult.BuildTextLoader();
             return textLoader.Read(path);
         }
 
@@ -138,7 +138,7 @@ namespace Microsoft.ML.Auto.Public
         {
             var mlContext = new MLContext();
             var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator);
-            var textLoader = columnInferenceResult.BuildTextLoader(mlContext);
+            var textLoader = columnInferenceResult.BuildTextLoader();
             return textLoader.Read(source);
         }
 
@@ -173,12 +173,13 @@ namespace Microsoft.ML.Auto.Public
         }
 
         // todo: should we keep public, or make this private?
-        public TextLoader BuildTextLoader(MLContext context)
+        public TextLoader BuildTextLoader()
         {
+            var context = new MLContext();
             return new TextLoader(context, new TextLoader.Arguments() {
                 AllowQuoting = IsQuoted,
                 AllowSparse = IsSparse,
-                Column = InferredColumns.Select(c => c.TextLoaderColumn).ToArray(),
+                Column = InferredColumns.Select(c => c.ToTextLoaderColumn()).ToArray(),
                 Separator = Separator
             });
         }
@@ -186,15 +187,29 @@ namespace Microsoft.ML.Auto.Public
 
     public class InferredColumn
     {
-        public readonly TextLoader.Column TextLoaderColumn;
+        public string Name;
+        public DataKind Type;
+        public TextLoader.Range[] Source;
 
         // todo: have an internal copy of ColumnPurpose?
-        public readonly ColumnPurpose ColumnPurpose;
+        public ColumnPurpose ColumnPurpose;
 
-        public InferredColumn(TextLoader.Column textLoaderColumn, ColumnPurpose columnPurpose)
+        public InferredColumn(string name, DataKind type, TextLoader.Range[] source, ColumnPurpose columnPurpose)
         {
-            TextLoaderColumn = textLoaderColumn;
+            Name = name;
+            Type = type;
+            Source = source;
             ColumnPurpose = columnPurpose;
+        }
+
+        public TextLoader.Column ToTextLoaderColumn()
+        {
+            return new TextLoader.Column()
+            {
+                Name = Name,
+                Type = Type,
+                Source = Source
+            };
         }
     }
 

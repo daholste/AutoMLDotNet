@@ -79,7 +79,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            return new Public.PipelineElement(Estimator.GetType().Name, Public.PipelineElementType.Transform,
+            return new Public.PipelineElement(Estimator.GetType().FullName, Public.PipelineElementType.Transform,
                 inputColumns, outputColumns, elementProperties);
         }
     }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.ML;
-using Microsoft.ML.Auto;
+﻿using Microsoft.ML;
 using Microsoft.ML.Auto.Public;
 
 namespace Samples
@@ -15,7 +11,9 @@ namespace Samples
         public static void Run()
         {
             var mlContext = new MLContext();
-            var data = mlContext.Data.AutoRead(trainDataPath, label);
+            var columnInference = mlContext.Data.InferColumns(trainDataPath, label, true);
+            var textLoader = columnInference.BuildTextLoader();
+            var data = textLoader.Read(trainDataPath);
             var pipeline = BinaryClassificationPipelineSuggester.GetFirstPipeline(data, label);
         }
     }

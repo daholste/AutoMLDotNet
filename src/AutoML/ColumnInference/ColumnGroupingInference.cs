@@ -38,7 +38,7 @@ namespace Microsoft.ML.Auto
             public Public.InferredColumn ToPublicInferredColumn()
             {
                 var textLoaderCol = GenerateTextLoaderColumn();
-                return new Public.InferredColumn(textLoaderCol, Purpose);
+                return new Public.InferredColumn(SuggestedName, ItemKind, textLoaderCol.Source, Purpose);
             }
 
             private TextLoader.Column GenerateTextLoaderColumn()
