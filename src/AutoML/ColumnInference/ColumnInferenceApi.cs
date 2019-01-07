@@ -4,7 +4,7 @@ using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
-    internal static class SchemaInferenceApi
+    internal static class ColumnInferenceApi
     {
         public static Public.ColumnInferenceResult InferColumns(MLContext context, string path, string label, 
             bool hasHeader = false, string separator = null)

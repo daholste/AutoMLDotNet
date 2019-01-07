@@ -3,9 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
+using Microsoft.ML.Data;
+using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Transforms;
 
 namespace Microsoft.ML.Auto
 {
@@ -20,6 +21,14 @@ namespace Microsoft.ML.Auto
                 message = message ?? "Assertion failed";
                 throw new Exception(message);
             }
+        }
+
+        public static IDataView Take(this IDataView data, int count)
+        {
+            // REVIEW: This should take an env as a parameter, not create one.
+            var env = new MLContext();
+            var take = SkipTakeFilter.Create(env, new SkipTakeFilter.TakeArguments { Count = count }, data);
+            return new CacheDataView(env, data, Enumerable.Range(0, data.Schema.Count).ToArray());
         }
     }
 }

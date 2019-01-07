@@ -117,7 +117,7 @@ namespace Microsoft.ML.Auto.Public
         {
             // todo: respect & test column overrides param
             var mlContext = new MLContext();
-            return SchemaInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
+            return ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
         }
 
         // Auto reader (includes column inference)
@@ -129,7 +129,7 @@ namespace Microsoft.ML.Auto.Public
         public static IDataView AutoRead(this DataOperations catalog, string path, string label, bool hasHeader = false, string separator = null)
         {
             var mlContext = new MLContext();
-            var columnInferenceResult = SchemaInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
+            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
             var textLoader = columnInferenceResult.BuildTextLoader(mlContext);
             return textLoader.Read(path);
         }
@@ -137,7 +137,7 @@ namespace Microsoft.ML.Auto.Public
         public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source, string label, bool hasHeader = false, string separator = null)
         {
             var mlContext = new MLContext();
-            var columnInferenceResult = SchemaInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator);
+            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator);
             var textLoader = columnInferenceResult.BuildTextLoader(mlContext);
             return textLoader.Read(source);
         }
