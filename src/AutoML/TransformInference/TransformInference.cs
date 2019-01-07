@@ -111,16 +111,6 @@ namespace Microsoft.ML.Auto
 
         private const int MaxRowsToRead = 1000;
 
-        public readonly struct InferenceResult
-        {
-            public readonly SuggestedTransform[] SuggestedTransforms;
-
-            public InferenceResult(SuggestedTransform[] suggestedTransforms)
-            {
-                SuggestedTransforms = suggestedTransforms;
-            }
-        }
-
         internal class IntermediateColumn
         {
             private readonly IDataView _data;
@@ -873,7 +863,7 @@ namespace Microsoft.ML.Auto
         /// <summary>
         /// Automatically infer transforms for the data view
         /// </summary>
-        public static InferenceResult InferTransforms(MLContext env, IDataView data, PurposeInference.Column[] purposes, Arguments args)
+        public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, PurposeInference.Column[] purposes, Arguments args)
         {
             data = data.Take(MaxRowsToRead);
             var cols = purposes.Where(x => !data.Schema[x.ColumnIndex].IsHidden).Select(x => new IntermediateColumn(data, x)).ToArray();
@@ -887,22 +877,19 @@ namespace Microsoft.ML.Auto
 
                 list.AddRange(suggestions);
             }
-
-            return new InferenceResult(list.ToArray());
+            return list.ToArray();
         }
 
-        public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, Arguments args)
+        public static SuggestedTransform[] InferTransforms(MLContext context, IDataView data, Arguments args, string label)
         {
             var dataSample = data.Take(MaxRowsToRead);
 
-            // Infer column purposes from data sample.
+            // infer column purposes from data sample
             var columnIndices = Enumerable.Range(0, dataSample.Schema.Count);
-            var piResult = PurposeInference.InferPurposes(env, dataSample, columnIndices);
-            var purposes = piResult.Columns;
+            var purposes = PurposeInference.InferPurposes(context, dataSample, columnIndices, label);
 
-            // Infer transforms
-            var inferenceResult = InferTransforms(env, data, purposes, args);
-            return inferenceResult.SuggestedTransforms;
+            // infer transforms
+            return InferTransforms(context, data, purposes, args);
         }
     }
 }

@@ -72,6 +72,14 @@ namespace Microsoft.ML.Auto
 
         public long? ApproximateRowCount => _approximateRowCount;
 
+        public static TextFileSample CreateFromFullFile(string path)
+        {
+            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                return CreateFromFullStream(fs);
+            }
+        }
+
         /// <summary>
         /// Create a <see cref="TextFileSample"/> by reading multiple chunks from the file (or other source) and
         /// then stitching them together. The algorithm is as follows:
@@ -83,85 +91,83 @@ namespace Microsoft.ML.Auto
         /// 4. Determine seek locations and read the chunks.
         /// 5. Stitch and return a <see cref="TextFileSample"/>.
         /// </summary>
-        public static TextFileSample CreateFromFullFile(string path)
+        public static TextFileSample CreateFromFullStream(Stream stream)
         {
-            using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            if (!stream.CanSeek)
             {
-                if (!fs.CanSeek)
-                    return CreateFromHead(path);
-                var fileSize = fs.Length;
-
-                if (fileSize <= 2 * BufferSizeMb * (1 << 20))
-                    return CreateFromHead(path);
-
-                var firstChunk = new byte[FirstChunkSizeMb * (1 << 20)];
-                int count = fs.Read(firstChunk, 0, firstChunk.Length);
-                if (!IsEncodingOkForSampling(firstChunk))
-                    return CreateFromHead(path);
-                // REVIEW: CreateFromHead still truncates the file before the last 0x0A byte. For multi-byte encoding,
-                // this might cause an unfinished string to be present in the buffer. Right now this is considered an acceptable
-                // price to pay for parse-free processing.
-
-                var lineCount = firstChunk.Count(x => x == '\n');
-                if (lineCount == 0)
-                    throw new Exception("Counldn't identify line breaks. File is not text?");
-
-                long approximateRowCount = (long)(lineCount * fileSize * 1.0 / firstChunk.Length);
-                var firstNewline = Array.FindIndex(firstChunk, x => x == '\n');
-
-                // First line may be header, so we exclude it. The remaining lineCount-1 line breaks are
-                // splitting the text into lineCount lines, and the last line is actually half-size.
-                Double averageLineLength = 2.0 * (firstChunk.Length - firstNewline) / (lineCount * 2 - 1);
-                averageLineLength = Math.Max(averageLineLength, 3);
-
-                int usefulChunkSize = (int)(averageLineLength * LinesPerChunk);
-                int chunkSize = (int)(usefulChunkSize + averageLineLength); // assuming that 1 line worth will be trimmed out
-
-                int chunkCount = (int)Math.Ceiling((BufferSizeMb * OversamplingRate - FirstChunkSizeMb) * (1 << 20) / usefulChunkSize);
-                int maxChunkCount = (int)Math.Floor((double)(fileSize - firstChunk.Length) / chunkSize);
-                chunkCount = Math.Min(chunkCount, maxChunkCount);
-
-                var chunks = new List<byte[]>();
-                chunks.Add(firstChunk);
-
-                // determine the start of each remaining chunk
-                long fileSizeRemaining = fileSize - firstChunk.Length - ((long)chunkSize) * chunkCount;
-
-                var rnd = AutoMlUtils.Random;
-                var chunkStartIndices = Enumerable.Range(0, chunkCount)
-                    .Select(x => rnd.NextDouble() * fileSizeRemaining)
-                    .OrderBy(x => x)
-                    .Select((spot, i) => (long)(spot + firstChunk.Length + i * chunkSize))
-                    .ToArray();
-
-                foreach (var chunkStartIndex in chunkStartIndices)
-                {
-                    fs.Seek(chunkStartIndex, SeekOrigin.Begin);
-                    byte[] chunk = new byte[chunkSize];
-                    int readCount = fs.Read(chunk, 0, chunkSize);
-                    Array.Resize(ref chunk, chunkSize);
-                    chunks.Add(chunk);
-                }
-
-                return new TextFileSample(StitchChunks(false, chunks.ToArray()), fileSize, approximateRowCount);
+                return CreateFromHead(stream);
             }
+            var fileSize = stream.Length;
+
+            if (fileSize <= 2 * BufferSizeMb * (1 << 20))
+            {
+                return CreateFromHead(stream);
+            }
+
+            var firstChunk = new byte[FirstChunkSizeMb * (1 << 20)];
+            int count = stream.Read(firstChunk, 0, firstChunk.Length);
+            if (!IsEncodingOkForSampling(firstChunk))
+                return CreateFromHead(stream);
+            // REVIEW: CreateFromHead still truncates the file before the last 0x0A byte. For multi-byte encoding,
+            // this might cause an unfinished string to be present in the buffer. Right now this is considered an acceptable
+            // price to pay for parse-free processing.
+
+            var lineCount = firstChunk.Count(x => x == '\n');
+            if (lineCount == 0)
+                throw new Exception("Counldn't identify line breaks. File is not text?");
+
+            long approximateRowCount = (long)(lineCount * fileSize * 1.0 / firstChunk.Length);
+            var firstNewline = Array.FindIndex(firstChunk, x => x == '\n');
+
+            // First line may be header, so we exclude it. The remaining lineCount-1 line breaks are
+            // splitting the text into lineCount lines, and the last line is actually half-size.
+            Double averageLineLength = 2.0 * (firstChunk.Length - firstNewline) / (lineCount * 2 - 1);
+            averageLineLength = Math.Max(averageLineLength, 3);
+
+            int usefulChunkSize = (int)(averageLineLength * LinesPerChunk);
+            int chunkSize = (int)(usefulChunkSize + averageLineLength); // assuming that 1 line worth will be trimmed out
+
+            int chunkCount = (int)Math.Ceiling((BufferSizeMb * OversamplingRate - FirstChunkSizeMb) * (1 << 20) / usefulChunkSize);
+            int maxChunkCount = (int)Math.Floor((double)(fileSize - firstChunk.Length) / chunkSize);
+            chunkCount = Math.Min(chunkCount, maxChunkCount);
+
+            var chunks = new List<byte[]>();
+            chunks.Add(firstChunk);
+
+            // determine the start of each remaining chunk
+            long fileSizeRemaining = fileSize - firstChunk.Length - ((long)chunkSize) * chunkCount;
+
+            var rnd = AutoMlUtils.Random;
+            var chunkStartIndices = Enumerable.Range(0, chunkCount)
+                .Select(x => rnd.NextDouble() * fileSizeRemaining)
+                .OrderBy(x => x)
+                .Select((spot, i) => (long)(spot + firstChunk.Length + i * chunkSize))
+                .ToArray();
+
+            foreach (var chunkStartIndex in chunkStartIndices)
+            {
+                stream.Seek(chunkStartIndex, SeekOrigin.Begin);
+                byte[] chunk = new byte[chunkSize];
+                int readCount = stream.Read(chunk, 0, chunkSize);
+                Array.Resize(ref chunk, chunkSize);
+                chunks.Add(chunk);
+            }
+
+            return new TextFileSample(StitchChunks(false, chunks.ToArray()), fileSize, approximateRowCount);
         }
 
         /// <summary>
         /// Create a <see cref="TextFileSample"/> by reading one chunk from the beginning.
         /// </summary>
-        private static TextFileSample CreateFromHead(string path)
+        private static TextFileSample CreateFromHead(Stream stream)
         {
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                var buf = new byte[BufferSizeMb * (1 << 20)];
-                int readCount = stream.Read(buf, 0, buf.Length);
-                Array.Resize(ref buf, readCount);
-                long? multiplier = stream.CanSeek ? (int?)(stream.Length / buf.Length) : null;
-                return new TextFileSample(StitchChunks(readCount == stream.Length, buf),
-                    stream.CanSeek ? (long?)stream.Length : null,
-                    multiplier.HasValue ? buf.Count(x => x == '\n') * multiplier : null);
-            }
+            var buf = new byte[BufferSizeMb * (1 << 20)];
+            int readCount = stream.Read(buf, 0, buf.Length);
+            Array.Resize(ref buf, readCount);
+            long? multiplier = stream.CanSeek ? (int?)(stream.Length / buf.Length) : null;
+            return new TextFileSample(StitchChunks(readCount == stream.Length, buf),
+                stream.CanSeek ? (long?)stream.Length : null,
+                multiplier.HasValue ? buf.Count(x => x == '\n') * multiplier : null);
         }
 
         /// <summary>

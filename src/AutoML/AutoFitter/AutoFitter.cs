@@ -16,6 +16,7 @@ namespace Microsoft.ML.Auto
     internal class AutoFitter
     {
         private readonly IList<PipelineRunResult> _history;
+        private readonly string _label;
         private readonly int _maxIterations;
         private readonly MLContext _mlContext;
         private readonly OptimizingMetricInfo _optimizingMetricInfo;
@@ -25,10 +26,11 @@ namespace Microsoft.ML.Auto
         private readonly IDataView _validationData;
 
         public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
-            TaskKind task, int maxIterations,
+            TaskKind task, int maxIterations, string label,
             IDataView trainData, IDataView validationData)
         {
             _history = new List<PipelineRunResult>();
+            _label = label;
             _maxIterations = maxIterations;
             _mlContext = mlContext;
             _optimizingMetricInfo = metricInfo;
@@ -41,7 +43,7 @@ namespace Microsoft.ML.Auto
         public PipelineRunResult[] InferPipelines(int batchSize)
         {
             var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _maxIterations);
-            var availableTransforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData);
+            var availableTransforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label);
             var pipelineSuggester = new RocketPipelineSuggester(_mlContext, _optimizingMetricInfo.IsMaximizing,
                 availableTrainers, availableTransforms);
 

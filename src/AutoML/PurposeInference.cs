@@ -33,16 +33,6 @@ namespace Microsoft.ML.Auto
             }
         }
 
-        public readonly struct InferenceResult
-        {
-            public readonly Column[] Columns;
-
-            public InferenceResult(Column[] columns)
-            {
-                Columns = columns;
-            }
-        }
-
         /// <summary>
         /// The design is the same as for <see cref="ColumnTypeInference"/>: there's a sequence of 'experts'
         /// that each look at all the columns. Every expert may or may not assign the 'answer' (suggested purpose)
@@ -127,12 +117,6 @@ namespace Microsoft.ML.Auto
                     {
                         if (column.IsPurposeSuggested)
                             continue;
-                        /*if (Regex.IsMatch(column.ColumnName, @"label", RegexOptions.IgnoreCase))
-                            column.SuggestedPurpose = ColumnPurpose.Label;
-                        if (Regex.IsMatch(column.ColumnName, @"^target$", RegexOptions.IgnoreCase))
-                            column.SuggestedPurpose = ColumnPurpose.Label;
-                        else if (Regex.IsMatch(column.ColumnName, @"^m_rating$", RegexOptions.IgnoreCase))
-                            column.SuggestedPurpose = ColumnPurpose.Label;*/
                         else if (Regex.IsMatch(column.ColumnName, @"^m_queryid$", RegexOptions.IgnoreCase))
                             column.SuggestedPurpose = ColumnPurpose.Group;
                         else if (Regex.IsMatch(column.ColumnName, @"group", RegexOptions.IgnoreCase))
@@ -284,8 +268,8 @@ namespace Microsoft.ML.Auto
         /// <param name="args">Additional arguments to inference.</param>
         /// <param name="label">User-defined label col</param>
         /// <returns>The result includes the array of auto-detected column purposes.</returns>
-        public static InferenceResult InferPurposes(MLContext env, IDataView data, IEnumerable<int> columnIndices,
-            string label = null)
+        public static PurposeInference.Column[] InferPurposes(MLContext env, IDataView data, IEnumerable<int> columnIndices,
+            string label)
         {
             var takenData = data.Take(MaxRowsToRead);
             var cols = columnIndices.Select(x => new IntermediateColumn(takenData, x)).ToList();
@@ -296,19 +280,16 @@ namespace Microsoft.ML.Auto
                 expert.Apply(cols.ToArray());
             }
 
-            if (label == null)
-            {
-                label = "Label";
-            }
             foreach (var col in cols)
             {
                 if (col.ColumnName == label)
                 {
                     col.SuggestedPurpose = ColumnPurpose.Label;
+                    break;
                 }
             }
 
-            return new InferenceResult(cols.Select(x => x.GetColumn()).ToArray());
+            return cols.Select(x => x.GetColumn()).ToArray();
         }
     }
 }

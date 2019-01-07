@@ -26,49 +26,6 @@ namespace Microsoft.ML.Auto
         {
             return new CacheDataView(env, data, Enumerable.Range(0, data.Schema.Count).ToArray());
         }
-
-        public static ColumnGroupingInference.GroupingColumn[] InferColumnPurposes(MLContext env, TextFileSample sample, TextFileContents.ColumnSplitResult splitResult,
-            out bool hasHeader, string colLabelName = null)
-        {
-           // detecting column types
-            var typeInferenceResult = ColumnTypeInference.InferTextFileColumnTypes(env, sample,
-                new ColumnTypeInference.Arguments
-                {
-                    ColumnCount = splitResult.ColumnCount,
-                    Separator = splitResult.Separator,
-                    AllowSparse = splitResult.AllowSparse,
-                    AllowQuote = splitResult.AllowQuote,
-                });
-
-            hasHeader = true;
-            if (!typeInferenceResult.IsSuccess)
-            {
-                // couldn't detect column types
-                return null;
-            }
-
-            // detecting column purposes
-            var typedLoaderArgs = new TextLoader.Arguments
-            {
-                Column = ColumnTypeInference.GenerateLoaderColumns(typeInferenceResult.Columns),
-                Separator = splitResult.Separator,
-                AllowSparse = splitResult.AllowSparse,
-                AllowQuoting = splitResult.AllowQuote,
-                HasHeader = typeInferenceResult.HasHeader
-            };
-            var textLoader = new TextLoader(env, typedLoaderArgs);
-            var typedData = textLoader.Read(sample);
-
-            var purposeInferenceResult = PurposeInference.InferPurposes(env, typedData,
-                Enumerable.Range(0, typedLoaderArgs.Column.Length),
-                label: colLabelName);
-
-            // detecting column grouping and generating column names
-            ColumnGroupingInference.GroupingColumn[] groupingResult = ColumnGroupingInference.InferGroupingAndNames(env, typeInferenceResult.HasHeader,
-                typeInferenceResult.Columns, purposeInferenceResult.Columns).Columns;
-
-            return groupingResult;
-        }
     }
 
     public enum ColumnPurpose

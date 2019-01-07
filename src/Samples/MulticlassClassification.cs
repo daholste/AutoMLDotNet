@@ -1,9 +1,5 @@
 ﻿using System;
-using System.IO;
 using Microsoft.ML;
-using Microsoft.ML.Core.Data;
-using Microsoft.ML.Auto;
-using Microsoft.ML.Runtime.Data;
 using Microsoft.ML.Auto.Public;
 
 namespace Samples
@@ -15,13 +11,14 @@ namespace Samples
             const string trainDataPath = @"C:\data\train.csv";
             const string validationDataPath = @"C:\data\valid.csv";
             const string testDataPath = @"C:\data\test.csv";
+            const string label = "Label";
 
             var mlContext = new MLContext();
 
             // auto-load data from disk
-            var trainData = mlContext.Data.AutoRead(trainDataPath);
-            var validationData = mlContext.Data.AutoRead(validationDataPath);
-            var testData = mlContext.Data.AutoRead(testDataPath);
+            var trainData = mlContext.Data.AutoRead(trainDataPath, label);
+            var validationData = mlContext.Data.AutoRead(validationDataPath, label);
+            var testData = mlContext.Data.AutoRead(testDataPath, label);
 
             // run AutoML & train model
             var autoMlResult = mlContext.MulticlassClassification.AutoFit(trainData, "Label", validationData,

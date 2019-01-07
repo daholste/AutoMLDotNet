@@ -6,10 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.ML.Auto;
 using Microsoft.ML.Runtime.Data;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Microsoft.ML.Auto
 {
@@ -23,14 +20,10 @@ namespace Microsoft.ML.Auto
         /// This is effectively a merger of <see cref="PurposeInference.Column"/> and a <see cref="ColumnTypeInference.Column"/>
         /// with support for vector-value columns.
         /// </summary>
-        public struct GroupingColumn
+        public class GroupingColumn
         {
             public string SuggestedName;
-
-            [JsonConverter(typeof(StringEnumConverter))]
             public DataKind ItemKind;
-
-            [JsonConverter(typeof(StringEnumConverter))]
             public ColumnPurpose Purpose;
             public string ColumnRangeSelector;
 
@@ -41,15 +34,16 @@ namespace Microsoft.ML.Auto
                 Purpose = purpose;
                 ColumnRangeSelector = rangeSelector;
             }
-        }
 
-        public readonly struct InferenceResult
-        {
-            public readonly GroupingColumn[] Columns;
-
-            public InferenceResult(GroupingColumn[] columns)
+            public Public.InferredColumn ToPublicInferredColumn()
             {
-                Columns = columns;
+                var textLoaderCol = GenerateTextLoaderColumn();
+                return new Public.InferredColumn(textLoaderCol, Purpose);
+            }
+
+            private TextLoader.Column GenerateTextLoaderColumn()
+            {
+                return TextLoader.Column.Parse(string.Format("{0}:{1}:{2}", SuggestedName, ItemKind, ColumnRangeSelector));
             }
         }
 
@@ -63,7 +57,7 @@ namespace Microsoft.ML.Auto
         /// <param name="types">The (detected) column types.</param>
         /// <param name="purposes">The (detected) column purposes. Must be parallel to <paramref name="types"/>.</param>
         /// <returns>The struct containing an array of grouped columns specifications.</returns>
-        public static InferenceResult InferGroupingAndNames(MLContext env, bool hasHeader, ColumnTypeInference.Column[] types, PurposeInference.Column[] purposes)
+        public static GroupingColumn[] InferGroupingAndNames(MLContext env, bool hasHeader, ColumnTypeInference.Column[] types, PurposeInference.Column[] purposes)
         {
             var result = new List<GroupingColumn>();
             var tuples = types.Zip(purposes, Tuple.Create).ToList();
@@ -89,7 +83,7 @@ namespace Microsoft.ML.Auto
                 result.Add(new GroupingColumn(name, g.Key.ItemType.RawKind(), g.Key.Purpose, range));
             }
 
-            return new InferenceResult(result.ToArray());
+            return result.ToArray();
         }
 
         private static int GetPurposeGroupId(int columnIndex, ColumnPurpose purpose)
@@ -162,18 +156,5 @@ namespace Microsoft.ML.Auto
 
             return sb.ToString();
         }
-
-        public static TextLoader.Column[] GenerateLoaderColumns(GroupingColumn[] columns)
-        {
-            var loaderColumns = new List<TextLoader.Column>();
-            foreach (var col in columns)
-            {
-                var loaderColumn = TextLoader.Column.Parse(string.Format("{0}:{1}:{2}", col.SuggestedName, col.ItemKind, col.ColumnRangeSelector));
-                if (loaderColumn != null && loaderColumn.IsValid())
-                    loaderColumns.Add(loaderColumn);
-            }
-            return loaderColumns.ToArray();
-        }
-
     }
 }

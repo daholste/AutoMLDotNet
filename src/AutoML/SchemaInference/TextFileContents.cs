@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Runtime.Data;
-using Microsoft.ML.Runtime.Data.IO;
 
 namespace Microsoft.ML.Auto
 {
@@ -16,7 +15,7 @@ namespace Microsoft.ML.Auto
     /// </summary>
     internal static class TextFileContents
     {
-        public readonly struct ColumnSplitResult
+        public class ColumnSplitResult
         {
             public readonly bool IsSuccess;
             public readonly string Separator;
@@ -46,15 +45,11 @@ namespace Microsoft.ML.Auto
         /// and this number of columns is more than 1.
         /// We sweep on separator, allow sparse and allow quote parameter.
         /// </summary>
-        public static ColumnSplitResult TrySplitColumns(IMultiStreamSource source,
-            string[] separatorCandidates, bool? allowSparse = null, bool? allowQuote = null, bool skipStrictValidation = false)
+        public static ColumnSplitResult TrySplitColumns(IMultiStreamSource source, string[] separatorCandidates)
         {
-            // Default value for sparse and quote is true.
-            bool[] sparse = new[] { true, false };
-            bool[] quote = new[] { true, false };
-            if (allowSparse.HasValue) { sparse = new[] { allowSparse.Value }; }
-            if (allowQuote.HasValue) { quote = new[] { allowQuote.Value }; }
-            bool foundAny = false;
+            var sparse = new[] { true, false };
+            var quote = new[] { true, false };
+            var foundAny = false;
             var result = default(ColumnSplitResult);
             foreach (var perm in (from _allowSparse in sparse
                                     from _allowQuote in quote
@@ -69,7 +64,7 @@ namespace Microsoft.ML.Auto
                     AllowSparse = perm._allowSparse
                 };
 
-                if (TryParseFile(args, source, skipStrictValidation, out result))
+                if (TryParseFile(args, source, out result))
                 {
                     foundAny = true;
                     break;
@@ -78,14 +73,14 @@ namespace Microsoft.ML.Auto
             return foundAny ? result : new ColumnSplitResult(false, null, true, true, 0);
         }
 
-        private static bool TryParseFile(TextLoader.Arguments args, IMultiStreamSource source, bool skipStrictValidation, out ColumnSplitResult result)
+        private static bool TryParseFile(TextLoader.Arguments args, IMultiStreamSource source, out ColumnSplitResult result)
         {
-            result = default(ColumnSplitResult);
+            result = null;
             var textLoader = new TextLoader(new MLContext(), args);
             var idv = textLoader.Read(source).Take(1000);
             var columnCounts = new List<int>();
             var column = idv.Schema["C"];
-            int columnIndex = column.Index;
+            var columnIndex = column.Index;
 
             using (var cursor = idv.GetRowCursor(x => x == columnIndex))
             {
@@ -100,11 +95,13 @@ namespace Microsoft.ML.Auto
             }
             
             var mostCommon = columnCounts.GroupBy(x => x).OrderByDescending(x => x.Count()).First();
-            if (!skipStrictValidation && mostCommon.Count() < UniformColumnCountThreshold * columnCounts.Count)
+            if (mostCommon.Count() < UniformColumnCountThreshold * columnCounts.Count)
+            {
                 return false;
+            }
 
-            // If user explicitly specified separator we're allowing "single" column case
-            if (!skipStrictValidation && mostCommon.Key <= 1) { return false; }
+            // disallow single-column case
+            if (mostCommon.Key <= 1) { return false; }
 
             result = new ColumnSplitResult(true, args.Separator, args.AllowQuoting, args.AllowSparse, mostCommon.Key);
             return true;
