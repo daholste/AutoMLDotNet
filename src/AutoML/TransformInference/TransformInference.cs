@@ -65,7 +65,7 @@ namespace Microsoft.ML.Auto
             return sb.ToString();
         }
 
-        public Public.PipelineElement ToObjectModel()
+        public PipelineNode ToPipelineNode()
         {
             var inputColumns = RoutingStructure.ColumnsConsumed.Select(c => c.Name).ToArray();
             var outputColumns = RoutingStructure.ColumnsProduced.Select(c => c.Name).ToArray();
@@ -79,7 +79,7 @@ namespace Microsoft.ML.Auto
                 }
             }
 
-            return new Public.PipelineElement(Estimator.GetType().FullName, Public.PipelineElementType.Transform,
+            return new PipelineNode(Estimator.GetType().FullName, PipelineNodeType.Transform,
                 inputColumns, outputColumns, elementProperties);
         }
     }

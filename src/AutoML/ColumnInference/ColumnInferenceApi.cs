@@ -6,7 +6,7 @@ namespace Microsoft.ML.Auto
 {
     internal static class ColumnInferenceApi
     {
-        public static Public.ColumnInferenceResult InferColumns(MLContext context, string path, string label, 
+        public static ColumnInferenceResult InferColumns(MLContext context, string path, string label, 
             bool hasHeader = false, string separator = null)
         {
             var sample = TextFileSample.CreateFromFullFile(path);
@@ -17,7 +17,7 @@ namespace Microsoft.ML.Auto
             return InferColumns(context, sample, createDataView, label, hasHeader, separator);
         }
 
-        public static Public.ColumnInferenceResult InferColumns(MLContext context, IMultiStreamSource multiStreamSource, 
+        public static ColumnInferenceResult InferColumns(MLContext context, IMultiStreamSource multiStreamSource, 
             string label, bool hasHeader = false, string separator = null)
         {
             // heuristic: use first stream in multi-stream source to infer column types & split
@@ -68,7 +68,7 @@ namespace Microsoft.ML.Auto
             return typeInferenceResult;
         }
 
-        private static Public.ColumnInferenceResult InferColumns(MLContext context,
+        private static ColumnInferenceResult InferColumns(MLContext context,
             TextFileSample sample, Func<TextLoader, IDataView> createDataView, string label, bool hasHeader, string separator)
         {
             var splitInference = InferSplit(sample, separator);
@@ -94,7 +94,7 @@ namespace Microsoft.ML.Auto
 
             // build result objects & return
             var inferredColumns = groupingResult.Select(c => c.ToPublicInferredColumn()).ToArray();
-            return new Public.ColumnInferenceResult(splitInference.AllowQuote, splitInference.AllowSparse, inferredColumns, splitInference.Separator);
+            return new ColumnInferenceResult(splitInference.AllowQuote, splitInference.AllowSparse, inferredColumns, splitInference.Separator);
         }
     }
 }

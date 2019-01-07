@@ -11,8 +11,8 @@ namespace Microsoft.ML.Auto
     /// </summary>
     internal interface IPipelineSuggester
     {
-        IEnumerable<Pipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int requestedBatchSize);
+        IEnumerable<InferredPipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int requestedBatchSize);
 
-        void MarkPipelineAsFailed(Pipeline failedPipeline);
+        void MarkPipelineAsFailed(InferredPipeline failedPipeline);
     }
 }

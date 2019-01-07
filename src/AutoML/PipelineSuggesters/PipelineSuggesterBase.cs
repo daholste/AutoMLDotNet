@@ -11,7 +11,7 @@ namespace Microsoft.ML.Auto
         protected IEnumerable<SuggestedTrainer> AvailableTrainers;
         protected IEnumerable<SuggestedTransform> AvailableTransforms;
 
-        private readonly HashSet<Pipeline> FailedPipelines;
+        private readonly HashSet<InferredPipeline> FailedPipelines;
         protected readonly bool IsMaximizingMetric;
         protected readonly MLContext MLContext;
 
@@ -21,19 +21,19 @@ namespace Microsoft.ML.Auto
             AvailableTrainers = availableTrainers;
             AvailableTransforms = availableTransforms;
 
-            FailedPipelines = new HashSet<Pipeline>();
+            FailedPipelines = new HashSet<InferredPipeline>();
             MLContext = mlContext;
             IsMaximizingMetric = isMaximizingMetric;
         }
 
-        public abstract IEnumerable<Pipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int numberOfCandidates);
+        public abstract IEnumerable<InferredPipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int numberOfCandidates);
 
-        public void MarkPipelineAsFailed(Pipeline failedPipeline)
+        public void MarkPipelineAsFailed(InferredPipeline failedPipeline)
         {
             FailedPipelines.Add(failedPipeline);
         }
 
-        protected bool HasPipelineFailed(Pipeline failedPipeline)
+        protected bool HasPipelineFailed(InferredPipeline failedPipeline)
         {
             return FailedPipelines.Contains(failedPipeline);
         }

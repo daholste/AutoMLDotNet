@@ -14,7 +14,7 @@ namespace Microsoft.ML.Auto
         private const int SecondStageTrialsPerTrainer = 5;
 
         private readonly Dictionary<string, ISweeper> _hyperSweepers;
-        private readonly ISet<Pipeline> _visitedPipelines;
+        private readonly ISet<InferredPipeline> _visitedPipelines;
 
         private int _currentTrainerIndex;
         private int _currentStage;
@@ -33,17 +33,17 @@ namespace Microsoft.ML.Auto
         {
             _currentStage = (int)Stage.First;
             _hyperSweepers = new Dictionary<string, ISweeper>();
-            _visitedPipelines = new HashSet<Pipeline>();
+            _visitedPipelines = new HashSet<InferredPipeline>();
             _remainingTrialsInCurrStage = availableTrainers.Count();
         }
 
-        public override IEnumerable<Pipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int requestedBatchSize)
+        public override IEnumerable<InferredPipeline> GetNextPipelines(IEnumerable<PipelineRunResult> history, int requestedBatchSize)
         {
             MoveToNextStageIfNeeded(history);
 
             var batchSize = GetBatchSize(requestedBatchSize);
 
-            var pipelnes = new List<Pipeline>();
+            var pipelnes = new List<InferredPipeline>();
             for (var i = 0; i < batchSize; i++)
             {
                 var pipeline = GetNextPipeline(history);
@@ -65,9 +65,9 @@ namespace Microsoft.ML.Auto
             return topTrainers;
         }
 
-        private Pipeline GetNextPipeline(IEnumerable<PipelineRunResult> history)
+        private InferredPipeline GetNextPipeline(IEnumerable<PipelineRunResult> history)
         {
-            Pipeline pipeline;
+            InferredPipeline pipeline;
 
             if (_currentStage == (int)Stage.First)
             {
@@ -87,7 +87,7 @@ namespace Microsoft.ML.Auto
                 bool valid;
                 do
                 {
-                    pipeline = new Pipeline(AvailableTransforms, trainer, MLContext);
+                    pipeline = new InferredPipeline(AvailableTransforms, trainer, MLContext);
                     valid = !_visitedPipelines.Contains(pipeline) && !HasPipelineFailed(pipeline);
                     count++;
                 } while (!valid && count <= maxNumberAttempts);
@@ -143,10 +143,10 @@ namespace Microsoft.ML.Auto
             }
         }
 
-        private Pipeline GetNextFirstStagePipeline()
+        private InferredPipeline GetNextFirstStagePipeline()
         {
             var trainer = AvailableTrainers.ElementAt(_currentTrainerIndex);
-            var pipeline = new Pipeline(AvailableTransforms, trainer, MLContext);
+            var pipeline = new InferredPipeline(AvailableTransforms, trainer, MLContext);
 
             // update current index
             _currentTrainerIndex++;
@@ -159,13 +159,72 @@ namespace Microsoft.ML.Auto
         /// </summary>
         private void InitHyperparamSweepers(SuggestedTrainer trainer)
         {
-            var sps = AutoFitterUtil.ConvertToValueGenerators(trainer.SweepParams);
+            var sps = ConvertToValueGenerators(trainer.SweepParams);
             _hyperSweepers[trainer.TrainerName] = new KdoSweeper(
                 new KdoSweeper.Arguments
                 {
                     SweptParameters = sps,
                     NumberInitialPopulation = SecondStageTrialsPerTrainer
                 });
+        }
+
+        public static IValueGenerator[] ConvertToValueGenerators(IEnumerable<SweepableParam> hps)
+        {
+            var results = new IValueGenerator[hps.Count()];
+
+            for (int i = 0; i < hps.Count(); i++)
+            {
+                switch (hps.ElementAt(i))
+                {
+                    case SweepableDiscreteParam dp:
+                        var dpArgs = new DiscreteParamArguments()
+                        {
+                            Name = dp.Name,
+                            Values = dp.Options.Select(o => o.ToString()).ToArray()
+                        };
+                        results[i] = new DiscreteValueGenerator(dpArgs);
+                        break;
+
+                    case SweepableFloatParam fp:
+                        var fpArgs = new FloatParamArguments()
+                        {
+                            Name = fp.Name,
+                            Min = fp.Min,
+                            Max = fp.Max,
+                            LogBase = fp.IsLogScale,
+                        };
+                        if (fp.NumSteps.HasValue)
+                        {
+                            fpArgs.NumSteps = fp.NumSteps.Value;
+                        }
+                        if (fp.StepSize.HasValue)
+                        {
+                            fpArgs.StepSize = fp.StepSize.Value;
+                        }
+                        results[i] = new FloatValueGenerator(fpArgs);
+                        break;
+
+                    case SweepableLongParam lp:
+                        var lpArgs = new LongParamArguments()
+                        {
+                            Name = lp.Name,
+                            Min = lp.Min,
+                            Max = lp.Max,
+                            LogBase = lp.IsLogScale
+                        };
+                        if (lp.NumSteps.HasValue)
+                        {
+                            lpArgs.NumSteps = lp.NumSteps.Value;
+                        }
+                        if (lp.StepSize.HasValue)
+                        {
+                            lpArgs.StepSize = lp.StepSize.Value;
+                        }
+                        results[i] = new LongValueGenerator(lpArgs);
+                        break;
+                }
+            }
+            return results;
         }
 
         private void SampleHyperparameters(SuggestedTrainer trainer, IEnumerable<PipelineRunResult> history)
@@ -178,7 +237,7 @@ namespace Microsoft.ML.Auto
             }
 
             // get new set of hyperparameter values
-            var proposedParamSet = sweeper.ProposeSweeps(1, AutoFitterUtil.ConvertToRunResults(historyToUse, IsMaximizingMetric)).First();
+            var proposedParamSet = sweeper.ProposeSweeps(1, history.Where(h => h.Pipeline.Trainer.HyperParamSet != null).Select(h => h.ToRunResult(IsMaximizingMetric))).First();
 
             // associate proposed param set with trainer, so that smart hyperparam
             // sweepers (like KDO) can map them back.

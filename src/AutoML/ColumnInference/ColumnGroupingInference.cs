@@ -35,10 +35,10 @@ namespace Microsoft.ML.Auto
                 ColumnRangeSelector = rangeSelector;
             }
 
-            public Public.InferredColumn ToPublicInferredColumn()
+            public InferredColumn ToPublicInferredColumn()
             {
                 var textLoaderCol = GenerateTextLoaderColumn();
-                return new Public.InferredColumn(SuggestedName, ItemKind, textLoaderCol.Source, Purpose);
+                return new InferredColumn(SuggestedName, ItemKind, textLoaderCol.Source, Purpose);
             }
 
             private TextLoader.Column GenerateTextLoaderColumn()

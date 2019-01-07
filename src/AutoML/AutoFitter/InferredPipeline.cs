@@ -14,13 +14,13 @@ namespace Microsoft.ML.Auto
     /// A runnable pipeline. Contains a learner and set of transforms,
     /// along with a RunSummary if it has already been exectued.
     /// </summary>
-    internal class Pipeline
+    internal class InferredPipeline
     {
         private readonly MLContext _mlContext;
         public readonly IList<SuggestedTransform> Transforms;
         public readonly SuggestedTrainer Trainer;
 
-        public Pipeline(IEnumerable<SuggestedTransform> transforms,
+        public InferredPipeline(IEnumerable<SuggestedTransform> transforms,
             SuggestedTrainer trainer,
             MLContext mlContext)
         {
@@ -37,15 +37,15 @@ namespace Microsoft.ML.Auto
             return ToString().GetHashCode();
         }
 
-        public Public.Pipeline ToObjectModel()
+        public Pipeline ToPipeline()
         {
-            var pipelineElements = new List<Public.PipelineElement>();
+            var pipelineElements = new List<PipelineNode>();
             foreach(var transform in Transforms)
             {
-                pipelineElements.Add(transform.ToObjectModel());
+                pipelineElements.Add(transform.ToPipelineNode());
             }
-            pipelineElements.Add(Trainer.ToObjectModel());
-            return new Public.Pipeline(pipelineElements.ToArray());
+            pipelineElements.Add(Trainer.ToPipelineNode());
+            return new Pipeline(pipelineElements.ToArray());
         }
 
         public ITransformer TrainTransformer(IDataView trainData)

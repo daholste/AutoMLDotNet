@@ -93,7 +93,7 @@ namespace Microsoft.ML.Auto
             }
         }
 
-        private void ProcessPipeline(Pipeline pipeline)
+        private void ProcessPipeline(InferredPipeline pipeline)
         {
             // run pipeline
             var stopwatch = Stopwatch.StartNew();

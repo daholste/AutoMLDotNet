@@ -9,7 +9,7 @@ using Microsoft.ML.Data;
 using Microsoft.ML.Runtime;
 using Microsoft.ML.Runtime.Data;
 
-namespace Microsoft.ML.Auto.Public
+namespace Microsoft.ML.Auto
 {
     public static class BinaryClassificationPipelineSuggester
     {
@@ -23,8 +23,8 @@ namespace Microsoft.ML.Auto.Public
             var mlContext = new MLContext();
             var availableTransforms = TransformInferenceApi.InferTransforms(mlContext, dataView, label);
             var availableTrainers = RecipeInference.AllowedTrainers(mlContext, TaskKind.BinaryClassification, 1);
-            var pipeline = new Auto.Pipeline(availableTransforms, availableTrainers.First(), mlContext);
-            return pipeline.ToObjectModel();
+            var pipeline = new Auto.InferredPipeline(availableTransforms, availableTrainers.First(), mlContext);
+            return pipeline.ToPipeline();
         }
     }
 

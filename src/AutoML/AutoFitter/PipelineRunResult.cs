@@ -10,19 +10,24 @@ namespace Microsoft.ML.Auto
     internal class PipelineRunResult
     {
         public readonly object EvaluatedMetrics;
-        public readonly Pipeline Pipeline;
+        public readonly InferredPipeline Pipeline;
         public readonly double Score;
         public readonly IDataView ScoredValidationData;
 
         public ITransformer Model { get; set; }
 
-        public PipelineRunResult(object evaluatedMetrics, ITransformer model, Pipeline pipeline, double score, IDataView scoredValidationData)
+        public PipelineRunResult(object evaluatedMetrics, ITransformer model, InferredPipeline pipeline, double score, IDataView scoredValidationData)
         {
             EvaluatedMetrics = evaluatedMetrics;
             Model = model;
             Pipeline = pipeline;
             Score = score;
             ScoredValidationData = scoredValidationData;
+        }
+
+        public IRunResult ToRunResult(bool isMetricMaximizing)
+        {
+           return new RunResult(Pipeline.Trainer.HyperParamSet, Score, isMetricMaximizing);
         }
     }
 }

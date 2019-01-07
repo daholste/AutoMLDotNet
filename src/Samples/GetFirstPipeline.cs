@@ -1,5 +1,5 @@
 ﻿using Microsoft.ML;
-using Microsoft.ML.Auto.Public;
+using Microsoft.ML.Auto;
 
 namespace Samples
 {

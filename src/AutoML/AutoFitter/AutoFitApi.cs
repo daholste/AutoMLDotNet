@@ -2,7 +2,7 @@
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Runtime.Data;
 
-namespace Microsoft.ML.Auto.Public
+namespace Microsoft.ML.Auto
 {
     internal static class AutoFitApi
     {
