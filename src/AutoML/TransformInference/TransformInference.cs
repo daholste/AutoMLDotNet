@@ -95,22 +95,8 @@ namespace Microsoft.ML.Auto
     /// </summary>
     internal static class TransformInference
     {
-        internal sealed class Arguments
-        {
-            /// <summary>
-            /// Relative size of the inspected data view vs. the 'real' data size.
-            /// </summary>
-            public Double EstimatedSampleFraction;
-            public bool ExcludeFeaturesConcatTransforms;
-            public int[] ExcludedColumnIndices;
-
-            public Arguments()
-            {
-                EstimatedSampleFraction = 1;
-                ExcludeFeaturesConcatTransforms = false;
-                ExcludedColumnIndices = new int[] { };
-            }
-        }
+        private const double EstimatedSampleFraction = 1.0;
+        private const bool ExcludeFeaturesConcatTransforms = false;
 
         private const int MaxRowsToRead = 1000;
 
@@ -240,14 +226,14 @@ namespace Microsoft.ML.Auto
         {
             bool IncludeFeaturesOverride { get; set; }
 
-            IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs);
+            IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns);
         }
 
         public abstract class TransformInferenceExpertBase : ITransformInferenceExpert
         {
             public bool IncludeFeaturesOverride { get; set; }
 
-            public abstract IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs);
+            public abstract IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns);
 
             protected readonly MLContext Env;
 
@@ -299,7 +285,7 @@ namespace Microsoft.ML.Auto
         {
             internal sealed class AutoLabel : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     var lastLabelColId = Array.FindLastIndex(columns, x => x.Purpose == ColumnPurpose.Label);
                     if (lastLabelColId < 0)
@@ -354,7 +340,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class GroupIdHashRename : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     var firstGroupColId = Array.FindIndex(columns, x => x.Purpose == ColumnPurpose.Group);
                     if (firstGroupColId < 0)
@@ -410,7 +396,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class LabelAdvisory : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     var firstLabelColId = Array.FindIndex(columns, x => x.Purpose == ColumnPurpose.Label);
                     if (firstLabelColId < 0)
@@ -441,7 +427,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class Categorical : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     bool foundCat = false;
                     bool foundCatHash = false;
@@ -457,7 +443,7 @@ namespace Microsoft.ML.Auto
                         var columnName = new StringBuilder();
                         columnName.AppendFormat("{0}", column.ColumnName);
 
-                        if (IsDictionaryOk(column, inferenceArgs.EstimatedSampleFraction))
+                        if (IsDictionaryOk(column, EstimatedSampleFraction))
                         {
                             foundCat = true;
                             catColumnsNew.Add(new OneHotEncodingEstimator.ColumnInfo(columnName.ToString(), columnName.ToString()));
@@ -496,7 +482,7 @@ namespace Microsoft.ML.Auto
                         yield return new SuggestedTransform(input, routingStructure);
                     }
 
-                    if (!inferenceArgs.ExcludeFeaturesConcatTransforms && featureCols.Count > 0)
+                    if (!ExcludeFeaturesConcatTransforms && featureCols.Count > 0)
                     {
                         yield return InferenceHelpers.GetRemainingFeatures(featureCols, columns, GetType(), IncludeFeaturesOverride);
                         IncludeFeaturesOverride = true;
@@ -523,7 +509,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class Boolean : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     var columnName = new StringBuilder();
                     var newColumns = new List<TypeConvertingTransformer.ColumnInfo>();
@@ -549,7 +535,7 @@ namespace Microsoft.ML.Auto
                         yield return new SuggestedTransform(input, routingStructure);
 
                         // Concat featurized columns into existing feature column, if transformed at least one column.
-                        if (!inferenceArgs.ExcludeFeaturesConcatTransforms)
+                        if (!ExcludeFeaturesConcatTransforms)
                         {
                             yield return InferenceHelpers.GetRemainingFeatures(newColumns.Select(c => c.Output).ToList(),
                                 columns, GetType(), IncludeFeaturesOverride);
@@ -633,7 +619,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class Text : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     var featureCols = new List<string>();
 
@@ -658,7 +644,7 @@ namespace Microsoft.ML.Auto
                     }
 
                     // Concat text featurized columns into existing feature column, if transformed at least one column.
-                    if (!inferenceArgs.ExcludeFeaturesConcatTransforms && featureCols.Count > 0)
+                    if (!ExcludeFeaturesConcatTransforms && featureCols.Count > 0)
                     {
                         yield return InferenceHelpers.GetRemainingFeatures(featureCols, columns, GetType(), IncludeFeaturesOverride);
                         IncludeFeaturesOverride = true;
@@ -668,7 +654,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class TextUniGramTriGram : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     List<string> textColumnNames =
                         columns.Where(
@@ -688,7 +674,9 @@ namespace Microsoft.ML.Auto
                             InferenceHelpers.ConcatColumnsIntoOne(textColumnNames, concatTextColumnName, GetType(), false);
                     }
                     else
+                    {
                         concatTextColumnName = textColumnNames.First();
+                    }
 
                     //Get Unigram + Trichar for text transform on the concatenated text column.
                     string featureTextColumn = columns[0].GetTempColumnName("FeaturesText");
@@ -702,14 +690,16 @@ namespace Microsoft.ML.Auto
                                 (col.Purpose == ColumnPurpose.CategoricalFeature)))
                         featureCols.Add(DefaultColumnNames.Features);
 
-                    if (!inferenceArgs.ExcludeFeaturesConcatTransforms)
+                    if (!ExcludeFeaturesConcatTransforms)
+                    {
                         yield return InferenceHelpers.ConcatColumnsIntoOne(featureCols, DefaultColumnNames.Features, GetType(), true);
+                    }
                 }
             }
 
             internal sealed class NumericMissing : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     bool found = false;
                     var columnName = new StringBuilder();
@@ -750,7 +740,7 @@ namespace Microsoft.ML.Auto
                     return false;
                 }
 
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     var selectedColumns = columns.Where(c => !IgnoreColumn(c.Purpose)).ToArray();
                     var colList = selectedColumns.Select(c => c.ColumnName).ToArray();
@@ -805,7 +795,7 @@ namespace Microsoft.ML.Auto
 
             internal sealed class NameColumnConcatRename : TransformInferenceExpertBase
             {
-                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns, Arguments inferenceArgs)
+                public override IEnumerable<SuggestedTransform> Apply(IntermediateColumn[] columns)
                 {
                     int count = 0;
                     bool isAllText = true;
@@ -866,7 +856,7 @@ namespace Microsoft.ML.Auto
         /// <summary>
         /// Automatically infer transforms for the data view
         /// </summary>
-        public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, PurposeInference.Column[] purposes, Arguments args)
+        public static SuggestedTransform[] InferTransforms(MLContext env, IDataView data, PurposeInference.Column[] purposes)
         {
             data = data.Take(MaxRowsToRead);
             var cols = purposes.Where(x => !data.Schema[x.ColumnIndex].IsHidden).Select(x => new IntermediateColumn(data, x)).ToArray();
@@ -875,24 +865,12 @@ namespace Microsoft.ML.Auto
             foreach (var expert in GetExperts())
             {
                 expert.IncludeFeaturesOverride = includeFeaturesOverride;
-                SuggestedTransform[] suggestions = expert.Apply(cols, args).ToArray();
+                SuggestedTransform[] suggestions = expert.Apply(cols).ToArray();
                 includeFeaturesOverride |= expert.IncludeFeaturesOverride;
 
                 list.AddRange(suggestions);
             }
             return list.ToArray();
-        }
-
-        public static SuggestedTransform[] InferTransforms(MLContext context, IDataView data, Arguments args, string label)
-        {
-            var dataSample = data.Take(MaxRowsToRead);
-
-            // infer column purposes from data sample
-            var columnIndices = Enumerable.Range(0, dataSample.Schema.Count);
-            var purposes = PurposeInference.InferPurposes(context, dataSample, columnIndices, label);
-
-            // infer transforms
-            return InferTransforms(context, data, purposes, args);
         }
     }
 }
