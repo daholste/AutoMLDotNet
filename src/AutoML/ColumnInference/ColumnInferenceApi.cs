@@ -37,10 +37,9 @@ namespace Microsoft.ML.Auto
             var separatorCandidates = separator == null ? TextFileContents.DefaultSeparators : new string[] { separator };
             var splitInference = TextFileContents.TrySplitColumns(sample, separatorCandidates);
             
-            // todo: error handling
             if (!splitInference.IsSuccess)
             {
-                throw new Exception("Unable to split the file provided into multiple, consistent columns.");
+                throw new InferenceException(InferenceType.ColumnSplit, "Unable to split the file provided into multiple, consistent columns.");
             }
 
             return splitInference;
@@ -59,10 +58,9 @@ namespace Microsoft.ML.Auto
                     AllowQuote = splitInference.AllowQuote,
                 });
 
-            // todo: error handling
             if (!typeInferenceResult.IsSuccess)
             {
-                throw new Exception("Unable to infer column types of the file provided.");
+                throw new InferenceException(InferenceType.ColumnDataKind, "Unable to infer column types of the file provided.");
             }
 
             return typeInferenceResult;

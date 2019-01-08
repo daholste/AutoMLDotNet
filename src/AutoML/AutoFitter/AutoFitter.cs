@@ -133,8 +133,9 @@ namespace Microsoft.ML.Auto
                     return _mlContext.MulticlassClassification.Evaluate(scoredData);
                 case TaskKind.Regression:
                     return _mlContext.Regression.Evaluate(scoredData);
+                // should not be possible to reach here
                 default:
-                    throw new NotSupportedException("unsupported task type");
+                    throw new NotSupportedException($"unsupported machine learning task type {_task}");
             }
         }
 
@@ -153,7 +154,9 @@ namespace Microsoft.ML.Auto
             {
                 return ((RegressionMetrics)evaluatedMetrics).RSquared;
             }
-            throw new NotSupportedException("unsupported task type");
+            
+            // should not be possible to reach here
+            throw new NotSupportedException($"unsupported machine learning task type {_task}");
         }
 
         private void WriteDebugLog(DebugStream stream, string message)

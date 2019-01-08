@@ -10,24 +10,24 @@ namespace Microsoft.ML.Auto
 {
     internal class TrainerExtensionCatalog
     {
-        public static IEnumerable<ITrainerExtension> GetTrainers(TaskKind trainerKind, int maxIterations)
+        public static IEnumerable<ITrainerExtension> GetTrainers(TaskKind task, int maxIterations)
         {
-            if(trainerKind == TaskKind.BinaryClassification)
+            if(task == TaskKind.BinaryClassification)
             {
                 return GetBinaryLearners(maxIterations);
             }
-            else if (trainerKind == TaskKind.BinaryClassification)
+            else if (task == TaskKind.BinaryClassification)
             {
                 return GetMultiLearners(maxIterations);
             }
-            else if (trainerKind == TaskKind.Regression)
+            else if (task == TaskKind.Regression)
             {
                 return GetRegressionLearners(maxIterations);
             }
             else
             {
-                // todo: fix this up
-                throw new Exception("unsupported task");
+                // should not be possible to reach here
+                throw new NotSupportedException($"unsupported machine learning task type {task}");
             }
         }
 

@@ -222,17 +222,10 @@ namespace Microsoft.ML.Auto
             _isMetricMaximizing = isMetricMaximizing;
         }
 
-        public RunResult(ParameterSet parameterSet)
-        {
-            _parameterSet = parameterSet;
-        }
-
         public Double MetricValue
         {
             get
             {
-                if (_metricValue == null)
-                    throw new Exception("Run result does not contain a metric");
                 return _metricValue.Value;
             }
         }

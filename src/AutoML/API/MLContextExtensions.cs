@@ -438,7 +438,8 @@ namespace Microsoft.ML.Auto
         ColumnPurpose,
         Tranform,
         Trainer,
-        Hyperparams
+        Hyperparams,
+        ColumnSplit
     }
 
     // Following exception is used when the data

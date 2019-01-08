@@ -50,8 +50,7 @@ namespace Microsoft.ML.Auto
             var column = data.Schema.GetColumnOrNull(columnName);
             if(column == null)
             {
-                // todo: error handling
-                throw new Exception($"Column '{columnName}' not found in data.");
+                throw new ArgumentException($"Column '{columnName}' not found in data.");
             }
             return column.Value;
         }
