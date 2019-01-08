@@ -48,6 +48,11 @@ namespace Microsoft.ML.Auto
 
         private static PurposeInference.Column[] ToInternalColumnPurposes(InferredColumn[] inferredColumns)
         {
+            if (inferredColumns == null)
+            {
+                return null;
+            }
+
             var result = new List<PurposeInference.Column>();
             foreach(var inferredColumn in inferredColumns)
             {

@@ -26,8 +26,8 @@ namespace Microsoft.ML.Auto
             CancellationToken cancellationToken = default(CancellationToken), InferredColumn[] inferredColumns = null,
             IProgress<RegressionPipelineResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, preprocessor, settings, 
-                cancellationToken, inferredColumns, iterationCallback);
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
+                cancellationToken, inferredColumns, iterationCallback, null);
         }
 
         // todo: instead of internal methods, use static debug class w/ singleton logger?
@@ -65,7 +65,7 @@ namespace Microsoft.ML.Auto
             IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
         {
             return AutoFit(context, trainData, label, validationData, preprocessor, settings,
-                inferredColumns, cancellationToken, iterationCallback);
+                inferredColumns, cancellationToken, iterationCallback, null);
         }
 
         internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
@@ -103,7 +103,7 @@ namespace Microsoft.ML.Auto
             IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
         {
             return AutoFit(context, trainData, label, validationData, preprocessor, settings,
-                inferredColumns, cancellationToken, iterationCallback);
+                inferredColumns, cancellationToken, iterationCallback, null);
         }
 
         internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
