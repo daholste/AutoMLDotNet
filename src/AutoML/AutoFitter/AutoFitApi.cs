@@ -9,7 +9,7 @@ namespace Microsoft.ML.Auto
     {
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFit(IDataView trainData, 
             IDataView validationData, string label, InferredColumn[] inferredColumns, int maxIterations, 
-            IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger = null)
+            IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
