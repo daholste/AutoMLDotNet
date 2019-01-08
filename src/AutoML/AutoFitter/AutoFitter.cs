@@ -15,6 +15,7 @@ namespace Microsoft.ML.Auto
 {
     internal class AutoFitter
     {
+        private readonly IDebugLogger _debugLogger;
         private readonly IList<PipelineRunResult> _history;
         private readonly string _label;
         private readonly int _maxIterations;
@@ -28,8 +29,9 @@ namespace Microsoft.ML.Auto
 
         public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
             TaskKind task, int maxIterations, string label, PurposeInference.Column[] puproseOverrides,
-            IDataView trainData, IDataView validationData)
+            IDataView trainData, IDataView validationData, IDebugLogger debugLogger)
         {
+            _debugLogger = debugLogger;
             _history = new List<PipelineRunResult>();
             _label = label;
             _maxIterations = maxIterations;
@@ -83,14 +85,14 @@ namespace Microsoft.ML.Auto
                         }
                         catch (Exception e)
                         {
-                            File.AppendAllText($"crash_dump1.txt", $"{pipeline.Trainer} Crashed {e}\r\n");
+                            WriteDebugLog(DebugStream.Exception, $"{pipeline.Trainer} Crashed {e}\r\n");
                             pipelineSuggester.MarkPipelineAsFailed(pipeline);
                         }
                     }
                 }
                 catch (Exception e)
                 {
-                    File.AppendAllText($"crash_dump2.txt", $"{e}\r\n");
+                    WriteDebugLog(DebugStream.Exception, $"{e}\r\n");
                 }
             }
         }
@@ -118,7 +120,7 @@ namespace Microsoft.ML.Auto
                 transformsSb.Append(" ");
             }
             var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
-            File.AppendAllText($"output.tsv", $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
+            WriteDebugLog(DebugStream.RunResult, $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
         }
 
         private object GetEvaluatedMetrics(IDataView scoredData)
@@ -152,6 +154,16 @@ namespace Microsoft.ML.Auto
                 return ((RegressionMetrics)evaluatedMetrics).RSquared;
             }
             throw new NotSupportedException("unsupported task type");
+        }
+
+        private void WriteDebugLog(DebugStream stream, string message)
+        {
+            if(_debugLogger == null)
+            {
+                return;
+            }
+
+            _debugLogger.Log(stream, message);
         }
     }
 }

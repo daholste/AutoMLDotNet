@@ -26,9 +26,19 @@ namespace Microsoft.ML.Auto
             CancellationToken cancellationToken = default(CancellationToken), InferredColumn[] inferredColumns = null,
             IProgress<RegressionPipelineResult> iterationCallback = null)
         {
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings, 
+                cancellationToken, inferredColumns, iterationCallback);
+        }
+
+        // todo: instead of internal methods, use static debug class w/ singleton logger?
+        internal static RegressionResult AutoFit(this RegressionContext context,
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default(CancellationToken), InferredColumn[] inferredColumns = null,
+            IProgress<RegressionPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
+        {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
-                settings.StoppingCriteria.MaxIterations,  preprocessor, TaskKind.Regression, OptimizingMetric.RSquared);
+                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
 
             var results = new RegressionPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -54,9 +64,19 @@ namespace Microsoft.ML.Auto
             InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken), 
             IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
         {
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
+                inferredColumns, cancellationToken, iterationCallback);
+        }
+
+        internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken),
+            IProgress<BinaryClassificationPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
+        {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
-                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy);
+                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
+                debugLogger);
 
             var results = new BinaryClassificationPipelineResult[allPipelines.Length];
             for(var i = 0; i < results.Length; i++)
@@ -82,9 +102,18 @@ namespace Microsoft.ML.Auto
             InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken), 
             IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
         {
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
+                inferredColumns, cancellationToken, iterationCallback);
+        }
+
+        internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken),
+            IProgress<MulticlassClassificationPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
+        {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
-                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy);
+                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
 
             var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)

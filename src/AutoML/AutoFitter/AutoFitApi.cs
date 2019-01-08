@@ -9,7 +9,7 @@ namespace Microsoft.ML.Auto
     {
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFit(IDataView trainData, 
             IDataView validationData, string label, InferredColumn[] inferredColumns, int maxIterations, 
-            IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric)
+            IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger = null)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
@@ -28,7 +28,7 @@ namespace Microsoft.ML.Auto
             var terminator = new IterationBasedTerminator(maxIterations);
             var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
                    maxIterations, label, ToInternalColumnPurposes(inferredColumns), 
-                   trainData, validationData);
+                   trainData, validationData, debugLogger);
             var allPipelines = autoFitter.InferPipelines(1);
 
             // apply preprocessor to returned models
