@@ -27,7 +27,7 @@ namespace Microsoft.ML.Auto
             else
             {
                 // todo: fix this up
-                throw new InferenceException("unsupported task");
+                throw new Exception("unsupported task");
             }
         }
 

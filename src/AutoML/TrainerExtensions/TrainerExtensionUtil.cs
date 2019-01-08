@@ -134,7 +134,7 @@ namespace Microsoft.ML.Auto
                 catch (Exception)
                 {
                     // hack: make better error message
-                    throw new InferenceException("cannot set learner parameter");
+                    throw new Exception("cannot set learner parameter");
                 }
             }
         }

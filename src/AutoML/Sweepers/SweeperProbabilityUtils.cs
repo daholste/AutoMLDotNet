@@ -200,7 +200,7 @@ namespace Microsoft.ML.Auto
                     result.Add(fvg.NormalizeValue(new FloatParameterValue(pset.Name, float.Parse(pset.ValueText))));
                 }
                 else
-                    throw new InferenceException("Smart sweeper can only sweep over discrete and numeric parameters");
+                    throw new Exception("Smart sweeper can only sweep over discrete and numeric parameters");
             }
 
             return result.ToArray();

@@ -436,12 +436,9 @@ namespace Microsoft.ML.Auto
         Task,
         ColumnDataKind,
         ColumnPurpose,
-        Transform,
+        Tranform,
         Trainer,
-        Hyperparams,
-        AutoFit,
-        ColumnInference,
-        PipelineSuggestion
+        Hyperparams
     }
 
     // Following exception is used when the data
@@ -457,11 +454,6 @@ namespace Microsoft.ML.Auto
         public InferenceException(InferenceType inferenceType, string message, Exception inner)
             : base(message, inner)
         {
-        }
-
-        internal InferenceException(string message) : base(message)
-        {
-
         }
     }
 }

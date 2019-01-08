@@ -51,25 +51,9 @@ namespace Microsoft.ML.Auto
             if(column == null)
             {
                 // todo: error handling
-                throw new InferenceException($"Column '{columnName}' not found in data.");
+                throw new Exception($"Column '{columnName}' not found in data.");
             }
             return column.Value;
-        }
-
-        public static T ExecuteApiFuncSafe<T>(InferenceType type, Func<T> func)
-        {
-            try
-            {
-                return func();
-            }
-            catch (InferenceException ex)
-            {
-                throw new InferenceException(type, ex.Message);
-            }
-            catch (Exception ex)
-            {
-                throw new InferenceException(type, $"Internal exception during {type}", ex);
-            }
         }
     }
 }

@@ -114,9 +114,7 @@ namespace Microsoft.ML.Auto
 
             var lineCount = firstChunk.Count(x => x == '\n');
             if (lineCount == 0)
-            {
-                throw new InferenceException("Counldn't identify line breaks. File is not text?");
-            }
+                throw new Exception("Counldn't identify line breaks. File is not text?");
 
             long approximateRowCount = (long)(lineCount * fileSize * 1.0 / firstChunk.Length);
             var firstNewline = Array.FindIndex(firstChunk, x => x == '\n');
@@ -205,7 +203,7 @@ namespace Microsoft.ML.Auto
                 var resultBuffer = resultStream.ToArray();
                 if (resultBuffer.Length == 0)
                 {
-                    throw new InferenceException("File is not text, or couldn't detect line breaks");
+                    throw new Exception("File is not text, or couldn't detect line breaks");
                 }
 
                 return resultBuffer;

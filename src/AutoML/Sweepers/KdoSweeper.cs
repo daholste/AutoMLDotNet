@@ -133,7 +133,7 @@ internal sealed class KdoSweeper : ISweeper
                                       $"NOTE: Default metric of 'AUC' only viable for binary classification problems. \n" +
                                       $"Please include an evaluator (ev) component with an appropriate metric specified for your task type.\n\n" +
                                        "Example RSP using alternate metric (i.e., AccuracyMicro):\nrunner=Local{\n\tev=Tlc{m=AccuracyMicro}\n\tpattern={...etc...}\n}";
-                throw new InferenceException(errorMessage);
+                throw new Exception(errorMessage);
             }
 
             return GenerateCandidateConfigurations(numOfCandidates, viableRuns);

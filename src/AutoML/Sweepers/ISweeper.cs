@@ -232,9 +232,7 @@ namespace Microsoft.ML.Auto
             get
             {
                 if (_metricValue == null)
-                {
-                    throw new InferenceException("Run result does not contain a metric");
-                }
+                    throw new Exception("Run result does not contain a metric");
                 return _metricValue.Value;
             }
         }

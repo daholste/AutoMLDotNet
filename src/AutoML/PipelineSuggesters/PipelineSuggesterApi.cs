@@ -7,12 +7,6 @@ namespace Microsoft.ML.Auto
     {
         public static Pipeline GetPipeline(TaskKind task, IDataView data, string label)
         {
-            return AutoMlUtils.ExecuteApiFuncSafe(InferenceType.PipelineSuggestion, () =>
-                GetPipelineSafe(task, data, label));
-        }
-
-        private static Pipeline GetPipelineSafe(TaskKind task, IDataView data, string label)
-        {
             var mlContext = new MLContext();
             var availableTransforms = TransformInferenceApi.InferTransforms(mlContext, data, label);
             var availableTrainers = RecipeInference.AllowedTrainers(mlContext, task, 1);
