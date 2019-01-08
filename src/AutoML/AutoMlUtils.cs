@@ -20,7 +20,7 @@ namespace Microsoft.ML.Auto
             if(!boolVal)
             {
                 message = message ?? "Assertion failed";
-                throw new Exception(message);
+                throw new InvalidOperationException(message);
             }
         }
 

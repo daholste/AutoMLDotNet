@@ -135,7 +135,7 @@ namespace Microsoft.ML.Auto
                     return _mlContext.Regression.Evaluate(scoredData);
                 // should not be possible to reach here
                 default:
-                    throw new NotSupportedException($"unsupported machine learning task type {_task}");
+                    throw new InvalidOperationException($"unsupported machine learning task type {_task}");
             }
         }
 
@@ -156,7 +156,7 @@ namespace Microsoft.ML.Auto
             }
             
             // should not be possible to reach here
-            throw new NotSupportedException($"unsupported machine learning task type {_task}");
+            throw new InvalidOperationException($"unsupported machine learning task type {_task}");
         }
 
         private void WriteDebugLog(DebugStream stream, string message)

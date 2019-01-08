@@ -133,7 +133,7 @@ namespace Microsoft.ML.Auto
                 }
                 catch (Exception)
                 {
-                    throw new Exception("cannot set learner parameter");
+                    throw new InvalidOperationException("cannot set learner parameter");
                 }
             }
         }
