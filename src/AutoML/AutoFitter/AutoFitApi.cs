@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Runtime.Data;
@@ -10,6 +11,15 @@ namespace Microsoft.ML.Auto
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFit(IDataView trainData, 
             IDataView validationData, string label, InferredColumn[] inferredColumns, int maxIterations, 
             IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger = null)
+        {
+            return AutoMlUtils.ExecuteApiFuncSafe(InferenceType.AutoFit, () =>
+                AutoFitSafe(trainData, validationData, label, inferredColumns, maxIterations, preprocessor,
+                        task, metric, debugLogger));
+        }
+
+        private static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFitSafe(IDataView trainData,
+           IDataView validationData, string label, InferredColumn[] inferredColumns, int maxIterations,
+           IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger = null)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
@@ -27,7 +37,7 @@ namespace Microsoft.ML.Auto
             var optimizingMetricfInfo = new OptimizingMetricInfo(metric);
             var terminator = new IterationBasedTerminator(maxIterations);
             var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
-                   maxIterations, label, ToInternalColumnPurposes(inferredColumns), 
+                   maxIterations, label, ToInternalColumnPurposes(inferredColumns),
                    trainData, validationData, debugLogger);
             var allPipelines = autoFitter.InferPipelines(1);
 

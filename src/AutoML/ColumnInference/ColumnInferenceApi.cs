@@ -6,8 +6,22 @@ namespace Microsoft.ML.Auto
 {
     internal static class ColumnInferenceApi
     {
-        public static ColumnInferenceResult InferColumns(MLContext context, string path, string label, 
+        public static ColumnInferenceResult InferColumns(MLContext context, string path, string label,
             bool hasHeader = false, string separator = null)
+        {
+            return AutoMlUtils.ExecuteApiFuncSafe(InferenceType.ColumnInference, () =>
+                InferColumnsSafe(context, path, label, hasHeader, separator));
+        }
+
+        public static ColumnInferenceResult InferColumns(MLContext context, IMultiStreamSource multiStreamSource,
+            string label, bool hasHeader = false, string separator = null)
+        {
+            return AutoMlUtils.ExecuteApiFuncSafe(InferenceType.ColumnInference, () =>
+                InferColumnsSafe(context, multiStreamSource, label, hasHeader, separator));
+        }
+
+        private static ColumnInferenceResult InferColumnsSafe(MLContext context, string path, string label, 
+            bool hasHeader, string separator)
         {
             var sample = TextFileSample.CreateFromFullFile(path);
             Func<TextLoader, IDataView> createDataView = (textLoader) => 
@@ -17,8 +31,8 @@ namespace Microsoft.ML.Auto
             return InferColumns(context, sample, createDataView, label, hasHeader, separator);
         }
 
-        public static ColumnInferenceResult InferColumns(MLContext context, IMultiStreamSource multiStreamSource, 
-            string label, bool hasHeader = false, string separator = null)
+        private static ColumnInferenceResult InferColumnsSafe(MLContext context, IMultiStreamSource multiStreamSource, 
+            string label, bool hasHeader, string separator)
         {
             // heuristic: use first stream in multi-stream source to infer column types & split
             var stream = multiStreamSource.Open(0);
@@ -40,7 +54,7 @@ namespace Microsoft.ML.Auto
             // todo: error handling
             if (!splitInference.IsSuccess)
             {
-                throw new Exception("Unable to split the file provided into multiple, consistent columns.");
+                throw new InferenceException("Unable to split the file provided into multiple, consistent columns.");
             }
 
             return splitInference;
@@ -62,7 +76,7 @@ namespace Microsoft.ML.Auto
             // todo: error handling
             if (!typeInferenceResult.IsSuccess)
             {
-                throw new Exception("Unable to infer column types of the file provided.");
+                throw new InferenceException("Unable to infer column types of the file provided.");
             }
 
             return typeInferenceResult;
