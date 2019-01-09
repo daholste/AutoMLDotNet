@@ -18,44 +18,43 @@ namespace Microsoft.ML.Auto
         private readonly IDebugLogger _debugLogger;
         private readonly IList<PipelineRunResult> _history;
         private readonly string _label;
-        private readonly int _maxIterations;
         private readonly MLContext _mlContext;
         private readonly OptimizingMetricInfo _optimizingMetricInfo;
         private readonly PurposeInference.Column[] _puproseOverrides;
-        private readonly IterationBasedTerminator _terminator;
+        private readonly AutoFitSettings _settings;
         private readonly IDataView _trainData;
         private readonly TaskKind _task;
         private readonly IDataView _validationData;
 
-        public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, IterationBasedTerminator terminator, 
-            TaskKind task, int maxIterations, string label, PurposeInference.Column[] puproseOverrides,
+        public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, AutoFitSettings settings, 
+            TaskKind task, string label, PurposeInference.Column[] puproseOverrides,
             IDataView trainData, IDataView validationData, IDebugLogger debugLogger)
         {
             _debugLogger = debugLogger;
             _history = new List<PipelineRunResult>();
             _label = label;
-            _maxIterations = maxIterations;
             _mlContext = mlContext;
             _optimizingMetricInfo = metricInfo;
+            _settings = settings ?? new AutoFitSettings();
             _puproseOverrides = puproseOverrides;
-            _terminator = terminator;
             _trainData = trainData;
             _task = task;
             _validationData = validationData;
         }
 
-        public PipelineRunResult[] InferPipelines(int batchSize)
+        public PipelineRunResult[] Fit(int batchSize)
         {
-            MainLearningLoop();
+            IteratePipelinesAndFit();
             return _history.ToArray();
         }
 
-        private void MainLearningLoop()
+        private void IteratePipelinesAndFit()
         {
+            var stopwatch = Stopwatch.StartNew();
             var transforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label, _puproseOverrides);
-            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _maxIterations);
+            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _settings.StoppingCriteria.MaxIterations);
 
-            while (!_terminator.ShouldTerminate(_history.Count))
+            do
             {
                 try
                 {
@@ -75,7 +74,8 @@ namespace Microsoft.ML.Auto
                 {
                     WriteDebugLog(DebugStream.Exception, $"{ex}");
                 }
-            }
+            } while (_history.Count < _settings.StoppingCriteria.MaxIterations &&
+                    stopwatch.Elapsed.TotalMinutes < _settings.StoppingCriteria.TimeOutInMinutes);
         }
 
         private void ProcessPipeline(InferredPipeline pipeline)

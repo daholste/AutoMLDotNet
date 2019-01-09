@@ -23,23 +23,22 @@ namespace Microsoft.ML.Auto
     {
         public static RegressionResult AutoFit(this RegressionContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            CancellationToken cancellationToken = default(CancellationToken), InferredColumn[] inferredColumns = null,
+            CancellationToken cancellationToken = default, InferredColumn[] inferredColumns = null,
             IProgress<RegressionPipelineResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, null, validationData, preprocessor, settings,
-                cancellationToken, inferredColumns, iterationCallback);
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
+                cancellationToken, inferredColumns, iterationCallback, null);
         }
 
         // todo: instead of internal methods, use static debug class w/ singleton logger?
         internal static RegressionResult AutoFit(this RegressionContext context,
-            IDataView trainData, string label, IDebugLogger debugLogger,
-            IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            CancellationToken cancellationToken = default(CancellationToken), InferredColumn[] inferredColumns = null,
-            IProgress<RegressionPipelineResult> iterationCallback = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default, InferredColumn[] inferredColumns = null,
+            IProgress<RegressionPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
-                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
+                settings, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
 
             var results = new RegressionPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -62,21 +61,21 @@ namespace Microsoft.ML.Auto
     {
         public static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken), 
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default, 
             IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, null, validationData, preprocessor, settings,
-                inferredColumns, cancellationToken, iterationCallback);
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
+                inferredColumns, cancellationToken, iterationCallback, null);
         }
 
         internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
-            IDataView trainData, string label, IDebugLogger debugLogger, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken),
-            IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default,
+            IProgress<BinaryClassificationPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
-                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
+                settings, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
                 debugLogger);
 
             var results = new BinaryClassificationPipelineResult[allPipelines.Length];
@@ -100,21 +99,21 @@ namespace Microsoft.ML.Auto
     {
         public static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken), 
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default, 
             IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, null, validationData, preprocessor, settings,
-                inferredColumns, cancellationToken, iterationCallback);
+            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
+                inferredColumns, cancellationToken, iterationCallback, null);
         }
 
         internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
-            IDataView trainData, string label, IDebugLogger debugLogger, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default(CancellationToken),
-            IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
+            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
+            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default,
+            IProgress<MulticlassClassificationPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.AutoFit(trainData, validationData, label, inferredColumns,
-                settings.StoppingCriteria.MaxIterations, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
+                settings, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
 
             var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -275,7 +274,7 @@ namespace Microsoft.ML.Auto
 
     public class AutoFitSettings
     {
-        public ExperimentStoppingCriteria StoppingCriteria;
+        public ExperimentStoppingCriteria StoppingCriteria = new ExperimentStoppingCriteria();
         internal IterationStoppingCriteria IterationStoppingCriteria;
         internal Concurrency Concurrency;
         internal Filters Filters;
@@ -294,8 +293,8 @@ namespace Microsoft.ML.Auto
 
     public class ExperimentStoppingCriteria
     {
-        public int MaxIterations;
-        public int TimeOutInMinutes;
+        public int MaxIterations = 10;
+        public int TimeOutInMinutes = 60;
         internal bool StopAfterConverging;
         internal double ExperimentExitScore;
     }

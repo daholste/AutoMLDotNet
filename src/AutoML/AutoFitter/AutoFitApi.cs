@@ -7,8 +7,8 @@ namespace Microsoft.ML.Auto
 {
     internal static class AutoFitApi
     {
-        public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) AutoFit(IDataView trainData, 
-            IDataView validationData, string label, InferredColumn[] inferredColumns, int maxIterations, 
+        public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) Fit(IDataView trainData, 
+            IDataView validationData, string label, InferredColumn[] inferredColumns, AutoFitSettings settings, 
             IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger)
         {
             // hack: init new MLContext
@@ -25,11 +25,10 @@ namespace Microsoft.ML.Auto
 
             // infer pipelines
             var optimizingMetricfInfo = new OptimizingMetricInfo(metric);
-            var terminator = new IterationBasedTerminator(maxIterations);
-            var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, terminator, task,
-                   maxIterations, label, ToInternalColumnPurposes(inferredColumns), 
+            var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, settings, task,
+                   label, ToInternalColumnPurposes(inferredColumns), 
                    trainData, validationData, debugLogger);
-            var allPipelines = autoFitter.InferPipelines(1);
+            var allPipelines = autoFitter.Fit(1);
 
             // apply preprocessor to returned models
             if (preprocessorTransform != null)
