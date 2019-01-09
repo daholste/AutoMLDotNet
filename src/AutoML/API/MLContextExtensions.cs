@@ -14,23 +14,32 @@ namespace Microsoft.ML.Auto
     public static class RegressionExtensions
     {
         public static RegressionResult AutoFit(this RegressionContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            CancellationToken cancellationToken = default, InferredColumn[] inferredColumns = null,
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null, 
+            AutoFitSettings settings = null,
+            InferredColumn[] inferredColumns = null,
+            CancellationToken cancellationToken = default, 
             IProgress<RegressionIterationResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
-                cancellationToken, inferredColumns, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
+                cancellationToken, iterationCallback, null);
         }
 
         // todo: instead of internal methods, use static debug class w/ singleton logger?
-        internal static RegressionResult AutoFit(this RegressionContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            CancellationToken cancellationToken = default, InferredColumn[] inferredColumns = null,
-            IProgress<RegressionIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
+        internal static RegressionResult AutoFit(this RegressionContext context, 
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null, 
+            InferredColumn[] inferredColumns = null, 
+            AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default, 
+            IProgress<RegressionIterationResult> iterationCallback = null, 
+            IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
+                settings, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
 
             var results = new RegressionIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -52,22 +61,31 @@ namespace Microsoft.ML.Auto
     public static class BinaryClassificationExtensions
     {
         public static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default, 
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null,
+            InferredColumn[] inferredColumns = null,
+            AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default, 
             IProgress<BinaryClassificationItertionResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
-                inferredColumns, cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
+                cancellationToken, iterationCallback, null);
         }
 
         internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default,
-            IProgress<BinaryClassificationItertionResult> iterationCallback = null, IDebugLogger debugLogger = null)
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null,
+            InferredColumn[] inferredColumns = null,
+            AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default,
+            IProgress<BinaryClassificationItertionResult> iterationCallback = null, 
+            IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
+                settings, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
                 debugLogger);
 
             var results = new BinaryClassificationItertionResult[allPipelines.Length];
@@ -90,22 +108,30 @@ namespace Microsoft.ML.Auto
     public static class MulticlassExtensions
     {
         public static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default, 
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null,
+            InferredColumn[] inferredColumns = null,
+            AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default, 
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, preprocessor, settings,
-                inferredColumns, cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
+                cancellationToken, iterationCallback, null);
         }
 
         internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
-            IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default,
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null,
+            InferredColumn[] inferredColumns = null, 
+            AutoFitSettings settings = null,
+            CancellationToken cancellationToken = default,
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
+                settings, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
 
             var results = new MulticlassClassificationIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -425,7 +451,6 @@ namespace Microsoft.ML.Auto
         ColumnSplit
     }
 
-    // Following exception is used when the data
     public class InferenceException : Exception
     {
         public InferenceType InferenceType;

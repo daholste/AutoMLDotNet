@@ -70,9 +70,8 @@ namespace Samples
             //////// AutoML
 
             // run AutoML & train model
-            var preprocessor = mlContext.Transforms.Categorical.OneHotEncoding("Workclass", "Workclass");
-            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, "Label", validationData, preprocessor, 
-                new AutoFitSettings()
+            var autoMlResult = mlContext.BinaryClassification.AutoFit(trainData, "Label", validationData,  
+                settings : new AutoFitSettings()
                 {
                     StoppingCriteria = new ExperimentStoppingCriteria() { MaxIterations = 10 }
                 });

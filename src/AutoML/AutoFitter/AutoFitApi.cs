@@ -9,19 +9,10 @@ namespace Microsoft.ML.Auto
     {
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) Fit(IDataView trainData, 
             IDataView validationData, string label, InferredColumn[] inferredColumns, AutoFitSettings settings, 
-            IEstimator<ITransformer> preprocessor, TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger)
+            TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
-
-            ITransformer preprocessorTransform = null;
-            if (preprocessor != null)
-            {
-                // preprocess train and validation data
-                preprocessorTransform = preprocessor.Fit(trainData);
-                trainData = preprocessorTransform.Transform(trainData);
-                validationData = preprocessorTransform.Transform(validationData);
-            }
 
             // infer pipelines
             var optimizingMetricfInfo = new OptimizingMetricInfo(metric);
@@ -29,15 +20,6 @@ namespace Microsoft.ML.Auto
                    label, ToInternalColumnPurposes(inferredColumns), 
                    trainData, validationData, debugLogger);
             var allPipelines = autoFitter.Fit(1);
-
-            // apply preprocessor to returned models
-            if (preprocessorTransform != null)
-            {
-                for (var i = 0; i < allPipelines.Length; i++)
-                {
-                    allPipelines[i].Model = preprocessorTransform.Append(allPipelines[i].Model);
-                }
-            }
 
             var bestScore = allPipelines.Max(p => p.Score);
             var bestPipeline = allPipelines.First(p => p.Score == bestScore);
