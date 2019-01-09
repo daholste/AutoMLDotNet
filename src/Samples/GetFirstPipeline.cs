@@ -5,16 +5,16 @@ namespace Samples
 {
     public static class GetFirstPipeline
     {
-        const string trainDataPath = @"C:\data\sample_train2.csv";
-        const string label = "Label";
+        const string TrainDataPath = @"C:\data\sample_train2.csv";
+        const string Label = "Label";
 
         public static void Run()
         {
-            var mlContext = new MLContext();
-            var columnInference = mlContext.Data.InferColumns(trainDataPath, label, true);
-            var textLoader = mlContext.Data.CreateTextReader(columnInference);
-            var data = textLoader.Read(trainDataPath);
-            var pipeline = mlContext.BinaryClassification.GetPipeline(data, label);
+            var context = new MLContext();
+            var columnInference = context.Data.InferColumns(TrainDataPath, Label, true);
+            var textLoader = context.Data.CreateTextReader(columnInference);
+            var data = textLoader.Read(TrainDataPath);
+            var pipeline = context.BinaryClassification.GetPipeline(data, Label);
         }
     }
 }

@@ -13,9 +13,9 @@ namespace Microsoft.ML.Auto
         /// </summary>
         /// <returns>Array of viable learners.</returns>
         public static IEnumerable<SuggestedTrainer> AllowedTrainers(MLContext mlContext, TaskKind task,
-            int maxNumIterations)
+            int maxIterations)
         {
-            var trainerExtensions = TrainerExtensionCatalog.GetTrainers(task, maxNumIterations);
+            var trainerExtensions = TrainerExtensionCatalog.GetTrainers(task, maxIterations);
 
             var trainers = new List<SuggestedTrainer>();
             foreach (var trainerExtension in trainerExtensions)

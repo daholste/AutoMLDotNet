@@ -46,53 +46,34 @@ namespace Microsoft.ML.Auto
 
         public PipelineRunResult[] InferPipelines(int batchSize)
         {
-            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _maxIterations);
-            var availableTransforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label, _puproseOverrides);
-            var pipelineSuggester = new RocketPipelineSuggester(_mlContext, _optimizingMetricInfo.IsMaximizing,
-                availableTrainers, availableTransforms);
-
-            MainLearningLoop(pipelineSuggester, batchSize);
-
+            MainLearningLoop();
             return _history.ToArray();
         }
 
-        private void MainLearningLoop(IPipelineSuggester pipelineSuggester, int batchSize)
+        private void MainLearningLoop()
         {
+            var transforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label, _puproseOverrides);
+            var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _maxIterations);
+
             while (!_terminator.ShouldTerminate(_history.Count))
             {
                 try
                 {
-                    // get next set of candidates
-                    var currentBatchSize = batchSize;
-                    if (_terminator is IterationBasedTerminator itr)
-                    {
-                        currentBatchSize = Math.Min(itr.RemainingIterations(_history.Count), batchSize);
-                    }
-                    var pipelines = pipelineSuggester.GetNextPipelines(_history, currentBatchSize);
+                    // get next pipeline
+                    var pipeline = RocketPipelineSuggester.GetNextPipeline(_history, transforms, availableTrainers, _optimizingMetricInfo.IsMaximizing);
 
                     // break if no candidates returned, means no valid pipeline available
-                    if (!pipelines.Any())
+                    if (pipeline == null)
                     {
                         break;
                     }
 
-                    // evaluate candidates
-                    foreach (var pipeline in pipelines)
-                    {
-                        try
-                        {
-                            ProcessPipeline(pipeline);
-                        }
-                        catch (Exception e)
-                        {
-                            WriteDebugLog(DebugStream.Exception, $"{pipeline.Trainer} Crashed {e}\r\n");
-                            pipelineSuggester.MarkPipelineAsFailed(pipeline);
-                        }
-                    }
+                    // evaluate pipeline
+                    ProcessPipeline(pipeline);
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    WriteDebugLog(DebugStream.Exception, $"{e}\r\n");
+                    WriteDebugLog(DebugStream.Exception, $"{ex}");
                 }
             }
         }
@@ -101,26 +82,38 @@ namespace Microsoft.ML.Auto
         {
             // run pipeline
             var stopwatch = Stopwatch.StartNew();
-            var pipelineModel = pipeline.TrainTransformer(_trainData);
-            var scoredValidationData = pipelineModel.Transform(_validationData);
-            var evaluatedMetrics = GetEvaluatedMetrics(scoredValidationData);
-            var score = GetPipelineScore(evaluatedMetrics);
+
+            PipelineRunResult runResult;
+            try
+            {
+                var pipelineModel = pipeline.TrainTransformer(_trainData);
+                var scoredValidationData = pipelineModel.Transform(_validationData);
+                var evaluatedMetrics = GetEvaluatedMetrics(scoredValidationData);
+                var score = GetPipelineScore(evaluatedMetrics);
+                runResult = new PipelineRunResult(evaluatedMetrics, pipelineModel, pipeline, score, scoredValidationData);
+            }
+            catch(Exception ex)
+            {
+                WriteDebugLog(DebugStream.Exception, $"{pipeline.Trainer} Crashed {ex}");
+                runResult = new PipelineRunResult(pipeline, false);
+            }
 
             // save pipeline run
-            var runResult = new PipelineRunResult(evaluatedMetrics, pipelineModel, pipeline, score, scoredValidationData);
             _history.Add(runResult);
 
-            stopwatch.Stop();
-
-            var transformsSb = new StringBuilder();
-            foreach (var transform in pipeline.Transforms)
+            // debug log pipeline result
+            if(runResult.RunSucceded)
             {
-                transformsSb.Append("xf=");
-                transformsSb.Append(transform);
-                transformsSb.Append(" ");
+                var transformsSb = new StringBuilder();
+                foreach (var transform in pipeline.Transforms)
+                {
+                    transformsSb.Append("xf=");
+                    transformsSb.Append(transform);
+                    transformsSb.Append(" ");
+                }
+                var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
+                WriteDebugLog(DebugStream.RunResult, $"{_history.Count}\t{runResult.Score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
             }
-            var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
-            WriteDebugLog(DebugStream.RunResult, $"{_history.Count}\t{score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
         }
 
         private object GetEvaluatedMetrics(IDataView scoredData)

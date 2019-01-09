@@ -16,21 +16,31 @@ namespace Microsoft.ML.Auto
     /// </summary>
     internal class InferredPipeline
     {
-        private readonly MLContext _mlContext;
+        private readonly MLContext _context;
         public readonly IList<SuggestedTransform> Transforms;
         public readonly SuggestedTrainer Trainer;
 
         public InferredPipeline(IEnumerable<SuggestedTransform> transforms,
             SuggestedTrainer trainer,
-            MLContext mlContext)
+            MLContext context = null)
         {
             Transforms = transforms.Select(t => t.Clone()).ToList();
             Trainer = trainer.Clone();
-            _mlContext = mlContext;
+            _context = context ?? new MLContext();
             AddNormalizationTransforms();
         }
         
         public override string ToString() => $"{Trainer}+{string.Join("+", Transforms.Select(t => t.ToString()))}";
+
+        public override bool Equals(object obj)
+        {
+            var pipeline = obj as InferredPipeline;
+            if(pipeline == null)
+            {
+                return false;
+            }
+            return pipeline.ToString() == this.ToString();
+        }
 
         public override int GetHashCode()
         {
@@ -62,7 +72,7 @@ namespace Microsoft.ML.Auto
             }
 
             // get learner
-            var learner = Trainer.BuildTrainer(_mlContext);
+            var learner = Trainer.BuildTrainer(_context);
 
             // append learner to pipeline
             pipeline = pipeline.Append(learner);
@@ -73,7 +83,7 @@ namespace Microsoft.ML.Auto
         private void AddNormalizationTransforms()
         {
             // get learner
-            var learner = Trainer.BuildTrainer(_mlContext);
+            var learner = Trainer.BuildTrainer(_context);
 
             // only add normalization if learner needs it
             if (!learner.Info.NeedNormalization)
@@ -81,7 +91,7 @@ namespace Microsoft.ML.Auto
                 return;
             }
 
-            var estimator = _mlContext.Transforms.Normalize(DefaultColumnNames.Features);
+            var estimator = _context.Transforms.Normalize(DefaultColumnNames.Features);
             var annotatedColNames = new[] { new AnnotatedName() { Name = DefaultColumnNames.Features, IsNumeric = true } };
             var routingStructure = new TransformInference.ColumnRoutingStructure(annotatedColNames, annotatedColNames);
             var properties = new Dictionary<string, string>()

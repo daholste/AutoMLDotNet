@@ -14,15 +14,29 @@ namespace Microsoft.ML.Auto
         public readonly double Score;
         public readonly IDataView ScoredValidationData;
 
+        /// <summary>
+        /// This setting is true if the pipeline run succeeded & ran to completion.
+        /// Else, it is false if some exception was thrown before the run could complete.
+        /// </summary>
+        public readonly bool RunSucceded;
+
         public ITransformer Model { get; set; }
 
-        public PipelineRunResult(object evaluatedMetrics, ITransformer model, InferredPipeline pipeline, double score, IDataView scoredValidationData)
+        public PipelineRunResult(object evaluatedMetrics, ITransformer model, InferredPipeline pipeline, double score, IDataView scoredValidationData,
+            bool runSucceeded = true)
         {
             EvaluatedMetrics = evaluatedMetrics;
             Model = model;
             Pipeline = pipeline;
             Score = score;
             ScoredValidationData = scoredValidationData;
+            RunSucceded = runSucceeded;
+        }
+
+        public PipelineRunResult(InferredPipeline pipeline, bool runSucceeded)
+        {
+            Pipeline = pipeline;
+            RunSucceded = runSucceeded;
         }
 
         public IRunResult ToRunResult(bool isMetricMaximizing)
