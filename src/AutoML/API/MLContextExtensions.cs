@@ -11,20 +11,12 @@ using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
-    public class BinaryClassificationPipelineSuggester
-    {
-        public Pipeline[] GetNextPipelines(Pipeline[] history, RegressionMetrics[] metrics, IDataView trainData, string label, List<string> whiteListeTrainers = null, List<string> blockListTrainers = null)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public static class RegressionExtensions
     {
         public static RegressionResult AutoFit(this RegressionContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
             CancellationToken cancellationToken = default, InferredColumn[] inferredColumns = null,
-            IProgress<RegressionPipelineResult> iterationCallback = null)
+            IProgress<RegressionIterationResult> iterationCallback = null)
         {
             return AutoFit(context, trainData, label, validationData, preprocessor, settings,
                 cancellationToken, inferredColumns, iterationCallback, null);
@@ -34,20 +26,20 @@ namespace Microsoft.ML.Auto
         internal static RegressionResult AutoFit(this RegressionContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
             CancellationToken cancellationToken = default, InferredColumn[] inferredColumns = null,
-            IProgress<RegressionPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
+            IProgress<RegressionIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
                 settings, preprocessor, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
 
-            var results = new RegressionPipelineResult[allPipelines.Length];
+            var results = new RegressionIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
             {
-                var pipelineResult = allPipelines[i];
-                var result = new RegressionPipelineResult((RegressionMetrics)pipelineResult.EvaluatedMetrics, pipelineResult.Model, pipelineResult.ScoredValidationData);
+                var iterationResult = allPipelines[i];
+                var result = new RegressionIterationResult((RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.Model, iterationResult.ScoredValidationData);
                 results[i] = result;
             }
-            var bestResult = new RegressionPipelineResult((RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            var bestResult = new RegressionIterationResult((RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
             return new RegressionResult(bestResult, results);
         }
 
@@ -62,7 +54,7 @@ namespace Microsoft.ML.Auto
         public static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
             InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default, 
-            IProgress<BinaryClassificationPipelineResult> iterationCallback = null)
+            IProgress<BinaryClassificationItertionResult> iterationCallback = null)
         {
             return AutoFit(context, trainData, label, validationData, preprocessor, settings,
                 inferredColumns, cancellationToken, iterationCallback, null);
@@ -71,21 +63,21 @@ namespace Microsoft.ML.Auto
         internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
             InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default,
-            IProgress<BinaryClassificationPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
+            IProgress<BinaryClassificationItertionResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
                 settings, preprocessor, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
                 debugLogger);
 
-            var results = new BinaryClassificationPipelineResult[allPipelines.Length];
+            var results = new BinaryClassificationItertionResult[allPipelines.Length];
             for(var i = 0; i < results.Length; i++)
             {
-                var pipelineResult = allPipelines[i];
-                var result = new BinaryClassificationPipelineResult((BinaryClassificationMetrics)pipelineResult.EvaluatedMetrics, pipelineResult.Model, pipelineResult.ScoredValidationData);
+                var iterationResult = allPipelines[i];
+                var result = new BinaryClassificationItertionResult((BinaryClassificationMetrics)iterationResult.EvaluatedMetrics, iterationResult.Model, iterationResult.ScoredValidationData);
                 results[i] = result;
             }
-            var bestResult = new BinaryClassificationPipelineResult((BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            var bestResult = new BinaryClassificationItertionResult((BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
             return new BinaryClassificationResult(bestResult, results);
         }
 
@@ -100,7 +92,7 @@ namespace Microsoft.ML.Auto
         public static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
             InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default, 
-            IProgress<MulticlassClassificationPipelineResult> iterationCallback = null)
+            IProgress<MulticlassClassificationIterationResult> iterationCallback = null)
         {
             return AutoFit(context, trainData, label, validationData, preprocessor, settings,
                 inferredColumns, cancellationToken, iterationCallback, null);
@@ -109,20 +101,20 @@ namespace Microsoft.ML.Auto
         internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, string label, IDataView validationData = null, IEstimator<ITransformer> preprocessor = null, AutoFitSettings settings = null,
             InferredColumn[] inferredColumns = null, CancellationToken cancellationToken = default,
-            IProgress<MulticlassClassificationPipelineResult> iterationCallback = null, IDebugLogger debugLogger = null)
+            IProgress<MulticlassClassificationIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
                 settings, preprocessor, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
 
-            var results = new MulticlassClassificationPipelineResult[allPipelines.Length];
+            var results = new MulticlassClassificationIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
             {
-                var pipelineResult = allPipelines[i];
-                var result = new MulticlassClassificationPipelineResult((MultiClassClassifierMetrics)pipelineResult.EvaluatedMetrics, pipelineResult.Model, pipelineResult.ScoredValidationData);
+                var iterationResult = allPipelines[i];
+                var result = new MulticlassClassificationIterationResult((MultiClassClassifierMetrics)iterationResult.EvaluatedMetrics, iterationResult.Model, iterationResult.ScoredValidationData);
                 results[i] = result;
             }
-            var bestResult = new MulticlassClassificationPipelineResult((MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            var bestResult = new MulticlassClassificationIterationResult((MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
             return new MulticlassClassificationResult(bestResult, results);
         }
 
@@ -267,11 +259,6 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    public class RunHistory
-    {
-        
-    }
-
     public class AutoFitSettings
     {
         public ExperimentStoppingCriteria StoppingCriteria = new ExperimentStoppingCriteria();
@@ -325,14 +312,10 @@ namespace Microsoft.ML.Auto
 
     internal enum Trainers
     {
-        RegressionLightGBM,
-        ClassficationRandomForest,
-        ClassificationLightGBM
     }
 
     internal enum Transformers
     {
-
     }
 
     internal class CrossValidationSettings
@@ -344,83 +327,83 @@ namespace Microsoft.ML.Auto
 
     public class BinaryClassificationResult
     {
-        public readonly BinaryClassificationPipelineResult BestPipeline;
-        public readonly BinaryClassificationPipelineResult[] PipelineResults;
+        public readonly BinaryClassificationItertionResult BestPipeline;
+        public readonly BinaryClassificationItertionResult[] IterationResults;
 
-        public BinaryClassificationResult(BinaryClassificationPipelineResult bestPipeline,
-            BinaryClassificationPipelineResult[] pipelineResults)
+        public BinaryClassificationResult(BinaryClassificationItertionResult bestPipeline,
+            BinaryClassificationItertionResult[] iterationResults)
         {
             BestPipeline = bestPipeline;
-            PipelineResults = pipelineResults;
+            IterationResults = iterationResults;
         }
     }
 
     public class MulticlassClassificationResult
     {
-        public readonly MulticlassClassificationPipelineResult BestPipeline;
-        public readonly MulticlassClassificationPipelineResult[] PipelineResults;
+        public readonly MulticlassClassificationIterationResult BestPipeline;
+        public readonly MulticlassClassificationIterationResult[] IterationResults;
 
-        public MulticlassClassificationResult(MulticlassClassificationPipelineResult bestPipeline,
-            MulticlassClassificationPipelineResult[] pipelineResults)
+        public MulticlassClassificationResult(MulticlassClassificationIterationResult bestPipeline,
+            MulticlassClassificationIterationResult[] iterationResults)
         {
             BestPipeline = bestPipeline;
-            PipelineResults = pipelineResults;
+            IterationResults = iterationResults;
         }
     }
 
     public class RegressionResult
     {
-        public readonly RegressionPipelineResult BestPipeline;
-        public readonly RegressionPipelineResult[] PipelineResults;
+        public readonly RegressionIterationResult BestPipeline;
+        public readonly RegressionIterationResult[] IterationResults;
 
-        public RegressionResult(RegressionPipelineResult bestPipeline,
-            RegressionPipelineResult[] pipelineResults)
+        public RegressionResult(RegressionIterationResult bestPipeline,
+            RegressionIterationResult[] iterationResults)
         {
             BestPipeline = bestPipeline;
-            PipelineResults = pipelineResults;
+            IterationResults = iterationResults;
         }
     }
 
-    public class BinaryClassificationPipelineResult : PipelineResult
+    public class BinaryClassificationItertionResult : IterationResult
     {
         public readonly BinaryClassificationMetrics Metrics;
 
-        public BinaryClassificationPipelineResult(BinaryClassificationMetrics metrics,
+        public BinaryClassificationItertionResult(BinaryClassificationMetrics metrics,
             ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
         {
             Metrics = metrics;
         }
     }
 
-    public class MulticlassClassificationPipelineResult : PipelineResult
+    public class MulticlassClassificationIterationResult : IterationResult
     {
         public readonly MultiClassClassifierMetrics Metrics;
 
-        public MulticlassClassificationPipelineResult(MultiClassClassifierMetrics metrics,
+        public MulticlassClassificationIterationResult(MultiClassClassifierMetrics metrics,
             ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
         {
             Metrics = metrics;
         }
     }
 
-    public class RegressionPipelineResult : PipelineResult
+    public class RegressionIterationResult : IterationResult
     {
         public readonly RegressionMetrics Metrics;
 
-        public RegressionPipelineResult(RegressionMetrics metrics,
+        public RegressionIterationResult(RegressionMetrics metrics,
             ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
         {
             Metrics = metrics;
         }
     }
 
-    public class PipelineResult
+    public class IterationResult
     {
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
         internal readonly Pipeline Pipeline;
 
-        public PipelineResult(ITransformer model, IDataView scoredValidationData, Pipeline pipeline = null)
+        public IterationResult(ITransformer model, IDataView scoredValidationData, Pipeline pipeline = null)
         {
             Model = model;
             ScoredValidationData = scoredValidationData;
