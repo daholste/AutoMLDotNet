@@ -28,7 +28,7 @@ namespace InternalClient
             {
                 // get next pipeline
                 var pipeline = RocketPipelineSuggester.GetNextPipeline(history, transforms, availableTrainers);
-                Console.WriteLine(pipeline.Trainer.TrainerName.ToString());
+                Console.WriteLine(pipeline);
 
                 // mock pipeline run
                 var pipelineScore = AutoMlUtils.Random.NextDouble();
