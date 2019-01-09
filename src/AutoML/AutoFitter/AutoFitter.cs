@@ -59,7 +59,7 @@ namespace Microsoft.ML.Auto
                 try
                 {
                     // get next pipeline
-                    var pipeline = RocketPipelineSuggester.GetNextPipeline(_history, transforms, availableTrainers, _optimizingMetricInfo.IsMaximizing);
+                    var pipeline = PipelineSuggester.GetNextPipeline(_history, transforms, availableTrainers, _optimizingMetricInfo.IsMaximizing);
 
                     // break if no candidates returned, means no valid pipeline available
                     if (pipeline == null)
