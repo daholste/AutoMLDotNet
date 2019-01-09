@@ -27,7 +27,7 @@ namespace InternalClient
             for(var i = 0; i < 100; i++)
             {
                 // get next pipeline
-                var pipeline = RocketPipelineSuggester.GetNextPipeline(history, transforms, availableTrainers);
+                var pipeline = PipelineSuggester.GetNextPipeline(history, transforms, availableTrainers);
                 Console.WriteLine(pipeline);
 
                 // mock pipeline run

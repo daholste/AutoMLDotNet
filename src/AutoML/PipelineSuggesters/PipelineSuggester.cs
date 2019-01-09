@@ -8,16 +8,9 @@ using System.Linq;
 
 namespace Microsoft.ML.Auto
 {
-    internal static class RocketPipelineSuggester
+    internal static class PipelineSuggester
     {
         private const int TopKTrainers = 3;
-
-        private enum Stage
-        {
-            First,
-            Second,
-            Third
-        }
 
         public static InferredPipeline GetNextPipeline(IEnumerable<PipelineRunResult> history,
             IEnumerable<SuggestedTransform> transforms,
