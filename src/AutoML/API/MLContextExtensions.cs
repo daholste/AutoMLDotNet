@@ -306,8 +306,8 @@ namespace Microsoft.ML.Auto
 
     public class ExperimentStoppingCriteria
     {
-        public int MaxIterations = 10;
-        public int TimeOutInMinutes = 60;
+        public int MaxIterations = 100;
+        public int TimeOutInMinutes = 300;
         internal bool StopAfterConverging;
         internal double ExperimentExitScore;
     }
