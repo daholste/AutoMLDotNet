@@ -320,7 +320,8 @@ namespace Microsoft.ML.Auto
                     Float[] transformedParams = SweeperProbabilityUtils.ParameterSetAsFloatArray(_sweepParameters, config, true);
                     VBuffer<Float> features = new VBuffer<Float>(transformedParams.Length, transformedParams);
                     List<int> path = null;
-                    var leafValue = forest.GetLeaf(0, features, ref path);
+                    var leafId = forest.GetLeaf(treeId, features, ref path);
+                    var leafValue = forest.GetLeafValue(treeId, leafId);
                     leafValues.Add(leafValue);
                 }
                 datasetLeafValues.Add(leafValues.ToArray());
