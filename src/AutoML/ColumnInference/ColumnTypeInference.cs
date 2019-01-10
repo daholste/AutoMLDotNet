@@ -153,6 +153,12 @@ namespace Microsoft.ML.Auto
                 {
                     foreach (var col in columns)
                     {
+                        // skip columns that already have a suggested type
+                        if(col.SuggestedType != null)
+                        {
+                            continue;
+                        }
+
                         if (!col.RawData.Skip(1)
                             .All(x =>
                             {
