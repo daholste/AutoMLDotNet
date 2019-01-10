@@ -2,16 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Learners;
-using Microsoft.ML.Runtime.LightGBM;
-using Microsoft.ML.Runtime.Training;
+using Microsoft.ML.Training;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
 using Microsoft.ML.Trainers.Online;
 using Microsoft.ML.Trainers.SymSgd;
 using System;
 using System.Collections.Generic;
+using Microsoft.ML.LightGBM;
+using Microsoft.ML.Learners;
 
 namespace Microsoft.ML.Auto
 {
@@ -115,7 +114,7 @@ namespace Microsoft.ML.Auto
 
         public ITrainerEstimator CreateInstance(MLContext mlContext, IEnumerable<SweepableParam> sweepParams)
         {
-            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<LinearSvm.Arguments>(sweepParams);
+            var argsFunc = TrainerExtensionUtil.CreateArgsFunc<LinearSvmTrainer.Arguments>(sweepParams);
             return mlContext.BinaryClassification.Trainers.LinearSupportVectorMachines(advancedSettings: argsFunc);
         }
 

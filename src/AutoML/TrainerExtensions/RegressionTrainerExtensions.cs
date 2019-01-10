@@ -3,13 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Training;
-using Microsoft.ML.StaticPipe;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Trainers.FastTree;
 using Microsoft.ML.Trainers.HalLearners;
 using Microsoft.ML.Trainers.Online;
+using Microsoft.ML.Training;
 
 namespace Microsoft.ML.Auto
 {

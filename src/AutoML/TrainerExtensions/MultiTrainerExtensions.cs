@@ -2,22 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Learners;
-using Microsoft.ML.Runtime.LightGBM;
-using Microsoft.ML.Runtime.Training;
-using Microsoft.ML.Trainers;
-using Microsoft.ML.Trainers.Online;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Microsoft.ML.Learners;
+using Microsoft.ML.LightGBM;
+using Microsoft.ML.Trainers;
+using Microsoft.ML.Training;
 
 namespace Microsoft.ML.Auto
 {
-    using ITrainerEstimatorProducingFloat = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
     using ITrainerEstimator = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictor>, IPredictor>;
-    
+    using ITrainerEstimatorProducingFloat = ITrainerEstimator<ISingleFeaturePredictionTransformer<IPredictorProducing<float>>, IPredictorProducing<float>>;
+
     internal class AveragedPerceptronOvaExtension : ITrainerExtension
     {
         private static readonly ITrainerExtension _binaryLearnerCatalogItem = new AveragedPerceptronBinaryExtension();

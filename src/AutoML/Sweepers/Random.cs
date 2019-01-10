@@ -3,8 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Sweeper;
 
 namespace Microsoft.ML.Auto
 {

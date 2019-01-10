@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Data;
 
 namespace Microsoft.ML.Auto
 {

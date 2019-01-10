@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoML", "src\AutoML\AutoML
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples", "src\Samples\Samples.csproj", "{64A7294E-A2C7-4499-8F0B-4BB074047C6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InternalClient", "InternalClient\InternalClient.csproj", "{50303A1D-2DF6-46B7-B028-438FE73DAF7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InternalClient", "src\InternalClient\InternalClient.csproj", "{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,14 +33,14 @@ Global
 		{64A7294E-A2C7-4499-8F0B-4BB074047C6B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{64A7294E-A2C7-4499-8F0B-4BB074047C6B}.Release-Intrinsics|Any CPU.ActiveCfg = Release|Any CPU
 		{64A7294E-A2C7-4499-8F0B-4BB074047C6B}.Release-Intrinsics|Any CPU.Build.0 = Release|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Debug-Intrinsics|Any CPU.ActiveCfg = Debug|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Debug-Intrinsics|Any CPU.Build.0 = Debug|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Release-Intrinsics|Any CPU.ActiveCfg = Release|Any CPU
-		{50303A1D-2DF6-46B7-B028-438FE73DAF7E}.Release-Intrinsics|Any CPU.Build.0 = Release|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Debug-Intrinsics|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Debug-Intrinsics|Any CPU.Build.0 = Debug|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Release-Intrinsics|Any CPU.ActiveCfg = Release|Any CPU
+		{8D564A01-DCA9-443A-9995-A5A67BE4C2CD}.Release-Intrinsics|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

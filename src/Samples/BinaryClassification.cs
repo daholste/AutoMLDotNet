@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using Microsoft.ML;
-using Microsoft.ML.Core.Data;
 using Microsoft.ML.Auto;
-using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Core.Data;
+using Microsoft.ML.Data;
 
 namespace Samples
 {
