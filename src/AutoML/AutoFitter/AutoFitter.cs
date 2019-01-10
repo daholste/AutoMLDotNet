@@ -54,24 +54,18 @@ namespace Microsoft.ML.Auto
 
             do
             {
-                try
-                {
-                    // get next pipeline
-                    var pipeline = PipelineSuggester.GetNextPipeline(_history, transforms, availableTrainers, _optimizingMetricInfo.IsMaximizing);
+                // get next pipeline
+                var pipeline = PipelineSuggester.GetNextPipeline(_history, transforms, availableTrainers, _optimizingMetricInfo.IsMaximizing);
 
-                    // break if no candidates returned, means no valid pipeline available
-                    if (pipeline == null)
-                    {
-                        break;
-                    }
-
-                    // evaluate pipeline
-                    ProcessPipeline(pipeline);
-                }
-                catch (Exception ex)
+                // break if no candidates returned, means no valid pipeline available
+                if (pipeline == null)
                 {
-                    WriteDebugLog(DebugStream.Exception, $"{ex}");
+                    break;
                 }
+
+                // evaluate pipeline
+                ProcessPipeline(pipeline);
+
             } while (_history.Count < _settings.StoppingCriteria.MaxIterations &&
                     stopwatch.Elapsed.TotalMinutes < _settings.StoppingCriteria.TimeOutInMinutes);
         }
@@ -110,7 +104,7 @@ namespace Microsoft.ML.Auto
                     transformsSb.Append(" ");
                 }
                 var commandLineStr = $"{transformsSb.ToString()} tr={pipeline.Trainer}";
-                WriteDebugLog(DebugStream.RunResult, $"{_history.Count}\t{runResult.Score}\t{stopwatch.Elapsed}\t{commandLineStr}\r\n");
+                WriteDebugLog(DebugStream.RunResult, $"{_history.Count}\t{runResult.Score}\t{stopwatch.Elapsed}\t{commandLineStr}");
             }
         }
 

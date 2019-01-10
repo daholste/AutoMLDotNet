@@ -6,10 +6,13 @@ namespace Samples
 {
     public static class Benchmarking
     {
-        const string TrainDataPath = @"D:\SplitDatasets\EverGreen_train.csv";
-        const string ValidationDataPath = @"D:\SplitDatasets\EverGreen_valid.csv";
-        const string TestDataPath = @"D:\SplitDatasets\EverGreen_test.csv";
-        const string Label = "Label";
+        const string DatasetName = "VirusPrediction";
+        const string Label = "WnvPresent";
+        const string DatasetPathPrefix = @"D:\SplitDatasets\";
+
+        static readonly string TrainDataPath = $"{DatasetPathPrefix}{DatasetName}_train.csv";
+        static readonly string ValidationDataPath = $"{DatasetPathPrefix}{DatasetName}_valid.csv";
+        static readonly string TestDataPath = $"{DatasetPathPrefix}{DatasetName}_test.csv";
 
         public static void Run()
         {
