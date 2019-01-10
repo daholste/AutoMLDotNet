@@ -3,7 +3,7 @@ using Microsoft.ML.Auto;
 
 namespace Samples
 {
-    public static class GetFirstPipeline
+    public static class Benchmarking
     {
         const string TrainDataPath = @"C:\data\sample_train2.csv";
         const string Label = "Label";

@@ -5,6 +5,7 @@ namespace Microsoft.ML.Auto
 {
     internal class PipelineSuggesterApi
     {
+        // local
         public static Pipeline GetPipeline(TaskKind task, IDataView data, string label)
         {
             var mlContext = new MLContext();

@@ -45,10 +45,10 @@ namespace Microsoft.ML.Auto
             for (var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new RegressionIterationResult((RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.Model, iterationResult.ScoredValidationData);
+                var result = new RegressionIterationResult(iterationResult.Model, (RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
                 results[i] = result;
             }
-            var bestResult = new RegressionIterationResult((RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            var bestResult = new RegressionIterationResult(bestPipeline.Model, (RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
             return new RegressionResult(bestResult, results);
         }
 
@@ -92,10 +92,10 @@ namespace Microsoft.ML.Auto
             for(var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new BinaryClassificationItertionResult((BinaryClassificationMetrics)iterationResult.EvaluatedMetrics, iterationResult.Model, iterationResult.ScoredValidationData);
+                var result = new BinaryClassificationItertionResult(iterationResult.Model, (BinaryClassificationMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
                 results[i] = result;
             }
-            var bestResult = new BinaryClassificationItertionResult((BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            var bestResult = new BinaryClassificationItertionResult(bestPipeline.Model, (BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
             return new BinaryClassificationResult(bestResult, results);
         }
 
@@ -137,10 +137,10 @@ namespace Microsoft.ML.Auto
             for (var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new MulticlassClassificationIterationResult((MultiClassClassifierMetrics)iterationResult.EvaluatedMetrics, iterationResult.Model, iterationResult.ScoredValidationData);
+                var result = new MulticlassClassificationIterationResult(iterationResult.Model, (MultiClassClassifierMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
                 results[i] = result;
             }
-            var bestResult = new MulticlassClassificationIterationResult((MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.Model, bestPipeline.ScoredValidationData);
+            var bestResult = new MulticlassClassificationIterationResult(bestPipeline.Model, (MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
             return new MulticlassClassificationResult(bestResult, results);
         }
 
@@ -169,7 +169,7 @@ namespace Microsoft.ML.Auto
     public static class DataExtensions
     {
         // Delimiter, header, column datatype inference
-        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label, bool hasHeader = false, string separator = null, TextLoader.Column[] columns = null)
+        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label = null, bool hasHeader = false, string separator = null, TextLoader.Column[] columns = null)
         {
             // todo: respect & test column overrides param
             var mlContext = new MLContext();
@@ -390,48 +390,49 @@ namespace Microsoft.ML.Auto
         }
     }
 
-    public class BinaryClassificationItertionResult : IterationResult
+    public class BinaryClassificationItertionResult
     {
         public readonly BinaryClassificationMetrics Metrics;
-
-        public BinaryClassificationItertionResult(BinaryClassificationMetrics metrics,
-            ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
-        {
-            Metrics = metrics;
-        }
-    }
-
-    public class MulticlassClassificationIterationResult : IterationResult
-    {
-        public readonly MultiClassClassifierMetrics Metrics;
-
-        public MulticlassClassificationIterationResult(MultiClassClassifierMetrics metrics,
-            ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
-        {
-            Metrics = metrics;
-        }
-    }
-
-    public class RegressionIterationResult : IterationResult
-    {
-        public readonly RegressionMetrics Metrics;
-
-        public RegressionIterationResult(RegressionMetrics metrics,
-            ITransformer model, IDataView scoredValidationData) : base(model, scoredValidationData)
-        {
-            Metrics = metrics;
-        }
-    }
-
-    public class IterationResult
-    {
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
         internal readonly Pipeline Pipeline;
 
-        public IterationResult(ITransformer model, IDataView scoredValidationData, Pipeline pipeline = null)
+        public BinaryClassificationItertionResult(ITransformer model, BinaryClassificationMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
         {
             Model = model;
+            ScoredValidationData = scoredValidationData;
+            Metrics = metrics;
+            Pipeline = pipeline;
+        }
+    }
+
+    public class MulticlassClassificationIterationResult
+    {
+        public readonly MultiClassClassifierMetrics Metrics;
+        public readonly ITransformer Model;
+        public readonly IDataView ScoredValidationData;
+        internal readonly Pipeline Pipeline;
+
+        public MulticlassClassificationIterationResult(ITransformer model, MultiClassClassifierMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        {
+            Model = model;
+            Metrics = metrics;
+            ScoredValidationData = scoredValidationData;
+            Pipeline = pipeline;
+        }
+    }
+
+    public class RegressionIterationResult
+    {
+        public readonly RegressionMetrics Metrics;
+        public readonly ITransformer Model;
+        public readonly IDataView ScoredValidationData;
+        internal readonly Pipeline Pipeline;
+
+        public RegressionIterationResult(ITransformer model, RegressionMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        {
+            Model = model;
+            Metrics = metrics;
             ScoredValidationData = scoredValidationData;
             Pipeline = pipeline;
         }
