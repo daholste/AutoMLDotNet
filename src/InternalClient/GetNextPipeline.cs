@@ -28,7 +28,11 @@ namespace InternalClient
             {
                 // get next pipeline
                 var pipeline = PipelineSuggester.GetNextPipeline(history, transforms, availableTrainers);
-                Console.WriteLine(pipeline);
+                if(pipeline == null)
+                {
+                    break;
+                }
+                Console.WriteLine($"{i}\t{pipeline}");
 
                 // mock pipeline run
                 var pipelineScore = AutoMlUtils.Random.NextDouble();
@@ -36,6 +40,8 @@ namespace InternalClient
 
                 history.Add(result);
             }
+
+            Console.ReadLine();
         }
     }
 }

@@ -56,14 +56,13 @@ namespace Microsoft.ML.Auto
 
         private readonly ISweeper _randomSweeper;
         private readonly Arguments _args;
-        private readonly MLContext _context;
+        private readonly MLContext _context = new MLContext();
 
         private readonly IValueGenerator[] _sweepParameters;
 
-        public SmacSweeper(MLContext context, Arguments args)
+        public SmacSweeper(Arguments args)
         {
             _args = args;
-            _context = context;
             _sweepParameters = args.SweptParameters;
             _randomSweeper = new UniformRandomSweeper(new SweeperBase.ArgumentsBase(), _sweepParameters);
         }

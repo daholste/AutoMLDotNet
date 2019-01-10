@@ -136,8 +136,8 @@ namespace Microsoft.ML.Auto
         private static void SampleHyperparameters(SuggestedTrainer trainer, IEnumerable<PipelineRunResult> history, bool isMaximizingMetric)
         {
             var sps = ConvertToValueGenerators(trainer.SweepParams);
-            var sweeper = new KdoSweeper(
-                new KdoSweeper.Arguments
+            var sweeper = new SmacSweeper(
+                new SmacSweeper.Arguments
                 {
                     SweptParameters = sps
                 });
