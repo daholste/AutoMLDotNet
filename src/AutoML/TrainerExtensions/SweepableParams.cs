@@ -140,7 +140,7 @@ namespace Microsoft.ML.Auto
 
         public static IEnumerable<SweepableParam> BuildSgdParams() {
             return new SweepableParam[] {
-                new SweepableDiscreteParam("L2Const", new object[] { 1e-7f, 5e-7f, 1e-6f, 5e-6f, 1e-5f }),
+                new SweepableDiscreteParam("L2Weight", new object[] { 1e-7f, 5e-7f, 1e-6f, 5e-6f, 1e-5f }),
                 new SweepableDiscreteParam("ConvergenceTolerance", new object[] { 1e-2f, 1e-3f, 1e-4f, 1e-5f }),
                 new SweepableDiscreteParam("MaxIterations", new object[] { 1, 5, 10, 20 }),
                 new SweepableDiscreteParam("Shuffle", null, isBool: true),
