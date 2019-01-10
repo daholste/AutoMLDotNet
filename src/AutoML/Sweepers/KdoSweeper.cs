@@ -2,17 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Float = System.Single;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.CommandLine;
-using Microsoft.ML.Runtime.EntryPoints;
 using Microsoft.ML.Trainers.FastTree.Internal;
-using Microsoft.ML.Runtime.Internal.Utilities;
-using Microsoft.ML.Runtime.Sweeper.Algorithms;
+using Float = System.Single;
 
 namespace Microsoft.ML.Auto
 {
@@ -33,7 +27,7 @@ namespace Microsoft.ML.Auto
     /// taken independently.
     /// </summary>
 
-internal sealed class KdoSweeper : ISweeper
+    internal sealed class KdoSweeper : ISweeper
     {
         internal sealed class Arguments
         {

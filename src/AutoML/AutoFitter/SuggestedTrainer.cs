@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Training;
+using Microsoft.ML.Training;
 
 namespace Microsoft.ML.Auto
 {

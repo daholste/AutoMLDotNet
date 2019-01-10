@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.ML.Core.Data;
-using Microsoft.ML.Runtime.Data;
+using Microsoft.ML.Data;
 using static Microsoft.ML.Auto.TransformInference.ColumnRoutingStructure;
 
 namespace Microsoft.ML.Auto

@@ -6,8 +6,6 @@ using System.Linq;
 using System.Threading;
 using Microsoft.ML.Core.Data;
 using Microsoft.ML.Data;
-using Microsoft.ML.Runtime;
-using Microsoft.ML.Runtime.Data;
 
 namespace Microsoft.ML.Auto
 {
