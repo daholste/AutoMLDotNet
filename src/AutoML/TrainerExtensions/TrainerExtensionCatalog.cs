@@ -47,7 +47,7 @@ namespace Microsoft.ML.Auto
             }
 
             learners.AddRange(new ITrainerExtension[] {
-                //new LinearSvmBinaryExtension(),
+                new LinearSvmBinaryExtension(),
                 new FastTreeBinaryExtension()
             });
 
