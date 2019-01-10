@@ -90,7 +90,7 @@ namespace Microsoft.ML.Auto
 
             // build result objects & return
             var inferredColumns = groupingResult.Select(c => c.ToPublicInferredColumn()).ToArray();
-            return new ColumnInferenceResult(splitInference.AllowQuote, splitInference.AllowSparse, inferredColumns, splitInference.Separator);
+            return new ColumnInferenceResult(splitInference.AllowQuote, splitInference.AllowSparse, inferredColumns, splitInference.Separator, hasHeader);
         }
     }
 }
