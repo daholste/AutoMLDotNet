@@ -221,14 +221,16 @@ namespace Microsoft.ML.Auto
         public readonly bool IsSparse;
         public readonly InferredColumn[] InferredColumns;
         public readonly string Separator;
+        public readonly bool HasHeader;
 
         public ColumnInferenceResult(bool isQuoted, bool isSparse, InferredColumn[] inferredColumns,
-            string separator)
+            string separator, bool hasHeader)
         {
             IsQuoted = isQuoted;
             IsSparse = isSparse;
             InferredColumns = inferredColumns;
             Separator = separator;
+            HasHeader = hasHeader;
         }
 
         internal TextLoader BuildTextLoader()
@@ -238,7 +240,8 @@ namespace Microsoft.ML.Auto
                 AllowQuoting = IsQuoted,
                 AllowSparse = IsSparse,
                 Column = InferredColumns.Select(c => c.ToTextLoaderColumn()).ToArray(),
-                Separator = Separator
+                Separator = Separator,
+                HasHeader = HasHeader
             });
         }
     }
