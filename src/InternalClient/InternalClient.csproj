@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\AutoML\AutoML.csproj" />
+    <ProjectReference Include="..\AutoML\AutoML.csproj" />
   </ItemGroup>
 
 </Project>
