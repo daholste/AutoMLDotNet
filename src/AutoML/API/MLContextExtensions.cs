@@ -167,11 +167,11 @@ namespace Microsoft.ML.Auto
     public static class DataExtensions
     {
         // Delimiter, header, column datatype inference
-        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label = null, bool hasHeader = false, string separator = null, TextLoader.Column[] columns = null)
+        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label = null, 
+            bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
-            // todo: respect & test column overrides param
             var mlContext = new MLContext();
-            return ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
+            return ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator, isQuoted, isSparse);
         }
 
         // Auto reader (includes column inference)
@@ -180,18 +180,20 @@ namespace Microsoft.ML.Auto
             throw new NotImplementedException();
         }
 
-        public static IDataView AutoRead(this DataOperations catalog, string path, string label, bool hasHeader = false, string separator = null)
+        public static IDataView AutoRead(this DataOperations catalog, string path, string label, 
+            bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
             var mlContext = new MLContext();
-            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
+            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator, isQuoted, isSparse);
             var textLoader = columnInferenceResult.BuildTextLoader();
             return textLoader.Read(path);
         }
 
-        public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source, string label, bool hasHeader = false, string separator = null)
+        public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source, string label, 
+            bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
             var mlContext = new MLContext();
-            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator);
+            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator, isQuoted, isSparse);
             var textLoader = columnInferenceResult.BuildTextLoader();
             return textLoader.Read(source);
         }
