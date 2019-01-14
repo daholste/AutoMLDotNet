@@ -22,13 +22,11 @@ namespace Microsoft.ML.Auto
         {
             public readonly int ColumnIndex;
             public readonly ColumnPurpose Purpose;
-            public readonly DataKind ItemKind;
 
-            public Column(int columnIndex, ColumnPurpose purpose, DataKind itemKind)
+            public Column(int columnIndex, ColumnPurpose purpose)
             {
                 ColumnIndex = columnIndex;
                 Purpose = purpose;
-                ItemKind = itemKind;
             }
         }
 
@@ -53,8 +51,6 @@ namespace Microsoft.ML.Auto
             private readonly Lazy<ColumnType> _type;
             private readonly Lazy<string> _columnName;
             private object _cachedData;
-
-            public int ColumnIndex { get { return _columnId; } }
 
             public bool IsPurposeSuggested { get { return _isPurposeSuggested; } }
 
@@ -83,7 +79,7 @@ namespace Microsoft.ML.Auto
 
             public Column GetColumn()
             {
-                return new Column(_columnId, _suggestedPurpose, _type.Value.RawKind());
+                return new Column(_columnId, _suggestedPurpose);
             }
 
             public T[] GetData<T>()
@@ -265,65 +261,41 @@ namespace Microsoft.ML.Auto
         /// Auto-detect purpose for the data view columns.
         /// </summary>
         public static PurposeInference.Column[] InferPurposes(MLContext context, IDataView data, string label,
-            PurposeInference.Column[] columnOverrides = null)
-        {
-            var labelColumn = data.GetColumn(label);
-
-            // select columns to include in inferencing
-            var columnIndices = CalcIncludedIndices(data.Schema.Count, labelColumn.Index, columnOverrides);
-
-            // do purpose inferencing
-            var intermediateCols = InferPurposes(context, data, columnIndices);
-
-            // result to return to caller
-            var result = new PurposeInference.Column[data.Schema.Count];
-
-            // add label column to result
-            result[labelColumn.Index] = (new IntermediateColumn(data, labelColumn.Index, ColumnPurpose.Label)).GetColumn();
-
-            // add inferred columns to result
-            foreach (var intermediateCol in intermediateCols)
-            {
-                result[intermediateCol.ColumnIndex] = intermediateCol.GetColumn();
-            }
-
-            // add overrides to result
-            if(columnOverrides != null)
-            {
-                foreach (var columnOverride in columnOverrides)
-                {
-                    result[columnOverride.ColumnIndex] = columnOverride;
-                }
-            }
-
-            return result;
-        }
-        
-        private static IntermediateColumn[] InferPurposes(MLContext context, IDataView data, IEnumerable<int> columnIndices)
+            IDictionary<string, ColumnPurpose> columnOverrides = null)
         {
             data = data.Take(MaxRowsToRead);
-            var cols = columnIndices.Select(x => new IntermediateColumn(data, x)).ToArray();
+
+            var allColumns = new List<IntermediateColumn>();
+            var columnsToInfer = new List<IntermediateColumn>();
+
+            for (var i = 0; i < data.Schema.Count; i++)
+            {
+                var column = data.Schema[i];
+                IntermediateColumn intermediateCol;
+
+                if(column.Name == label)
+                {
+                    intermediateCol = new IntermediateColumn(data, i, ColumnPurpose.Label);
+                }
+                else if(columnOverrides != null && columnOverrides.TryGetValue(column.Name, out var columnPurpose))
+                {
+                    intermediateCol = new IntermediateColumn(data, i, columnPurpose);
+                }
+                else
+                {
+                    intermediateCol = new IntermediateColumn(data, i);
+                    columnsToInfer.Add(intermediateCol);
+                }
+
+                allColumns.Add(intermediateCol);
+            }
+
             foreach (var expert in GetExperts())
             {
-                expert.Apply(cols);
+                expert.Apply(columnsToInfer.ToArray());
             }
-            return cols;
-        }
 
-        private static IEnumerable<int> CalcIncludedIndices(int columnCount,
-            int labelIndex, 
-            PurposeInference.Column[] columnOverrides = null)
-        {
-            var allIndices = new HashSet<int>(Enumerable.Range(0, columnCount));
-            allIndices.Remove(labelIndex);
-            if(columnOverrides != null)
-            {
-                foreach (var columnOverride in columnOverrides)
-                {
-                    allIndices.Remove(columnOverride.ColumnIndex);
-                }
-            }
-            return allIndices;
+            return allColumns.Select(c => c.GetColumn()).ToArray();
         }
     }
 }

@@ -7,38 +7,24 @@ namespace Microsoft.ML.Auto
     internal static class AutoFitApi
     {
         public static (PipelineRunResult[] allPipelines, PipelineRunResult bestPipeline) Fit(IDataView trainData, 
-            IDataView validationData, string label, InferredColumn[] inferredColumns, AutoFitSettings settings, 
-            TaskKind task, OptimizingMetric metric, IDebugLogger debugLogger)
+            IDataView validationData, string label, AutoFitSettings settings, TaskKind task, OptimizingMetric metric, 
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides, IDebugLogger debugLogger)
         {
             // hack: init new MLContext
             var mlContext = new MLContext();
 
-            // infer pipelines
+            var purposeOverridesDict = purposeOverrides?.ToDictionary(p => p.Item1, p => p.Item2);
             var optimizingMetricfInfo = new OptimizingMetricInfo(metric);
+
+            // infer pipelines
             var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, settings, task,
-                   label, ToInternalColumnPurposes(inferredColumns), 
-                   trainData, validationData, debugLogger);
-            var allPipelines = autoFitter.Fit(1);
+                   label, trainData, validationData, purposeOverridesDict, debugLogger);
+            var allPipelines = autoFitter.Fit();
 
             var bestScore = allPipelines.Max(p => p.Score);
             var bestPipeline = allPipelines.First(p => p.Score == bestScore);
 
             return (allPipelines, bestPipeline);
-        }
-
-        private static PurposeInference.Column[] ToInternalColumnPurposes(InferredColumn[] inferredColumns)
-        {
-            if (inferredColumns == null)
-            {
-                return null;
-            }
-
-            var result = new List<PurposeInference.Column>();
-            foreach(var inferredColumn in inferredColumns)
-            {
-                result.AddRange(inferredColumn.ToInternalColumnPurposes());
-            }
-            return result.ToArray();
         }
     }
 }

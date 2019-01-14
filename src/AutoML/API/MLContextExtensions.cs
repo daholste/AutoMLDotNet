@@ -16,12 +16,12 @@ namespace Microsoft.ML.Auto
             string label, 
             IDataView validationData = null, 
             AutoFitSettings settings = null,
-            InferredColumn[] inferredColumns = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default, 
             IProgress<RegressionIterationResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
-                cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, settings,
+                purposeOverrides, cancellationToken, iterationCallback, null);
         }
 
         // todo: instead of internal methods, use static debug class w/ singleton logger?
@@ -29,15 +29,15 @@ namespace Microsoft.ML.Auto
             IDataView trainData, 
             string label, 
             IDataView validationData = null, 
-            InferredColumn[] inferredColumns = null, 
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default, 
-            IProgress<RegressionIterationResult> iterationCallback = null, 
+            IProgress<RegressionIterationResult> iterationCallback = null,
             IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
+                settings, TaskKind.Regression, OptimizingMetric.RSquared, purposeOverrides, debugLogger);
 
             var results = new RegressionIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -62,29 +62,29 @@ namespace Microsoft.ML.Auto
             IDataView trainData, 
             string label, 
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default, 
             IProgress<BinaryClassificationItertionResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
-                cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, settings,
+                purposeOverrides, cancellationToken, iterationCallback, null);
         }
 
         internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData, 
             string label, 
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default,
             IProgress<BinaryClassificationItertionResult> iterationCallback = null, 
             IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
                 settings, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
-                debugLogger);
+                purposeOverrides, debugLogger);
 
             var results = new BinaryClassificationItertionResult[allPipelines.Length];
             for(var i = 0; i < results.Length; i++)
@@ -109,27 +109,28 @@ namespace Microsoft.ML.Auto
             IDataView trainData, 
             string label, 
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default, 
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
-                cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, settings,
+                purposeOverrides, cancellationToken, iterationCallback, null);
         }
 
         internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData, 
             string label, 
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null, 
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default,
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
+                settings, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, 
+                purposeOverrides, debugLogger);
 
             var results = new MulticlassClassificationIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -273,18 +274,6 @@ namespace Microsoft.ML.Auto
                 Type = Type,
                 Source = Source
             };
-        }
-
-        internal PurposeInference.Column[] ToInternalColumnPurposes()
-        {
-            var columnIndexList = AutoMlUtils.GetColumnIndexList(Source);
-            var result = new PurposeInference.Column[columnIndexList.Count];
-            for(var i = 0; i < columnIndexList.Count; i++)
-            {
-                var internalColumn = new PurposeInference.Column(columnIndexList[i], ColumnPurpose, Type);
-                result[i] = internalColumn;
-            }
-            return result;
         }
     }
 
