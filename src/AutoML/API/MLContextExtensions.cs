@@ -43,10 +43,10 @@ namespace Microsoft.ML.Auto
             for (var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new RegressionIterationResult(iterationResult.Model, (RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
+                var result = new RegressionIterationResult(iterationResult.Model, (RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData, iterationResult.Pipeline.ToPipeline());
                 results[i] = result;
             }
-            var bestResult = new RegressionIterationResult(bestPipeline.Model, (RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
+            var bestResult = new RegressionIterationResult(bestPipeline.Model, (RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData, bestPipeline.Pipeline.ToPipeline());
             return new RegressionResult(bestResult, results);
         }
 
@@ -90,10 +90,10 @@ namespace Microsoft.ML.Auto
             for(var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new BinaryClassificationItertionResult(iterationResult.Model, (BinaryClassificationMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
+                var result = new BinaryClassificationItertionResult(iterationResult.Model, (BinaryClassificationMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData, iterationResult.Pipeline.ToPipeline());
                 results[i] = result;
             }
-            var bestResult = new BinaryClassificationItertionResult(bestPipeline.Model, (BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
+            var bestResult = new BinaryClassificationItertionResult(bestPipeline.Model, (BinaryClassificationMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData, bestPipeline.Pipeline.ToPipeline());
             return new BinaryClassificationResult(bestResult, results);
         }
 
@@ -136,10 +136,10 @@ namespace Microsoft.ML.Auto
             for (var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new MulticlassClassificationIterationResult(iterationResult.Model, (MultiClassClassifierMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
+                var result = new MulticlassClassificationIterationResult(iterationResult.Model, (MultiClassClassifierMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData, iterationResult.Pipeline.ToPipeline());
                 results[i] = result;
             }
-            var bestResult = new MulticlassClassificationIterationResult(bestPipeline.Model, (MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
+            var bestResult = new MulticlassClassificationIterationResult(bestPipeline.Model, (MultiClassClassifierMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData, bestPipeline.Pipeline.ToPipeline());
             return new MulticlassClassificationResult(bestResult, results);
         }
 
@@ -387,9 +387,9 @@ namespace Microsoft.ML.Auto
         public readonly BinaryClassificationMetrics Metrics;
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
-        internal readonly Pipeline Pipeline;
+        public readonly Pipeline Pipeline;
 
-        public BinaryClassificationItertionResult(ITransformer model, BinaryClassificationMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        public BinaryClassificationItertionResult(ITransformer model, BinaryClassificationMetrics metrics, IDataView scoredValidationData, Pipeline pipeline)
         {
             Model = model;
             ScoredValidationData = scoredValidationData;
@@ -403,9 +403,9 @@ namespace Microsoft.ML.Auto
         public readonly MultiClassClassifierMetrics Metrics;
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
-        internal readonly Pipeline Pipeline;
+        public readonly Pipeline Pipeline;
 
-        public MulticlassClassificationIterationResult(ITransformer model, MultiClassClassifierMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        public MulticlassClassificationIterationResult(ITransformer model, MultiClassClassifierMetrics metrics, IDataView scoredValidationData, Pipeline pipeline)
         {
             Model = model;
             Metrics = metrics;
@@ -419,9 +419,9 @@ namespace Microsoft.ML.Auto
         public readonly RegressionMetrics Metrics;
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
-        internal readonly Pipeline Pipeline;
+        public readonly Pipeline Pipeline;
 
-        public RegressionIterationResult(ITransformer model, RegressionMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        public RegressionIterationResult(ITransformer model, RegressionMetrics metrics, IDataView scoredValidationData, Pipeline pipeline)
         {
             Model = model;
             Metrics = metrics;
