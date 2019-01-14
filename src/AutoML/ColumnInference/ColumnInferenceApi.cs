@@ -100,8 +100,8 @@ namespace Microsoft.ML.Auto
                 typeInference.Columns, purposeInferenceResult);
 
             // build result objects & return
-            var inferredColumns = groupingResult.Select(c => c.ToPublicInferredColumn()).ToArray();
-            return new ColumnInferenceResult(splitInference.AllowQuote, splitInference.AllowSparse, inferredColumns, splitInference.Separator, hasHeader);
+            var inferredColumns = groupingResult.Select(c => (c.GenerateTextLoaderColumn(), c.Purpose)).ToArray();
+            return new ColumnInferenceResult(inferredColumns, splitInference.AllowQuote, splitInference.AllowSparse, splitInference.Separator, hasHeader);
         }
     }
 }

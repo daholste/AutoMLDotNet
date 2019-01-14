@@ -220,18 +220,18 @@ namespace Microsoft.ML.Auto
     
     public class ColumnInferenceResult
     {
+        public readonly IEnumerable<(TextLoader.Column, ColumnPurpose)> Columns;
         public readonly bool IsQuoted;
         public readonly bool IsSparse;
-        public readonly InferredColumn[] InferredColumns;
         public readonly string Separator;
         public readonly bool HasHeader;
 
-        public ColumnInferenceResult(bool isQuoted, bool isSparse, InferredColumn[] inferredColumns,
-            string separator, bool hasHeader)
+        public ColumnInferenceResult(IEnumerable<(TextLoader.Column, ColumnPurpose)> columns,
+            bool isQuoted, bool isSparse, string separator, bool hasHeader)
         {
+            Columns = columns;
             IsQuoted = isQuoted;
             IsSparse = isSparse;
-            InferredColumns = inferredColumns;
             Separator = separator;
             HasHeader = hasHeader;
         }
@@ -242,38 +242,10 @@ namespace Microsoft.ML.Auto
             return new TextLoader(context, new TextLoader.Arguments() {
                 AllowQuoting = IsQuoted,
                 AllowSparse = IsSparse,
-                Column = InferredColumns.Select(c => c.ToTextLoaderColumn()).ToArray(),
+                Column = Columns.Select(c => c.Item1).ToArray(),
                 Separator = Separator,
                 HasHeader = HasHeader
             });
-        }
-    }
-
-    public class InferredColumn
-    {
-        public string Name;
-        public DataKind Type;
-        public TextLoader.Range[] Source;
-
-        // todo: have an internal copy of ColumnPurpose?
-        public ColumnPurpose ColumnPurpose;
-
-        public InferredColumn(string name, DataKind type, TextLoader.Range[] source, ColumnPurpose columnPurpose)
-        {
-            Name = name;
-            Type = type;
-            Source = source;
-            ColumnPurpose = columnPurpose;
-        }
-
-        internal TextLoader.Column ToTextLoaderColumn()
-        {
-            return new TextLoader.Column()
-            {
-                Name = Name,
-                Type = Type,
-                Source = Source
-            };
         }
     }
 
