@@ -16,15 +16,21 @@ namespace Microsoft.ML.Auto
             string label,
             IDataView validationData = null,
             AutoFitSettings settings = null,
+<<<<<<< HEAD
             InferredColumn[] inferredColumns = null,
             CancellationToken cancellationToken = default,
+=======
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
+            CancellationToken cancellationToken = default, 
+>>>>>>> origin/master
             IProgress<RegressionIterationResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
-                cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, settings,
+                purposeOverrides, cancellationToken, iterationCallback, null);
         }
 
         // todo: instead of internal methods, use static debug class w/ singleton logger?
+<<<<<<< HEAD
         internal static RegressionResult AutoFit(this RegressionContext context,
             IDataView trainData,
             string label,
@@ -32,21 +38,30 @@ namespace Microsoft.ML.Auto
             InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
             CancellationToken cancellationToken = default,
+=======
+        internal static RegressionResult AutoFit(this RegressionContext context, 
+            IDataView trainData, 
+            string label, 
+            IDataView validationData = null, 
+            AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
+            CancellationToken cancellationToken = default, 
+>>>>>>> origin/master
             IProgress<RegressionIterationResult> iterationCallback = null,
             IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, TaskKind.Regression, OptimizingMetric.RSquared, debugLogger);
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
+                settings, TaskKind.Regression, OptimizingMetric.RSquared, purposeOverrides, debugLogger);
 
             var results = new RegressionIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
             {
                 var iterationResult = allPipelines[i];
-                var result = new RegressionIterationResult(iterationResult.Model, (RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData);
+                var result = new RegressionIterationResult(iterationResult.Model, (RegressionMetrics)iterationResult.EvaluatedMetrics, iterationResult.ScoredValidationData, iterationResult.Pipeline.ToPipeline());
                 results[i] = result;
             }
-            var bestResult = new RegressionIterationResult(bestPipeline.Model, (RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData);
+            var bestResult = new RegressionIterationResult(bestPipeline.Model, (RegressionMetrics)bestPipeline.EvaluatedMetrics, bestPipeline.ScoredValidationData, bestPipeline.Pipeline.ToPipeline());
             return new RegressionResult(bestResult, results);
         }
 
@@ -62,29 +77,33 @@ namespace Microsoft.ML.Auto
             IDataView trainData,
             string label,
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
+<<<<<<< HEAD
             CancellationToken cancellationToken = default,
+=======
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
+            CancellationToken cancellationToken = default, 
+>>>>>>> origin/master
             IProgress<BinaryClassificationItertionResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
-                cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, settings,
+                purposeOverrides, cancellationToken, iterationCallback, null);
         }
 
         internal static BinaryClassificationResult AutoFit(this BinaryClassificationContext context,
             IDataView trainData,
             string label,
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default,
             IProgress<BinaryClassificationItertionResult> iterationCallback = null,
             IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
                 settings, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
-                debugLogger);
+                purposeOverrides, debugLogger);
 
             var results = new BinaryClassificationItertionResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -109,27 +128,36 @@ namespace Microsoft.ML.Auto
             IDataView trainData,
             string label,
             IDataView validationData = null,
-            InferredColumn[] inferredColumns = null,
             AutoFitSettings settings = null,
+<<<<<<< HEAD
             CancellationToken cancellationToken = default,
+=======
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
+            CancellationToken cancellationToken = default, 
+>>>>>>> origin/master
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null)
         {
-            return AutoFit(context, trainData, label, validationData, inferredColumns, settings,
-                cancellationToken, iterationCallback, null);
+            return AutoFit(context, trainData, label, validationData, settings,
+                purposeOverrides, cancellationToken, iterationCallback, null);
         }
 
         internal static MulticlassClassificationResult AutoFit(this MulticlassClassificationContext context,
             IDataView trainData,
             string label,
             IDataView validationData = null,
+<<<<<<< HEAD
             InferredColumn[] inferredColumns = null,
+=======
+>>>>>>> origin/master
             AutoFitSettings settings = null,
+            IEnumerable<(string, ColumnPurpose)> purposeOverrides = null,
             CancellationToken cancellationToken = default,
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
             // run autofit & get all pipelines run in that process
-            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label, inferredColumns,
-                settings, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, debugLogger);
+            var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
+                settings, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, 
+                purposeOverrides, debugLogger);
 
             var results = new MulticlassClassificationIterationResult[allPipelines.Length];
             for (var i = 0; i < results.Length; i++)
@@ -167,11 +195,11 @@ namespace Microsoft.ML.Auto
     public static class DataExtensions
     {
         // Delimiter, header, column datatype inference
-        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label = null, bool hasHeader = false, string separator = null, TextLoader.Column[] columns = null)
+        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label = null, 
+            bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
-            // todo: respect & test column overrides param
             var mlContext = new MLContext();
-            return ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
+            return ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator, isQuoted, isSparse);
         }
 
         // Auto reader (includes column inference)
@@ -180,18 +208,20 @@ namespace Microsoft.ML.Auto
             throw new NotImplementedException();
         }
 
-        public static IDataView AutoRead(this DataOperations catalog, string path, string label, bool hasHeader = false, string separator = null)
+        public static IDataView AutoRead(this DataOperations catalog, string path, string label, 
+            bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
             var mlContext = new MLContext();
-            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator);
+            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator, isQuoted, isSparse);
             var textLoader = columnInferenceResult.BuildTextLoader();
             return textLoader.Read(path);
         }
 
-        public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source, string label, bool hasHeader = false, string separator = null)
+        public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source, string label, 
+            bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
             var mlContext = new MLContext();
-            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator);
+            var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator, isQuoted, isSparse);
             var textLoader = columnInferenceResult.BuildTextLoader();
             return textLoader.Read(source);
         }
@@ -217,18 +247,18 @@ namespace Microsoft.ML.Auto
 
     public class ColumnInferenceResult
     {
+        public readonly IEnumerable<(TextLoader.Column, ColumnPurpose)> Columns;
         public readonly bool IsQuoted;
         public readonly bool IsSparse;
-        public readonly InferredColumn[] InferredColumns;
         public readonly string Separator;
         public readonly bool HasHeader;
 
-        public ColumnInferenceResult(bool isQuoted, bool isSparse, InferredColumn[] inferredColumns,
-            string separator, bool hasHeader)
+        public ColumnInferenceResult(IEnumerable<(TextLoader.Column, ColumnPurpose)> columns,
+            bool isQuoted, bool isSparse, string separator, bool hasHeader)
         {
+            Columns = columns;
             IsQuoted = isQuoted;
             IsSparse = isSparse;
-            InferredColumns = inferredColumns;
             Separator = separator;
             HasHeader = hasHeader;
         }
@@ -240,13 +270,14 @@ namespace Microsoft.ML.Auto
             {
                 AllowQuoting = IsQuoted,
                 AllowSparse = IsSparse,
-                Column = InferredColumns.Select(c => c.ToTextLoaderColumn()).ToArray(),
+                Column = Columns.Select(c => c.Item1).ToArray(),
                 Separator = Separator,
                 HasHeader = HasHeader
             });
         }
     }
 
+<<<<<<< HEAD
     public class InferredColumn
     {
         public string Name;
@@ -287,6 +318,8 @@ namespace Microsoft.ML.Auto
         }
     }
 
+=======
+>>>>>>> origin/master
     public class AutoFitSettings
     {
         public ExperimentStoppingCriteria StoppingCriteria = new ExperimentStoppingCriteria();
@@ -399,7 +432,7 @@ namespace Microsoft.ML.Auto
         public readonly IDataView ScoredValidationData;
         public readonly Pipeline Pipeline;
 
-        public BinaryClassificationItertionResult(ITransformer model, BinaryClassificationMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        public BinaryClassificationItertionResult(ITransformer model, BinaryClassificationMetrics metrics, IDataView scoredValidationData, Pipeline pipeline)
         {
             Model = model;
             ScoredValidationData = scoredValidationData;
@@ -413,9 +446,9 @@ namespace Microsoft.ML.Auto
         public readonly MultiClassClassifierMetrics Metrics;
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
-        internal readonly Pipeline Pipeline;
+        public readonly Pipeline Pipeline;
 
-        public MulticlassClassificationIterationResult(ITransformer model, MultiClassClassifierMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        public MulticlassClassificationIterationResult(ITransformer model, MultiClassClassifierMetrics metrics, IDataView scoredValidationData, Pipeline pipeline)
         {
             Model = model;
             Metrics = metrics;
@@ -429,9 +462,9 @@ namespace Microsoft.ML.Auto
         public readonly RegressionMetrics Metrics;
         public readonly ITransformer Model;
         public readonly IDataView ScoredValidationData;
-        internal readonly Pipeline Pipeline;
+        public readonly Pipeline Pipeline;
 
-        public RegressionIterationResult(ITransformer model, RegressionMetrics metrics, IDataView scoredValidationData, Pipeline pipeline = null)
+        public RegressionIterationResult(ITransformer model, RegressionMetrics metrics, IDataView scoredValidationData, Pipeline pipeline)
         {
             Model = model;
             Metrics = metrics;

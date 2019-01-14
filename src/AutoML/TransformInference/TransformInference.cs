@@ -274,7 +274,7 @@ namespace Microsoft.ML.Auto
             yield return new Experts.FeaturesColumnConcatRenameNumericOnly();
 
             // For text columns, also use TextTransform with Unigram + trichar.
-            yield return new Experts.TextUniGramTriGram();
+            //yield return new Experts.TextUniGramTriGram();
         }
 
         internal static class Experts
@@ -599,7 +599,7 @@ namespace Microsoft.ML.Auto
                         string columnDestRenamed = $"{columnNameSafe}{columnDestSuffix}";
 
                         featureCols.Add(columnDestRenamed);
-                        var input = new TextFeaturizingEstimator(Env, columnDestRenamed, columnNameSafe);
+                        var input = new TextFeaturizingEstimator(Env, columnNameSafe, columnDestRenamed);
                         ColumnRoutingStructure.AnnotatedName[] columnsSource =
                             { new ColumnRoutingStructure.AnnotatedName { IsNumeric = false, Name = columnNameSafe} };
                         ColumnRoutingStructure.AnnotatedName[] columnsDest =

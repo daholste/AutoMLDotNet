@@ -5,8 +5,8 @@ namespace Microsoft.ML.Auto
 {
     internal static class TransformInferenceApi
     {
-        public static IEnumerable<SuggestedTransform> InferTransforms(MLContext context, IDataView data, string label, 
-            PurposeInference.Column[] purposeOverrides = null)
+        public static IEnumerable<SuggestedTransform> InferTransforms(MLContext context, IDataView data, string label,
+            IDictionary<string, ColumnPurpose> purposeOverrides = null)
         {
             // infer column purposes
             var purposes = PurposeInference.InferPurposes(context, data, label, purposeOverrides);

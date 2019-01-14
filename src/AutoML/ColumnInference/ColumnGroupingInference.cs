@@ -35,13 +35,7 @@ namespace Microsoft.ML.Auto
                 ColumnRangeSelector = rangeSelector;
             }
 
-            public InferredColumn ToPublicInferredColumn()
-            {
-                var textLoaderCol = GenerateTextLoaderColumn();
-                return new InferredColumn(SuggestedName, ItemKind, textLoaderCol.Source, Purpose);
-            }
-
-            private TextLoader.Column GenerateTextLoaderColumn()
+            public TextLoader.Column GenerateTextLoaderColumn()
             {
                 return TextLoader.Column.Parse(string.Format("{0}:{1}:{2}", SuggestedName, ItemKind, ColumnRangeSelector));
             }

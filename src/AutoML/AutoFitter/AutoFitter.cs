@@ -18,15 +18,15 @@ namespace Microsoft.ML.Auto
         private readonly string _label;
         private readonly MLContext _mlContext;
         private readonly OptimizingMetricInfo _optimizingMetricInfo;
-        private readonly PurposeInference.Column[] _puproseOverrides;
+        private readonly IDictionary<string, ColumnPurpose> _purposeOverrides;
         private readonly AutoFitSettings _settings;
         private readonly IDataView _trainData;
         private readonly TaskKind _task;
         private readonly IDataView _validationData;
 
         public AutoFitter(MLContext mlContext, OptimizingMetricInfo metricInfo, AutoFitSettings settings, 
-            TaskKind task, string label, PurposeInference.Column[] puproseOverrides,
-            IDataView trainData, IDataView validationData, IDebugLogger debugLogger)
+            TaskKind task, string label, IDataView trainData, IDataView validationData,
+            IDictionary<string, ColumnPurpose> purposeOverrides, IDebugLogger debugLogger)
         {
             _debugLogger = debugLogger;
             _history = new List<PipelineRunResult>();
@@ -34,13 +34,13 @@ namespace Microsoft.ML.Auto
             _mlContext = mlContext;
             _optimizingMetricInfo = metricInfo;
             _settings = settings ?? new AutoFitSettings();
-            _puproseOverrides = puproseOverrides;
+            _purposeOverrides = purposeOverrides;
             _trainData = trainData;
             _task = task;
             _validationData = validationData;
         }
 
-        public PipelineRunResult[] Fit(int batchSize)
+        public PipelineRunResult[] Fit()
         {
             IteratePipelinesAndFit();
             return _history.ToArray();
@@ -49,7 +49,7 @@ namespace Microsoft.ML.Auto
         private void IteratePipelinesAndFit()
         {
             var stopwatch = Stopwatch.StartNew();
-            var transforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label, _puproseOverrides);
+            var transforms = TransformInferenceApi.InferTransforms(_mlContext, _trainData, _label, _purposeOverrides);
             var availableTrainers = RecipeInference.AllowedTrainers(_mlContext, _task, _settings.StoppingCriteria.MaxIterations);
 
             do

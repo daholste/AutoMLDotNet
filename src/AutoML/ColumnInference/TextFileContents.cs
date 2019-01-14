@@ -19,9 +19,10 @@ namespace Microsoft.ML.Auto
         {
             public readonly bool IsSuccess;
             public readonly string Separator;
-            public readonly bool AllowQuote;
-            public readonly bool AllowSparse;
             public readonly int ColumnCount;
+
+            public bool AllowQuote { get; set; }
+            public bool AllowSparse { get; set; }
 
             public ColumnSplitResult(bool isSuccess, string separator, bool allowQuote, bool allowSparse, int columnCount)
             {
