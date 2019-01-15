@@ -15,7 +15,7 @@ namespace Microsoft.ML.Auto
             ValidateLabel(trainData, validationData, label);
             ValidateValidationData(trainData, validationData);
             ValidateSettings(settings);
-            ValidatePurposeOverrides(trainData, validationData, purposeOverrides);
+            ValidatePurposeOverrides(trainData, validationData, label, purposeOverrides);
         }
 
         public static void ValidateInferTransformArgs(IDataView data, string label)

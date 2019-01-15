@@ -74,22 +74,22 @@ namespace Microsoft.ML.Auto
             return argsFunc;
         }
 
-        private static void SetValue(FieldInfo fi, IComparable value, object entryPointObj, Type propertyType)
+        private static void SetValue(FieldInfo fi, IComparable value, object obj, Type propertyType)
         {
             if (propertyType == value?.GetType())
-                fi.SetValue(entryPointObj, value);
+                fi.SetValue(obj, value);
             else if (propertyType == typeof(double) && value is float)
-                fi.SetValue(entryPointObj, Convert.ToDouble(value));
+                fi.SetValue(obj, Convert.ToDouble(value));
             else if (propertyType == typeof(int) && value is long)
-                fi.SetValue(entryPointObj, Convert.ToInt32(value));
+                fi.SetValue(obj, Convert.ToInt32(value));
             else if (propertyType == typeof(long) && value is int)
-                fi.SetValue(entryPointObj, Convert.ToInt64(value));
+                fi.SetValue(obj, Convert.ToInt64(value));
         }
 
         /// <summary>
-        /// Updates properties of entryPointObj instance based on the values in sweepParams
+        /// Updates properties of object instance based on the values in sweepParams
         /// </summary>
-        public static void UpdateFields(object entryPointObj, IEnumerable<SweepableParam> sweepParams)
+        public static void UpdateFields(object obj, IEnumerable<SweepableParam> sweepParams)
         {
             foreach (var param in sweepParams)
             {
@@ -101,7 +101,7 @@ namespace Microsoft.ML.Auto
                     {
                         continue;
                     }
-                    var fi = entryPointObj.GetType().GetField(param.Name);
+                    var fi = obj.GetType().GetField(param.Name);
                     var propType = Nullable.GetUnderlyingType(fi.FieldType) ?? fi.FieldType;
 
                     if (param is SweepableDiscreteParam dp)
@@ -115,21 +115,21 @@ namespace Microsoft.ML.Auto
                         {
                             //Check if nullable type, in which case 'null' is the auto value.
                             if (Nullable.GetUnderlyingType(fi.FieldType) != null)
-                                fi.SetValue(entryPointObj, null);
+                                fi.SetValue(obj, null);
                             else if (fi.FieldType.IsEnum)
                             {
                                 // Check if there is an enum option named Auto
                                 var enumDict = fi.FieldType.GetEnumValues().Cast<int>()
                                     .ToDictionary(v => Enum.GetName(fi.FieldType, v), v => v);
                                 if (enumDict.ContainsKey("Auto"))
-                                    fi.SetValue(entryPointObj, enumDict["Auto"]);
+                                    fi.SetValue(obj, enumDict["Auto"]);
                             }
                         }
                         else
-                            SetValue(fi, (IComparable)dp.Options[optIndex], entryPointObj, propType);
+                            SetValue(fi, (IComparable)dp.Options[optIndex], obj, propType);
                     }
                     else
-                        SetValue(fi, param.RawValue, entryPointObj, propType);
+                        SetValue(fi, param.RawValue, obj, propType);
                 }
                 catch (Exception)
                 {

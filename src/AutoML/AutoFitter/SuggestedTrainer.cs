@@ -7,7 +7,7 @@ namespace Microsoft.ML.Auto
     internal class SuggestedTrainer
     {
         public IEnumerable<SweepableParam> SweepParams { get; }
-        public string TrainerName { get; }
+        public TrainerName TrainerName { get; }
         public ParameterSet HyperParamSet { get; set; }
 
         private readonly MLContext _mlContext;
@@ -19,7 +19,7 @@ namespace Microsoft.ML.Auto
             _mlContext = mlContext;
             _trainerExtension = trainerExtension;
             SweepParams = _trainerExtension.GetHyperparamSweepRanges();
-            TrainerName = _trainerExtension.GetTrainerName().ToString();
+            TrainerName = _trainerExtension.GetTrainerName();
             SetHyperparamValues(hyperParamSet);
         }
 
@@ -62,7 +62,7 @@ namespace Microsoft.ML.Auto
             {
                 elementProperties[hyperParam.Name] = hyperParam.ProcessedValue();
             }
-            return new PipelineNode(TrainerName, PipelineNodeType.Trainer, 
+            return new PipelineNode(TrainerName.ToString(), PipelineNodeType.Trainer, 
                 new[] { "Features" }, new[] { "Score" }, elementProperties);
         }
 
