@@ -165,20 +165,24 @@ namespace Microsoft.ML.Auto
         }
 
         private static void ValidatePurposeOverrides(IDataView trainData, IDataView validationData,
-            IEnumerable<(string, ColumnPurpose)> purposeOverrides)
+            string label, IEnumerable<(string, ColumnPurpose)> purposeOverrides)
         {
             if (purposeOverrides == null)
             {
                 return;
             }
 
-            ValidatePurposeOverrides(purposeOverrides);
-
-            foreach(var purposeOverride in purposeOverrides)
+            foreach (var purposeOverride in purposeOverrides)
             {
                 var colName = purposeOverride.Item1;
+                var colPurpose = purposeOverride.Item2;
 
-                if(trainData.Schema.GetColumnOrNull(colName) == null)
+                if (colName == null)
+                {
+                    throw new ArgumentException(nameof(purposeOverrides), "Purpose override column name cannot be null.");
+                }
+
+                if (trainData.Schema.GetColumnOrNull(colName) == null)
                 {
                     throw new ArgumentException(nameof(purposeOverride), $"Purpose override column name '{colName}' not found in training data.");
                 }
@@ -187,14 +191,13 @@ namespace Microsoft.ML.Auto
                 {
                     throw new ArgumentException(nameof(purposeOverride), $"Purpose override column name '{colName}' not found in validation data.");
                 }
-            }
-        }
 
-        private static void ValidatePurposeOverrides(IEnumerable<(string, ColumnPurpose)> purposeOverrides)
-        {
-            if(purposeOverrides.Any(p => p.Item1 == null))
-            {
-                throw new ArgumentException(nameof(purposeOverrides), "Purpose override column name cannot be null.");
+                // if column w/ purpose = 'Label' found, ensure it matches the passed-in label
+                if(colPurpose == ColumnPurpose.Label && colName != label)
+                {
+                    throw new ArgumentException(nameof(purposeOverrides), $"Label column name in provided list of purposes '{colName}' must match " +
+                        $"the label column name '{label}'");
+                }
             }
 
             // ensure all column names unique
