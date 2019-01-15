@@ -17,7 +17,7 @@ namespace Microsoft.ML.Auto
             var optimizingMetricfInfo = new OptimizingMetricInfo(metric);
 
             // infer pipelines
-            var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, settings, task,
+            var autoFitter = new AutoFitter(mlContext, optimizingMetricfInfo, settings ?? new AutoFitSettings(), task,
                    label, trainData, validationData, purposeOverridesDict, debugLogger);
             var allPipelines = autoFitter.Fit();
 

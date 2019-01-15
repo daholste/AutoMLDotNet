@@ -35,6 +35,8 @@ namespace Microsoft.ML.Auto
             IProgress<RegressionIterationResult> iterationCallback = null,
             IDebugLogger debugLogger = null)
         {
+            UserInputValidationUtil.ValidateAutoFitArgs(trainData, label, validationData, settings, purposeOverrides);
+
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
                 settings, TaskKind.Regression, OptimizingMetric.RSquared, purposeOverrides, debugLogger);
@@ -81,6 +83,8 @@ namespace Microsoft.ML.Auto
             IProgress<BinaryClassificationItertionResult> iterationCallback = null, 
             IDebugLogger debugLogger = null)
         {
+            UserInputValidationUtil.ValidateAutoFitArgs(trainData, label, validationData, settings, purposeOverrides);
+
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
                 settings, TaskKind.BinaryClassification, OptimizingMetric.Accuracy,
@@ -127,6 +131,8 @@ namespace Microsoft.ML.Auto
             CancellationToken cancellationToken = default,
             IProgress<MulticlassClassificationIterationResult> iterationCallback = null, IDebugLogger debugLogger = null)
         {
+            UserInputValidationUtil.ValidateAutoFitArgs(trainData, label, validationData, settings, purposeOverrides);
+
             // run autofit & get all pipelines run in that process
             var (allPipelines, bestPipeline) = AutoFitApi.Fit(trainData, validationData, label,
                 settings, TaskKind.MulticlassClassification, OptimizingMetric.Accuracy, 
@@ -153,6 +159,7 @@ namespace Microsoft.ML.Auto
     {
         public static IEstimator<ITransformer> InferTransforms(this TransformsCatalog catalog, IDataView data, string label)
         {
+            UserInputValidationUtil.ValidateInferTransformArgs(data, label);
             var mlContext = new MLContext();
             var suggestedTransforms = TransformInferenceApi.InferTransforms(mlContext, data, label);
             var estimators = suggestedTransforms.Select(s => s.Estimator);
@@ -168,9 +175,10 @@ namespace Microsoft.ML.Auto
     public static class DataExtensions
     {
         // Delimiter, header, column datatype inference
-        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label = null, 
+        public static ColumnInferenceResult InferColumns(this DataOperations catalog, string path, string label,
             bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
+            UserInputValidationUtil.ValidateInferColumnsArgs(path, label);
             var mlContext = new MLContext();
             return ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator, isQuoted, isSparse);
         }
@@ -184,6 +192,7 @@ namespace Microsoft.ML.Auto
         public static IDataView AutoRead(this DataOperations catalog, string path, string label, 
             bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
+            UserInputValidationUtil.ValidateAutoReadArgs(path, label);
             var mlContext = new MLContext();
             var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, path, label, hasHeader, separator, isQuoted, isSparse);
             var textLoader = columnInferenceResult.BuildTextLoader();
@@ -193,6 +202,7 @@ namespace Microsoft.ML.Auto
         public static IDataView AutoRead(this DataOperations catalog, IMultiStreamSource source, string label, 
             bool hasHeader = false, string separator = null, bool? isQuoted = null, bool? isSparse = null)
         {
+            UserInputValidationUtil.ValidateAutoReadArgs(source, label);
             var mlContext = new MLContext();
             var columnInferenceResult = ColumnInferenceApi.InferColumns(mlContext, source, label, hasHeader, separator, isQuoted, isSparse);
             var textLoader = columnInferenceResult.BuildTextLoader();
@@ -201,6 +211,7 @@ namespace Microsoft.ML.Auto
 
         public static TextLoader CreateTextReader(this DataOperations catalog, ColumnInferenceResult columnInferenceResult)
         {
+            UserInputValidationUtil.ValidateCreateTextReaderArgs(columnInferenceResult);
             return columnInferenceResult.BuildTextLoader();
         }
 
